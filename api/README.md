@@ -9,13 +9,16 @@ bun install
 To run:
 
 ```bash
-bun run index.js
+bun index.js
 ```
-
-This project was created using `bun init` in bun v1.0.19. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
-
 
 # Dependencies
 - [dotenv](https://www.npmjs.com/package/dotenv)
-- [pg](https://www.npmjs.com/package/pg)
 - [express](https://www.npmjs.com/package/express)
+- [express-rate-limit](https://www.npmjs.com/package/express-rate-limit)
+- [Helmet](https://www.npmjs.com/package/helmet) : Helmet helps secure Express apps by setting HTTP response headers.
+- [moment-timezone](https://www.npmjs.com/package/moment-timezone)
+- [morgan](https://www.npmjs.com/package/morgan) : Logging
+- [redis](https://www.npmjs.com/package/redis)
+- [pg](https://www.npmjs.com/package/pg)
+- [validator](https://www.npmjs.com/package/validator)

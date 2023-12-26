@@ -8,6 +8,10 @@
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
+  "scripts": {
+    "test": "mocha v1/test/user.test.js",
+    "start": "bun index.js"
+  },
   "dependencies": {
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
@@ -15,7 +19,6 @@
     "helmet": "^7.1.0",
     "moment-timezone": "^0.5.43",
     "morgan": "^1.10.0",
-    "nodemon": "^3.0.1",
     "pg": "^8.11.3",
     "redis": "^4.6.11",
     "validator": "^13.11.0"
