@@ -1,11 +1,12 @@
 const express = require("express");
+const validator = require("validator");
+const moment = require("moment-timezone");
 const router = express.Router();
 
 const pool = require("../db");
 const redisClient = require("../dbredis");
-var validator = require("validator");
-const { generateToken, reservedKeywordsF } = require("../tools");
 const config = require("../config/config.json");
+const { generateToken, reservedKeywordsFile } = require("../tools");
 
 const cachingBool = Boolean(config.caching);
 
@@ -17,8 +18,11 @@ const createUser = async (request, response) => {
       username,
       email,
       password_hash,
+      salt,
       avatar_url = null,
-      country = "global",
+      locality_country,
+      locality_state,
+      locality_city,
     } = request.body;
 
     // username validation
@@ -34,7 +38,7 @@ const createUser = async (request, response) => {
       avatar_url = `https://api.dicebear.com/7.x/notionists/svg?scale=130?seed=${username}`;
     }
 
-    if (reservedKeywordsF().includes(username.toLowerCase())) {
+    if (reservedKeywordsFile().includes(username.toLowerCase())) {
       return response
         .status(400)
         .json({ error: "Username is a reserved keyword and cannot be used." });
@@ -67,8 +71,18 @@ const createUser = async (request, response) => {
 
     // Insert the user
     const insertUserResult = await pool.query(
-      "INSERT INTO users (username, email, password_hash, avatar_url, country, token) VALUES ($1, $2, $3, $4, $5, $6) RETURNING token",
-      [username, email, password_hash, avatar_url, country, generateToken(25)]
+      "INSERT INTO users (username, email, password_hash, salt, avatar_url, locality_country, locality_state, locality_city, token) VALUES ($1, $2, $3, $4, $5, $6) RETURNING token",
+      [
+        username,
+        email,
+        password_hash,
+        salt,
+        avatar_url,
+        locality_country,
+        locality_state,
+        locality_city,
+        generateToken(25),
+      ]
     );
 
     response.status(200).json({ token: insertUserResult.rows[0].token });
@@ -80,7 +94,8 @@ const createUser = async (request, response) => {
 
 // delete user function
 const deleteUser = (request, response) => {
-  const token = parseInt(request.params.token);
+  // TODO add some validtion or conformation before deleting account
+  const token = request.params.token;
 
   if (!token) {
     return response.status(400).json({ error: "token can not be null" });
@@ -98,94 +113,59 @@ const deleteUser = (request, response) => {
   );
 };
 
-const getUserPubPosts = async (request, response) => {
-  var offset = parseInt(request.body.offset);
-  var token = request.body.token;
-
-  if (!offset) {
-    offset = 0;
-  }
-
-  if (!token) {
-    return response.status(400).json({ error: "Provide a user token" });
-  }
-
-  // Check if the user exists and get the user_id
-  const userResult = await pool.query(
-    "SELECT user_id FROM users WHERE token = $1",
-    [token]
-  );
-
-  if (!userResult.rows.length) {
-    return response.status(400).json({
-      error: "Not a valid token",
-    });
-  }
-
-  const user_id = userResult.rows[0].user_id;
-
+const loginUser = async (request, response) => {
   try {
-    if (cachingBool) {
-      redisClient.select(0);
+    const { username, password_hash } = request.body;
 
-      value = await redisClient.get(`postsPubBy:userID-${user_id}:${offset}`);
-
-      if (value) {
-        // Data found in Redis, parse and send response
-        response.status(200).json(JSON.parse(value));
-      }
-    } else {
-      pool.query(
-        `SELECT
-    posts.post_id,
-    posts.post_title,
-    CONCAT(SUBSTRING(posts.post_content,1,159), '...') as short_content,
-    posts.image,
-    posts.subreddit_id,
-    posts.created_at,
-    posts.total_votes,
-    posts.total_comments,
-    posts.total_views,
-    subreddit.subreddit_name,
-    subreddit.logo_url,
-    EXISTS (SELECT 1 FROM user_subreddit_link WHERE user_id = $1 AND subreddit_id = subreddit.subreddit_id ) AS has_joined
-  FROM
-    posts
-  JOIN
-    subreddit ON posts.subreddit_id = subreddit.subreddit_id
-  WHERE
-    posts.active = 'T' 
-      AND
-    posts.user_id = $1
-  ORDER BY
-    posts.created_at DESC
-  LIMIT 20
-  OFFSET $2`,
-        [user_id, offset],
-        (error, result) => {
-          if (error) {
-            return response.status(500).json({ error: error });
-          }
-          userData = result.rows;
-          if (cachingBool) {
-            redisClient.setEx(
-              `postsPubBy:userID-${user_id}:${offset}`,
-              1800,
-              JSON.stringify(userData)
-            );
-          }
-          response.status(200).json(userData);
-        }
-      );
+    if (
+      !username ||
+      !validator.isLength(username, { min: 4, max: 15 }) ||
+      !allowedCharactersRegex.test(username)
+    ) {
+      return response.status(400).json({ error: "Enter a valid username" });
     }
+
+    if (!password_hash) {
+      return response.status(400).json({ error: "Password is required" });
+    }
+
+    // Check if the user exists and get the user_id
+    const userResult = await pool.query(
+      "SELECT token, user_id FROM users WHERE username = $1 AND password_hash = $2",
+      [username, password_hash]
+    );
+
+    const user = userResult.rows[0];
+
+    if (!user || !user.token) {
+      return response
+        .status(400)
+        .json({ error: "Invalid username or password" });
+    }
+
+    const { token, user_id } = user;
+    const now = moment().tz("UTC").format();
+
+    pool.query(
+      "UPDATE users SET last_login = $1 WHERE user_id = $2 ",
+      [now, user_id],
+      (error, result) => {
+        if (error) {
+          response.status(500);
+        }
+
+        response.status(200).json({ token: token });
+      }
+    );
   } catch (error) {
-    console.error("Database error:", error);
-    response.status(400).json({ error: error.message });
+    console.error("Error creating post error:", error);
+    response.status(500).send("Error creating post");
   }
 };
 
 router.post("/users", createUser);
-router.post("/users/posts", getUserPubPosts);
+router.post("/login", loginUser);
+
 router.delete("/users/:token", deleteUser);
 
 module.exports = router;

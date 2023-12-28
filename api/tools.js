@@ -10,7 +10,7 @@ const generateToken = (length) => {
 };
 
 // Read the reserved keywords from the file
-const reservedKeywordsF = () => {
+const reservedKeywordsFile = () => {
   const reservedKeywordsFile = "reserved-usernames.txt";
   const reservedKeywords = fs
     .readFileSync(reservedKeywordsFile, "utf-8")
@@ -22,5 +22,5 @@ const reservedKeywordsF = () => {
 
 module.exports = {
   generateToken,
-  reservedKeywordsF,
+  reservedKeywordsFile,
 };

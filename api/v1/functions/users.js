@@ -4,40 +4,40 @@ const config = require("../../config/config.json");
 
 const cachingBool = Boolean(config.caching);
 
-async function getUserId(token) {
-  // Check if the user exists and get the user_id
+async function getUserData(userToken) {
+  // Return list of users data based on users token
   try {
     if (cachingBool) {
       redisClient.select(0);
 
-      value = await redisClient.get(`id-${token}`);
+      var value = await redisClient.get(`userData-${userToken}`);
 
       if (value) {
         // Data found in Redis, parse and send response
         return value;
       }
-    } else {
-      // Data not found in Redis, fetch from PostgreSQL
-      const userResult = await pool.query(
-        "SELECT user_id FROM users WHERE token = $1",
-        [token]
-      );
-
-      if (!userResult.rows.length) {
-        return;
-      }
-
-      userData = userResult.rows[0].user_id;
-      // Store data in Redis with expiration (e.g., 1 hour)
-      if (cachingBool) {
-        redisClient.setEx(`id-${token}`, 3600, JSON.stringify(userData));
-      }
-      return userData;
     }
+    // Data not found in Redis, fetch from PostgreSQL
+    const userResult = await pool.query(
+      // "SELECT user_id FROM users WHERE token = $1",
+      "SELECT user_id, username, email, bio, avatar_url, created_at, locality_country, locality_state, locality_city from users where users.token = $1",
+      [userToken]
+    );
+
+    if (!userResult.rows.length) {
+      return;
+    }
+
+    var userData = userResult.rows[0];
+
+    if (cachingBool) {
+      await redisClient.set(`userData-${userToken}`, JSON.stringify(userData));
+    }
+    return userData;
   } catch (error) {
     console.error("Database error:", error);
     return error;
   }
 }
 
-module.exports = { getUserId };
+module.exports = { getUserData };

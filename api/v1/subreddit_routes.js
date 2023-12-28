@@ -2,8 +2,12 @@ const express = require("express");
 const router = express.Router();
 
 const pool = require("../db");
+const redisClient = require("../dbredis");
 var validator = require("validator");
 const { reservedKeywordsF } = require("../tools");
+const config = require("../config/config.json");
+
+const cachingBool = Boolean(config.caching);
 
 // regex for alphanumeric and underscore
 const allowedCharactersRegex = /^[a-zA-Z0-9_]*$/;
@@ -140,8 +144,10 @@ const joinSubreddit = async (request, response) => {
     return response.status(400).json({ error: "user token is required" });
   }
 
-  if(!status){
-    return response.status(400).json({ error: "join or leave status is required" });
+  if (!status) {
+    return response
+      .status(400)
+      .json({ error: "join or leave status is required" });
   }
 
   // Check if the user exists and get the user_id
@@ -158,26 +164,52 @@ const joinSubreddit = async (request, response) => {
 
   const user_id = userResult.rows[0].user_id;
 
-  pool.query(
-    "INSERT INTO user_subreddit_link (user_id, subreddit_id) VALUES ($1, $2)",
-    [user_id, subreddit_id],
-    (error, results) => {
-      if (error) {
-        if (error.code === "23505") {
-          // Unique violation error, the record already exists
-          response
-            .status(409)
-            .json({ status: "User already joined this subreddit" });
-        } else {
-          // Other error
-          response.status(400).json({ status: "Error joining subreddit" });
-        }
-      } else {
-        // Successfully inserted
-        response.status(200).json({ status: "Successfully joined subreddit" });
+  // ========SUBREDDIT JOIN Count REDIS========
+  try {
+    if (cachingBool) {
+      redisClient.select(0);
+
+      var value = await redisClient.get(
+        `community:joinedCount:${subreddit_id}`
+      );
+      if (value) {
+        value = parseInt(`${value}`);
+        await redisClient.set(`community:joinedCount:${subreddit_id}`, ++value);
       }
+    } else {
+      pool.query(
+        "UPDATE community_stats SET subscriber_count = subscriber_count + 1 WHERE community_id = $1",
+        [subreddit_id]
+      );
     }
-  );
+
+    // ===================================
+
+    pool.query(
+      "INSERT INTO user_subreddit_link (user_id, subreddit_id) VALUES ($1, $2)",
+      [user_id, subreddit_id],
+      (error, results) => {
+        if (error) {
+          if (error.code === "23505") {
+            // Unique violation error, the record already exists
+            response
+              .status(409)
+              .json({ status: "User already joined this subreddit" });
+          } else {
+            // Other error
+            response.status(400).json({ status: "Error joining subreddit" });
+          }
+        } else {
+          // Successfully inserted
+          response
+            .status(200)
+            .json({ status: "Successfully joined subreddit" });
+        }
+      }
+    );
+  } catch (error) {
+    console.log("redis failed to insert community:joinedCount");
+  }
 };
 
 router.get("/subreddit", getSubreddits);

@@ -4,13 +4,13 @@ const helmet = require("helmet");
 const { rateLimit } = require("express-rate-limit");
 const morgan = require("morgan");
 const https = require("https");
+const http = require("http");
 const fs = require("fs");
 const path = require("path");
 
 const userRoutes = require("./v1/user_routes");
 const subredditRoutes = require("./v1/subreddit_routes");
 const postRoutes = require("./v1/post_routes");
-const loginRoutes = require("./v1/login_routes");
 const commentRoutes = require("./v1/comments_routes");
 const votesRoutes = require("./v1/votes_routes");
 const reportRoutes = require("./v1/report_routes");
@@ -40,7 +40,7 @@ const v1path = subdirectory + latestVersion;
 app.set("trust proxy", 1);
 app.get("/ip", (request, response) => response.send(request.ip));
 
-// app.use(helmet());
+app.use(helmet());
 app.use(
   morgan(
     ":date[web] :remote-addr  :method :url :status - :response-time ms :res[content-length]"
@@ -57,23 +57,35 @@ app.use(
 app.use(v1path, userRoutes);
 app.use(v1path, subredditRoutes);
 app.use(v1path, postRoutes);
-app.use(v1path, loginRoutes);
 app.use(v1path, commentRoutes);
 app.use(v1path, votesRoutes);
 app.use(v1path, reportRoutes);
 app.use(v1path, meRoutes);
 app.use(v1path, historyRoutes);
 
-// app.listen(port, () => {
-//   console.log(`Server is running on http://localhost:${port}`);
-// });
-
 process.on("SIGINT", () => {
   console.log("Ctrl-C was pressed");
   process.exit();
 });
 
-const sslServer = https.createServer(options, app);
-sslServer.listen(1337, () => {
-  console.log("Secure server is listening on port 1337");
+// app.listen(port, () => {
+//   console.log(`Server is running on http://localhost:${port}`);
+// });
+
+http.createServer(app.handle.bind(app)).listen(3001, () => {
+  console.log(`server is listening on port 3001`);
 });
+
+https
+  .createServer(
+    {
+      // ca: fs.readFileSync("./server.ca-bundle"),
+      key: fs.readFileSync("./cert/key.pem"),
+      cert: fs.readFileSync("./cert/cert.pem"),
+    },
+    app.handle.bind(app)
+  )
+  .listen(3002, () => {
+    console.log(`Secure server is listening on port 3002`);
+  });
+

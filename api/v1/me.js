@@ -8,35 +8,36 @@ const cachingBool = Boolean(config.caching);
 const router = express.Router();
 
 const meInfo = async (request, response) => {
-  const token = request.body.token;
+  const userToken = request.body.token;
 
   try {
     if (cachingBool) {
       redisClient.select(0);
       // Check if data is available in Redis
-      value = await redisClient.get(token);
+      var value = await redisClient.get(`userData-${userToken}`);
 
       if (value) {
         // Data found in Redis, parse and send response
         response.status(200).json(JSON.parse(value));
         return;
       }
-    } 
-      // Data not found in Redis, fetch from PostgreSQL
-      const queryResult = await pool.query(
-        "SELECT username, email, bio, avatar_url, created_at, karma from users where users.token = $1 and users.active = true",
-        [token]
-      );
+    }
+    // Data not found in Redis, fetch from PostgreSQL
+    const userResult = await pool.query(
+      "SELECT user_id, username, email, bio, avatar_url, created_at, locality_country, locality_state, locality_city from users where users.token = $1",
+      [userToken]
+    );
 
-      const userData = queryResult.rows[0];
-
-      // Store data in Redis with expiration (e.g., 1 hour)
-      if (cachingBool) {
-        redisClient.setEx(token, 3600, JSON.stringify(userData));
-      
-      response.status(200).json(userData);
+    if (!userResult.rows.length) {
       return;
     }
+
+    var userData = userResult.rows[0];
+
+    if (cachingBool) {
+      await redisClient.set(`userData-${userToken}`, JSON.stringify(userData));
+    }
+    return userData;
   } catch (error) {
     console.error("Database error:", error);
     response.status(400).json({ error: error.message });

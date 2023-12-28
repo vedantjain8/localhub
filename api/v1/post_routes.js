@@ -3,7 +3,8 @@ const router = express.Router();
 
 const pool = require("../db");
 const redisClient = require("../dbredis");
-const { getUserId } = require("./functions/users");
+const { getUserData } = require("./functions/users");
+const { getCommunityData } = require("./functions/community");
 var validator = require("validator");
 const config = require("../config/config.json");
 
@@ -17,35 +18,23 @@ const createPost = async (request, response) => {
   try {
     var {
       post_title,
-      post_content = "",
-      subreddit_name,
+      post_content,
+      post_image,
+      is_adult,
+      community_name,
       token,
-      image_url,
     } = request.body;
 
     if (!token) {
       return response.status(400).json({ error: "Token is required" });
     }
 
-    if (image_url == "") {
-      image_url = null;
+    if (post_image == "") {
+      post_image = null;
     }
 
-    // Check if the user exists and get the user_id
-    const userResult = await pool.query(
-      "SELECT user_id FROM users WHERE token = $1",
-      [token]
-    );
-
-    if (!userResult.rows.length) {
-      return response.status(400).json({
-        error: "Not a valid token",
-      });
-    }
-
-    // continue validatio
-    if (!subreddit_name) {
-      return response.status(400).json({ error: "Subreddit name is required" });
+    if (!community_name) {
+      return response.status(400).json({ error: "Community name is required" });
     }
 
     if (
@@ -56,26 +45,25 @@ const createPost = async (request, response) => {
       return response.status(400).json({ error: "Enter a valid post title" });
     }
 
-    const user_id = userResult.rows[0].user_id;
+    const user_id = JSON.parse(await getUserData(token))["user_id"];
 
-    // Check if the subreddit name is available
-    const subredditResult = await pool.query(
-      "SELECT subreddit_id FROM subreddit WHERE LOWER(subreddit_name) = LOWER($1)",
-      [subreddit_name]
-    );
-
-    if (!subredditResult.rows[0].subreddit_id) {
-      return response
-        .status(400)
-        .json({ error: "Invalid subreddit name provided" });
+    if (!user_id) {
+      return response.status(400).json({ error: "Invalid  name provided" });
     }
 
-    const subreddit_id = subredditResult.rows[0].subreddit_id;
+    const community_id = JSON.parse(await getCommunityData(community_name))[
+      "community_id"
+    ];
 
+    if (!community_id) {
+      return response
+        .status(400)
+        .json({ error: "Invalid community name provided" });
+    }
     // Create the post
     const createPostResult = await pool.query(
-      "INSERT INTO posts (post_title, post_content, user_id, subreddit_id, image) VALUES ($1, $2, $3, $4, $5) RETURNING post_id",
-      [post_title, post_content, user_id, subreddit_id, image_url]
+      "INSERT INTO posts (post_title, post_content, post_image, user_id, community_id, is_adult) VALUES ($1, $2, $3, $4, $5, $6) RETURNING post_id",
+      [post_title, post_content, post_image, user_id, community_id, is_adult]
     );
 
     response
@@ -113,19 +101,16 @@ const getPosts = async (request, response) => {
       `SELECT
           posts.post_id,
           posts.post_title,
-          CONCAT(SUBSTRING(posts.post_content, 1 ,159), '...') as short_content,
-          posts.image,
-          posts.subreddit_id,
+          LEFT(posts.post_content, 159) as short_content,
+          posts.post_image,
+          posts.community_id,
           posts.created_at,
-          posts.total_votes,
-          posts.total_comments,
-          posts.total_views,
-          subreddit.subreddit_name,
-          subreddit.logo_url
+          community.community_name,
+          community.logo_url
         FROM
           posts
         JOIN
-          subreddit ON posts.subreddit_id = subreddit.subreddit_id
+          community ON posts.community_id = community.community_id
         WHERE
           posts.active = 'T'
         ORDER BY
@@ -137,11 +122,7 @@ const getPosts = async (request, response) => {
 
     // Store data in Redis if caching is enabled
     if (cachingBool) {
-      await redisClient.setEx(
-        `posts:offset-${offset}`,
-        1800,
-        JSON.stringify(userData)
-      );
+      await redisClient.set(`posts:offset-${offset}`, JSON.stringify(userData));
     }
 
     response.status(200).json(userData);
@@ -154,21 +135,21 @@ const getPosts = async (request, response) => {
 
 const getSubredditPosts = async (request, response) => {
   var { offset } = parseInt(request.body.offset);
-  var subreddit_id = request.body.subreddit_id;
+  var community_id = request.body.community_id;
 
   if (!offset) {
     offset = 0;
   }
 
-  if (!subreddit_id) {
-    return response.status(400).json({ error: "subreddit_id is required" });
+  if (!community_id) {
+    return response.status(400).json({ error: "community_id is required" });
   }
 
   try {
     if (cachingBool) {
       redisClient.select(0);
       const value = await redisClient.get(
-        `posts:subreddit-${subreddit_id}:${offset}`
+        `community-${community_id}:posts:offset-${offset}`
       );
       if (value) {
         response.status(200).json(JSON.parse(value)); // Data found in Redis
@@ -181,34 +162,32 @@ const getSubredditPosts = async (request, response) => {
       `SELECT
       posts.post_id,
       posts.post_title,
-      CONCAT(SUBSTRING(posts.post_content, 1, 159), '...') as short_content,
-      posts.image,
-      posts.subreddit_id,
+      LEFT(posts.post_content, 159) as short_content,
+      posts.post_image,
+      posts.community_id,
+      posts.is_adult,
       posts.created_at,
-      posts.total_votes,
-      posts.total_comments,
-      posts.total_views,
-      subreddit.subreddit_name,
-      subreddit.logo_url
+      community.community_name,
+      community.logo_url
     FROM
         posts
     JOIN
-        subreddit ON posts.subreddit_id = subreddit.subreddit_id
+        community ON posts.community_id = community.community_id
     WHERE
         posts.active = 'T'
-        AND posts.subreddit_id = $1
+        AND posts.community_id = $1 
+        AND community.community_id = $1
     ORDER BY
         posts.created_at DESC
     LIMIT 20
     OFFSET $2`,
-      [subreddit_id, offset]
+      [community_id, offset]
     );
 
     // Store data in Redis if caching is enabled
     if (cachingBool) {
-      redisClient.setEx(
-        `posts:subreddit-${subreddit_id}:${offset}`,
-        1800,
+      redisClient.set(
+        `community-${community_id}:posts:offset-${offset}`,
         JSON.stringify(userData)
       );
     }
@@ -234,32 +213,32 @@ const getUserFeedSubredditPosts = async (request, response) => {
     return response.status(400).json({ error: "Provide a user token" });
   }
 
-  // Check if the user exists and get the user_id
-  const user_id = parseInt(await getUserId(token));
+  const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+  if (!user_id) {
+    return response.status(400).json({ error: "Invalid  name provided" });
+  }
+
   try {
     pool.query(
       `SELECT
     posts.post_id,
     posts.post_title,
-    CONCAT(SUBSTRING(posts.post_content, 1, 159), '...') as short_content,
-    posts.image,
-    posts.subreddit_id,
+    LEFT(posts.post_content, 159) as short_content,
+    posts.post_image,
+    posts.community_id,
     posts.created_at,
-    posts.total_votes,
-    posts.total_comments,
-    posts.total_views,
-    subreddit.subreddit_name,
-    subreddit.logo_url,
-    EXISTS (SELECT 1 FROM user_subreddit_link WHERE user_id = $1 AND subreddit_id = subreddit.subreddit_id ) AS has_joined
+    community.community_name,
+    community.logo_url
 FROM
     posts
 JOIN
-    subreddit ON posts.subreddit_id = subreddit.subreddit_id
+    subreddit ON posts.community_id = community.community_id
 JOIN
-    user_subreddit_link ON posts.subreddit_id = user_subreddit_link.subreddit_id
+    users_community_link ON posts.community_id = users_community_link.community_id
 WHERE
     posts.active = 'T'
-    AND user_subreddit_link.user_id = $1
+    AND user_community_link.user_id = $1
 ORDER BY
     posts.created_at DESC
 LIMIT 20
@@ -306,30 +285,28 @@ const getPostById = async (request, response) => {
     const { rows: userData } = await pool.query(
       `SELECT
         posts.post_id,
-        (SELECT username from users where user_id = posts.user_id) AS post_username,
+        users.username AS post_username,
         posts.post_title,
         posts.post_content,
-        posts.image,
-        posts.subreddit_id,
+        posts.post_image,
+        posts.community_id,
         posts.created_at,
-        posts.total_votes,
-        posts.total_comments,
-        posts.total_views,
-        subreddit.subreddit_name,
-        subreddit.logo_url
+        community.community_name,
+        community.logo_url
     FROM
         posts
     JOIN
-        subreddit ON posts.subreddit_id = subreddit.subreddit_id
+        community ON posts.community_id = community.community_id
+    JOIN
+        users ON posts.user_id = users.user_id
    WHERE
         posts.active = 'T' AND posts.post_id = $1`,
       [post_id]
     );
 
     if (cachingBool) {
-      await redisClient.setEx(
+      await redisClient.set(
         `posts:postID-${post_id}`,
-        1800,
         JSON.stringify(userData)
       );
     }
@@ -341,27 +318,101 @@ const getPostById = async (request, response) => {
   }
 };
 
-const updatePost = (request, response) => {
-  const post_id = parseInt(request.params.id);
-  const { post_title, post_content, token } = request.body;
-  pool.query(
-    "UPDATE posts SET post_title = $1, post_content = $2 WHERE user_id = (SELECT user_id FROM users WHERE token = $3) AND post_id = $4 RETURNING post_id",
-    [post_title, post_content, token, post_id],
-    (error, results) => {
-      if (error) {
-        response.status(500).json({ error: error });
+// TODO create update post endpoint
+// const updatePost = (request, response) => {
+//   const post_id = parseInt(request.params.id);
+//   const { post_title, post_content, token } = request.body;
+//   pool.query(
+//     "UPDATE posts SET post_title = $1, post_content = $2 WHERE user_id = (SELECT user_id FROM users WHERE token = $3) AND post_id = $4 RETURNING post_id",
+//     [post_title, post_content, token, post_id],
+//     (error, results) => {
+//       if (error) {
+//         response.status(500).json({ error: error });
+//       }
+//       response.status(200).json({ 200: `Post modified having Post_ID: ${id}` });
+//     }
+//   );
+// };
+
+const getUserPubPosts = async (request, response) => {
+  var offset = parseInt(request.body.offset);
+  var token = request.body.token;
+
+  if (!offset) {
+    offset = 0;
+  }
+
+  if (!token) {
+    return response.status(400).json({ error: "Provide a user token" });
+  }
+
+  const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+  try {
+    if (cachingBool) {
+      redisClient.select(0);
+
+      value = await redisClient.get(`postsPubBy:userID-${user_id}:${offset}`);
+
+      if (value) {
+        // Data found in Redis, parse and send response
+        response.status(200).json(JSON.parse(value));
       }
-      response.status(200).json({ 200: `Post modified having Post_ID: ${id}` });
+    } else {
+      pool.query(
+        `SELECT
+    posts.post_id,
+    posts.post_title,
+    LEFT(posts.post_content, 159) as short_content,
+    posts.post_image,
+    posts.community_id,
+    posts.is_adult,
+    posts.created_at,
+    community.community_name,
+    community.logo_url,
+  FROM
+    posts
+  INNER JOIN
+    subreddit ON posts.subreddit_id = subreddit.subreddit_id
+  WHERE
+    posts.user_id = $1
+      AND
+    posts.active = 'T'
+  ORDER BY
+    posts.created_at DESC
+  LIMIT 20
+  OFFSET $2`,
+        [user_id, offset],
+        (error, result) => {
+          if (error) {
+            return response.status(500).json({ error: error });
+          }
+          userData = result.rows;
+          if (cachingBool) {
+            redisClient.setEx(
+              `postsPubBy:userID-${user_id}:${offset}`,
+              1800,
+              JSON.stringify(userData)
+            );
+          }
+          response.status(200).json(userData);
+        }
+      );
     }
-  );
+  } catch (error) {
+    console.error("Database error:", error);
+    response.status(400).json({ error: error.message });
+  }
 };
 
 router.get("/posts", getPosts);
 router.get("/posts/:id", getPostById);
-router.post("/posts", createPost);
 
 router.post("/posts", createPost);
-router.put("/posts/:id", updatePost);
+router.post("/users/posts", getUserPubPosts);
+
+// TODO
+// router.put("/posts/:id", updatePost);
 
 router.post("/getSubredditPosts", getSubredditPosts);
 router.post("/getUserFeedSubredditPosts", getUserFeedSubredditPosts);
