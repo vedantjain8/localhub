@@ -10,6 +10,8 @@ const allowedCharactersRegex =
   /^[a-zA-Z0-9\s.,!?()\-_+=*&^%$#@[\]{}|\\/<>:;"'`]*$/;
 
 const createComment = async (request, response) => {
+  // !caution: caching in this is not the best
+  // TODO: other way to caching data
   try {
     const { post_id, comment_content, token } = request.body;
 
@@ -29,28 +31,20 @@ const createComment = async (request, response) => {
       return response.status(400).json({ error: "enter a valid comment" });
     }
     // Check if the user exists and get the user_id
-    const userResult = await pool.query(
-      "SELECT user_id FROM users WHERE token = $1",
-      [token]
-    );
-
-    if (!userResult.rows.length) {
-      return response.status(400).json({
-        error: "Not a valid token",
-      });
-    }
-
-    const user_id = userResult.rows[0].user_id;
+    const user_id = JSON.parse(await getUserData(token))["user_id"];
 
     // Create the comment
-    const createPostResult = await pool.query(
-      "INSERT INTO comments_link (post_id, user_id, comment_content) VALUES ($1, $2, $3) RETURNING comment_id",
+    await pool.query(
+      "INSERT INTO posts_comments_link (post_id, user_id, comment_content) VALUES ($1, $2, $3) RETURNING comment_id",
       [post_id, user_id, comment_content],
       (error, result) => {
         if (error) {
           return response.status(500).json({ error: error });
         }
 
+        if (cachingBool) {
+          redisClient.del(`comments:postID-${post_id}:*`);
+        }
         return response.status(200).json(result.rows[0]);
       }
     );
@@ -68,6 +62,12 @@ const getPostComment = async (request, response) => {
     offset = 0;
   }
 
+  if (offset % 20 !== 0) {
+    return response
+      .status(400)
+      .json({ error: "offset should be 20 multiple only" });
+  }
+
   if (!post_id) {
     return response.status(400).json({ error: "post_id is required" });
   }
@@ -76,48 +76,46 @@ const getPostComment = async (request, response) => {
     if (cachingBool) {
       redisClient.select(0);
 
-      value = await redisClient.get(`comments:postID-${post_id}:${offset}`);
+      const value = await redisClient.get(`comments:postID-${post_id}:${offset}`);
 
       if (value) {
         // Data found in Redis, parse and send response
-        response.status(200).json(JSON.parse(value));
+        return response.status(200).json(JSON.parse(value));
       }
-    } else {
-      pool.query(
-        `SELECT
-        comments_link.comment_id,
+    }
+    pool.query(
+      `SELECT
+        posts_comments_link.comment_id,
         users.username,
-        comments_link.comment_content,
-        comments_link.created_at,
+        posts_comments_link.comment_content,
+        posts_comments_link.created_at,
         users.avatar_url
         FROM
-        comments_link
-  JOIN
-    users ON comments_link.user_id = users.user_id
-  WHERE
-    comments_link.active = 'T' AND comments_link.post_id = $1
-  ORDER BY
-    comments_link.created_at DESC
-  LIMIT 20
-  OFFSET $2`,
-        [post_id, offset],
-        (error, result) => {
-          if (error) {
-            return response.status(500).json({ error: error });
-          }
-          userData = result.rows;
-
-          if (cachingBool) {
-            redisClient.setEx(
-              `comments:postID-${post_id}:${offset}`,
-              1800,
-              JSON.stringify(userData)
-            );
-          }
-          response.status(200).json(userData);
+        posts_comments_link
+        JOIN
+          users ON posts_comments_link.user_id = users.user_id
+        WHERE
+          posts_comments_link.active = 'T' AND posts_comments_link.post_id = $1
+        ORDER BY
+          posts_comments_link.created_at DESC
+        LIMIT 20
+        OFFSET $2`,
+      [post_id, offset],
+      (error, result) => {
+        if (error) {
+          return response.status(500).json({ error: error });
         }
-      );
-    }
+        const userData = result.rows;
+
+        if (cachingBool) {
+          redisClient.set(
+            `comments:postID-${post_id}:${offset}`,
+            JSON.stringify(userData)
+          );
+        }
+        return response.status(200).json(userData);
+      }
+    );
   } catch (error) {
     console.error("Database error:", error);
     response.status(400).json({ error: error.message });
