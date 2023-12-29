@@ -18,8 +18,7 @@ const meInfo = async (request, response) => {
 
       if (value) {
         // Data found in Redis, parse and send response
-        response.status(200).json(JSON.parse(value));
-        return;
+        return response.status(200).json(JSON.parse(value));
       }
     }
     // Data not found in Redis, fetch from PostgreSQL
@@ -37,7 +36,7 @@ const meInfo = async (request, response) => {
     if (cachingBool) {
       await redisClient.set(`userData-${userToken}`, JSON.stringify(userData));
     }
-    return userData;
+    return response.status(200).json(JSON.parse(userData));
   } catch (error) {
     console.error("Database error:", error);
     response.status(400).json({ error: error.message });

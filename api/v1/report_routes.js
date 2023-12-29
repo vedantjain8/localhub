@@ -15,18 +15,7 @@ const reportComment = async (request, response) => {
     }
 
     // Check if the user exists and get the user_id
-    const userResult = await pool.query(
-      "SELECT user_id FROM users WHERE token = $1",
-      [token]
-    );
-
-    if (!userResult.rows.length) {
-      return response.status(400).json({
-        error: "Not a valid token",
-      });
-    }
-
-    const user_id = userResult.rows[0].user_id;
+    const user_id = JSON.parse(await getUserData(token))["user_id"];
 
     pool.query(
       "INSERT INTO report_comment (user_id, comment_id) VALUES ($1, $2)",
@@ -44,7 +33,7 @@ const reportComment = async (request, response) => {
           }
         } else {
           // Successfully inserted
-          response
+          return response
             .status(200)
             .json({ status: "Successfully reported comment" });
         }
@@ -68,18 +57,7 @@ const reportPost = async (request, response) => {
     }
 
     // Check if the user exists and get the user_id
-    const userResult = await pool.query(
-      "SELECT user_id FROM users WHERE token = $1",
-      [token]
-    );
-
-    if (!userResult.rows.length) {
-      return response.status(400).json({
-        error: "Not a valid token",
-      });
-    }
-
-    const user_id = userResult.rows[0].user_id;
+    const user_id = JSON.parse(await getUserData(token))["user_id"];
 
     pool.query(
       "INSERT INTO report_post (user_id, post_id) VALUES ($1, $2)",
@@ -97,7 +75,7 @@ const reportPost = async (request, response) => {
           }
         } else {
           // Successfully inserted
-          response.status(200).json({ status: "Successfully reported post" });
+          return response.status(200).json({ status: "Successfully reported post" });
         }
       }
     );
