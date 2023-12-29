@@ -9,7 +9,7 @@ const fs = require("fs");
 const path = require("path");
 
 const userRoutes = require("./v1/user_routes");
-const subredditRoutes = require("./v1/subreddit_routes");
+const communityRoutes = require("./v1/community_routes");
 const postRoutes = require("./v1/post_routes");
 const commentRoutes = require("./v1/comments_routes");
 const votesRoutes = require("./v1/votes_routes");
@@ -55,7 +55,7 @@ app.use(
 );
 
 app.use(v1path, userRoutes);
-app.use(v1path, subredditRoutes);
+app.use(v1path, communityRoutes);
 app.use(v1path, postRoutes);
 app.use(v1path, commentRoutes);
 app.use(v1path, votesRoutes);

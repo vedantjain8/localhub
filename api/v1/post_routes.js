@@ -62,7 +62,17 @@ const createPost = async (request, response) => {
     }
     // Create the post
     const createPostResult = await pool.query(
-      "INSERT INTO posts (post_title, post_content, post_image, user_id, community_id, is_adult) VALUES ($1, $2, $3, $4, $5, $6) RETURNING post_id",
+      `INSERT INTO
+      posts (
+        post_title,
+        post_content,
+        post_image,
+        user_id,
+        community_id,
+        is_adult
+      )
+    VALUES
+      ($1, $2, $3, $4, $5, $6) RETURNING post_id`,
       [post_title, post_content, post_image, user_id, community_id, is_adult]
     );
 

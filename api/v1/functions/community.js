@@ -19,7 +19,19 @@ async function getCommunityData(communityName) {
     }
     // Data not found in Redis, fetch from PostgreSQL
     const communityResult = await pool.query(
-      "SELECT community_id, community_name, community_description, creator_user_id, created_at, banner_url, logo_url from community where LOWER(community_name) = LOWER($1) and community.active = TRUE",
+      `SELECT
+      community_id,
+      community_name,
+      community_description,
+      creator_user_id,
+      created_at,
+      banner_url,
+      logo_url
+    FROM
+      community
+    WHERE
+      LOWER(community_name) = LOWER($1)
+      AND community.active = TRUE`,
       [communityName]
     );
 

@@ -35,6 +35,7 @@ bun index.js
 - [redis](https://www.npmjs.com/package/redis)
 - [pg](https://www.npmjs.com/package/pg)
 - [validator](https://www.npmjs.com/package/validator)
+- [node-cron](https://www.npmjs.com/package/node-cron)
 
 # Understand the code
 - token is generated from the tools.js using crypto package to generate truely random token key
@@ -50,4 +51,10 @@ bun index.js
 - **`community-${community_id}:posts:offset-${offset}`**
   - post_id, post_title, short_content, post_image, community_id, created_at, community.community_name, community.logo_url
 - **`posts:postID-${post_id}`**
-  - 
+  - !! users.username AS post_username
+- **`community:joinedCount:${community_id}`**
+- community_id, subscriber_count
+- **user_community_data**
+  - hashes
+    - `user:${user_id}:community:${community_id}` : JSON.stringify({ userId: user_id, communityId: community_id, timestamp: new Date().toISOString()})
+-
