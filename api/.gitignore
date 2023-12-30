@@ -174,4 +174,8 @@ dist
 # Finder (MacOS) folder config
 .DS_Store
 
+# binary file
 bun.lockb
+
+# upload data
+upload/*

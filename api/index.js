@@ -16,6 +16,9 @@ const votesRoutes = require("./v1/votes_routes");
 const reportRoutes = require("./v1/report_routes");
 const meRoutes = require("./v1/me");
 const historyRoutes = require("./v1/history");
+const uploadImageRoutes = require("./v1/uploadImage_route");
+
+// process.env.NODE_ENV = "development";
 
 const options = {
   key: fs.readFileSync(path.join(__dirname, "./cert/key.pem")),
@@ -31,7 +34,6 @@ const limiter = rateLimit({
 });
 
 const app = express();
-const port = 3000;
 const subdirectory = "/api";
 const latestVersion = "/v1";
 
@@ -40,6 +42,7 @@ const v1path = subdirectory + latestVersion;
 app.set("trust proxy", 1);
 app.get("/ip", (request, response) => response.send(request.ip));
 
+app.use(express.urlencoded({ extended: false }));
 app.use(helmet());
 app.use(
   morgan(
@@ -62,6 +65,7 @@ app.use(v1path, votesRoutes);
 app.use(v1path, reportRoutes);
 app.use(v1path, meRoutes);
 app.use(v1path, historyRoutes);
+app.use(v1path, uploadImageRoutes);
 
 process.on("SIGINT", () => {
   console.log("Ctrl-C was pressed");
