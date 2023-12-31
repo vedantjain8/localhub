@@ -10,30 +10,60 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _loginController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _passwordController.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.all(15.0),
-      child: Column(
-        children: [
-          TextFieldInput(
-            hasPrefix: true, // displays prefix icon
-            textEditingController: _loginController,
-            hintText: "E-Mail",
-            textInputType: TextInputType.text,
-            prefixIcon: const Icon(Icons.email_rounded),
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          TextFieldInput(
-            hasPrefix: true,
-            textEditingController: _loginController,
-            hintText: "Password",
-            textInputType: TextInputType.text,
-            prefixIcon: const Icon(Icons.lock_rounded),
-          ),
-        ],
+      child: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            TextFieldInput(
+              hasPrefix: true,
+              textEditingController: _loginController,
+              hintText: "E-Mail",
+              textInputType: TextInputType.text,
+              prefixIcon: const Icon(Icons.email_rounded),
+            ),
+            const SizedBox(
+              height: 30,
+            ),
+            TextFieldInput(
+              hasPrefix: true,
+              textEditingController: _passwordController,
+              hintText: "Password",
+              textInputType: TextInputType.text,
+              prefixIcon: const Icon(Icons.lock_rounded),
+              isPass: true,
+            ),
+            TextButton(
+              onPressed: () {},
+              child: const Text(
+                "Forgot Password",
+                style: TextStyle(color: Colors.blue),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {},
+              style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStatePropertyAll<Color>(colorScheme.secondary),
+                  fixedSize: const MaterialStatePropertyAll(Size(150, 30))),
+              child: Text(
+                "Login",
+                style: TextStyle(color: colorScheme.onSecondary),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
