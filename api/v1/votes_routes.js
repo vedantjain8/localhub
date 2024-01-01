@@ -2,27 +2,16 @@ const express = require("express");
 const pool = require("../db");
 const router = express.Router();
 
-const vote = async (request, response) => {
+const createVote = async (request, response, vote_type) => {
   try {
-    const { token, vote_type } = request.body;
+    const { token } = request.body;
     const post_id = parseInt(request.params.id);
 
     if (!token || !post_id || !vote_type) {
       return response.status(400).json({ error: "Invalid input data" });
     }
 
-    const userResult = await pool.query(
-      "SELECT user_id FROM users WHERE token = $1",
-      [token]
-    );
-
-    if (!userResult.rows.length) {
-      return response.status(400).json({
-        error: "Not a valid token",
-      });
-    }
-
-    const user_id = userResult.rows[0].user_id;
+    const user_id = JSON.parse(await getUserData(token))["user_id"];
 
     const existingVote = await pool.query(
       "SELECT * FROM post_vote_link WHERE post_id = $1 AND user_id = $2",
@@ -49,7 +38,12 @@ const vote = async (request, response) => {
   }
 };
 
-router.post("/vote/posts/:id", vote);
+router.post("/vote/upvote/posts/:id", (request, response) =>
+  createVote(request, response, "U")
+);
+router.post("/vote/downvote/posts/:id", (request, response) =>
+  createVote(request, response, "D")
+);
 // router.get("/vote/comment/:id", postRoutes.getPostById);
 
 module.exports = router;

@@ -11,18 +11,20 @@ To run:
 ```bash
 bun index.js
 ```
+> [!CAUTION]
+> ssl certificates are self signed certs that should not be used in production. 
+> It is recommended to use a valid CA or use lets encrypt for a ssl certificate.
 
 # TODO:
 - [ ] stats update from redis > cron job
-- [ ] add an endpoint to fetch stats for posts(get post) and community
-- [ ] image upload karne ka dekhna h
-- [ ] start with login > register > get posts > ... for redis caching
-  - [ ] add first caching for views, comments count, join, unjoin community and then add cron job for the same
+  - [ ] votes - redis - status update
+- [ ] ip post view count increment limiting
+- [ ] admin page endpoint
 - [ ] endpoint for debugging to clear all database and recreate from scratch
 - [ ] create a docker image 
   - [ ] read [this](https://dev.to/duncanlew/best-practices-for-reducing-the-docker-image-size-for-a-nodejs-application-2m7a) article and [this, along with recommended articles at end](https://blog.devgenius.io/reduce-the-size-of-your-node-js-docker-image-by-up-to-90-53aad23890e2)
 - [ ] for nginx config - [this](https://stackoverflow.com/a/54403319)
-- [ ] [t](https://stackabuse.com/6-easy-ways-to-speed-up-express/)
+- [ ] [easy ways to speed up express article](https://stackabuse.com/6-easy-ways-to-speed-up-express/)
 
 # MAYBE TODOs:
 - [ ] create a moderators table, account, mods action page
@@ -66,3 +68,7 @@ bun index.js
   - comment_id, users.username, comment_content, created_at, users.avatar_url
 - **`user${user_id}:voteType${vote}:${offset}`**
   - same as post
+- **`community:stats:${community_id}`**
+  - subscriber_count
+- **`post:stats:${post_id}`**
+  - total_votes, total_views, total_comments

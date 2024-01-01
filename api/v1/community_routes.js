@@ -259,7 +259,7 @@ cron.schedule("*/10 * * * *", async () => {
 router.get("/community", getcommunity);
 // router.get("/community/:id", getcommunityById);
 router.post("/community", createCommunity);
-router.post("/joincommunity", joinCommunity);
-router.post("/leavecommunity", leaveCommunity);
+router.post("/community/join", joinCommunity);
+router.post("/community/leave", leaveCommunity);
 
 module.exports = router;

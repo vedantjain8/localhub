@@ -16,6 +16,7 @@ const votesRoutes = require("./v1/votes_routes");
 const reportRoutes = require("./v1/report_routes");
 const meRoutes = require("./v1/me");
 const historyRoutes = require("./v1/history");
+const statsRoutes = require("./v1/stats_routes");
 const uploadImageRoutes = require("./v1/uploadImage_route");
 
 // process.env.NODE_ENV = "development";
@@ -42,6 +43,12 @@ const v1path = subdirectory + latestVersion;
 app.set("trust proxy", 1);
 app.get("/ip", (request, response) => response.send(request.ip));
 
+// access images on path
+// http://<ip>:<port>/upload/<low/original>/<image file name>
+app.use("/files", express.static(__dirname + "/upload"));
+
+app.use("/favicon.ico", express.static("./static/favicon.ico"));
+
 app.use(express.urlencoded({ extended: false }));
 app.use(helmet());
 app.use(
@@ -65,6 +72,7 @@ app.use(v1path, votesRoutes);
 app.use(v1path, reportRoutes);
 app.use(v1path, meRoutes);
 app.use(v1path, historyRoutes);
+app.use(v1path, statsRoutes);
 app.use(v1path, uploadImageRoutes);
 
 process.on("SIGINT", () => {
@@ -92,4 +100,3 @@ https
   .listen(3002, () => {
     console.log(`Secure server is listening on port 3002`);
   });
-
