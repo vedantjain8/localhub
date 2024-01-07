@@ -1,5 +1,6 @@
 const express = require("express");
 const pool = require("../db");
+const { getUserData } = require("./functions/users");
 const router = express.Router();
 
 const createVote = async (request, response, vote_type) => {
@@ -38,10 +39,10 @@ const createVote = async (request, response, vote_type) => {
   }
 };
 
-router.post("/vote/upvote/posts/:id", (request, response) =>
+router.post("/posts/vote/upvote/:id", (request, response) =>
   createVote(request, response, "U")
 );
-router.post("/vote/downvote/posts/:id", (request, response) =>
+router.post("/posts/vote/downvote/:id", (request, response) =>
   createVote(request, response, "D")
 );
 // router.get("/vote/comment/:id", postRoutes.getPostById);

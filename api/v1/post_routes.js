@@ -5,6 +5,7 @@ const pool = require("../db");
 const redisClient = require("../dbredis");
 const { getUserData } = require("./functions/users");
 const { getCommunityData } = require("./functions/community");
+const { incrementView } = require("./functions/post_views");
 var validator = require("validator");
 const config = require("../config/config.json");
 
@@ -143,7 +144,7 @@ const getPosts = async (request, response) => {
   }
 };
 
-const getSubredditPosts = async (request, response) => {
+const getCommunityPosts = async (request, response) => {
   var { offset } = parseInt(request.body.offset);
   var community_id = request.body.community_id;
 
@@ -274,6 +275,7 @@ OFFSET $2
 
 const getPostById = async (request, response) => {
   const post_id = parseInt(request.params.id);
+  const token = request.params.token;
 
   if (!post_id) {
     return response.status(400).json({ error: "post id is required" });
@@ -320,6 +322,12 @@ const getPostById = async (request, response) => {
         JSON.stringify(userData)
       );
     }
+
+    if (token) {
+      const user_id = JSON.parse(await getUserData(token))["user_id"];
+      incrementView(post_id, user_id);
+    }
+
     response.status(200).json(userData);
     return;
   } catch (error) {
@@ -328,21 +336,59 @@ const getPostById = async (request, response) => {
   }
 };
 
-// TODO create update post endpoint
-// const updatePost = (request, response) => {
-//   const post_id = parseInt(request.params.id);
-//   const { post_title, post_content, token } = request.body;
-//   pool.query(
-//     "UPDATE posts SET post_title = $1, post_content = $2 WHERE user_id = (SELECT user_id FROM users WHERE token = $3) AND post_id = $4 RETURNING post_id",
-//     [post_title, post_content, token, post_id],
-//     (error, results) => {
-//       if (error) {
-//         response.status(500).json({ error: error });
-//       }
-//       response.status(200).json({ 200: `Post modified having Post_ID: ${id}` });
-//     }
-//   );
-// };
+const updatePost = async (request, response) => {
+  const post_id = parseInt(request.params.id);
+  const { post_title, post_content, post_image, is_adult, active, token } = request.body;
+
+  if (!token) {
+    return response.status(400).json({ error: "Provide a user token" });
+  }
+
+  const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+  // Construct the SET clause dynamically based on provided fields
+  const setClause = [];
+  const values = [post_id];
+
+  if (post_title !== undefined) {
+    setClause.push(`post_title = $${values.push(post_title)}`);
+  }
+
+  if (post_content !== undefined) {
+    setClause.push(`post_content = $${values.push(post_content)}`);
+  }
+
+  if (post_image !== undefined) {
+    setClause.push(`post_image = $${values.push(post_image)}`);
+  }
+
+  if (is_adult !== undefined) {
+    setClause.push(`is_adult = $${values.push(is_adult)}`);
+  }
+
+  if (active !== undefined) {
+    setClause.push(`active = $${values.push(active)}`);
+  }
+
+  // Check if any valid fields were provided
+  if (setClause.length === 0) {
+    return response.status(400).json({ error: "No valid fields provided for update." });
+  }
+
+  const updateQuery = `UPDATE posts SET ${setClause.join(', ')} WHERE user_id = ${user_id} AND post_id = $1 RETURNING post_id`;
+
+  pool.query(updateQuery, values, (error, results) => {
+    if (error) {
+      return response.status(500).json({ error: error.message });
+    }
+
+    if (results.rowCount === 0) {
+      return response.status(404).json({ error: `Post with ID ${post_id} not found for the user.` });
+    }
+
+    response.status(200).json({ 200: `Post modified having Post_ID: ${post_id}` });
+  });
+};
 
 const getUserPubPosts = async (request, response) => {
   var offset = parseInt(request.body.offset);
@@ -421,10 +467,9 @@ router.get("/posts/:id", getPostById);
 router.post("/posts", createPost);
 router.post("/users/posts", getUserPubPosts);
 
-// TODO
-// router.put("/posts/:id", updatePost);
+router.put("/posts/:id", updatePost);
 
-router.post("/getSubredditPosts", getSubredditPosts);
+router.post("/community/posts", getCommunityPosts);
 router.post("/getUserFeedSubredditPosts", getUserFeedSubredditPosts);
 
 module.exports = router;

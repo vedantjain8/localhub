@@ -218,6 +218,7 @@ const leaveCommunity = async (request, response) => {
   }
 };
 
+// used to send data to db from redis
 cron.schedule("*/10 * * * *", async () => {
   // running task every 10 minutes
   if (cachingBool) {

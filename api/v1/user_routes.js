@@ -6,6 +6,7 @@ const router = express.Router();
 const pool = require("../db");
 const redisClient = require("../dbredis");
 const config = require("../config/config.json");
+const { getUserData } = require("./functions/users");
 const { generateToken, reservedKeywordsFile } = require("../tools");
 
 const cachingBool = Boolean(config.caching);
@@ -93,22 +94,22 @@ const createUser = async (request, response) => {
 };
 
 // delete user function
-const deleteUser = (request, response) => {
-  // TODO add some validtion or conformation before deleting account
+const deleteUser = async (request, response) => {
   const token = request.params.token;
 
   if (!token) {
     return response.status(400).json({ error: "token can not be null" });
   }
+  const user_id = JSON.parse(await getUserData(token))["user_id"];
 
   pool.query(
-    "UPDATE users SET active = 'false' WHERE token = $1",
-    [token],
+    "UPDATE users SET active = 'false' WHERE userid = $1",
+    [user_id],
     (error, results) => {
       if (error) {
         throw error;
       }
-      response.status(200).json({ 200: `User deleted with token: ${token}` });
+      return response.status(200).json({ 200: `User deleted with token: ${token}` });
     }
   );
 };
