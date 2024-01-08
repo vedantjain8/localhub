@@ -17,6 +17,5 @@ ENV REDIS_PORT 6379
 EXPOSE 3001
 EXPOSE 3002
 
-user bun
 CMD ["bun", "index.js"]
 # CMD ["/bin/sh", "-c", "bash"]
