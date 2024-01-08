@@ -8,6 +8,8 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 
+const createDirectories = require("./v1/functions/initCreateDirectory");
+
 const userRoutes = require("./v1/user_routes");
 const communityRoutes = require("./v1/community_routes");
 const postRoutes = require("./v1/post_routes");
@@ -39,6 +41,8 @@ const subdirectory = "/api";
 const latestVersion = "/v1";
 
 const v1path = subdirectory + latestVersion;
+
+createDirectories();
 
 app.set("trust proxy", 1);
 app.get("/ip", (request, response) => response.send(request.ip));

@@ -15,10 +15,47 @@ bun index.js
 > ssl certificates are self signed certs that should not be used in production. 
 > It is recommended to use a valid CA or use lets encrypt for a ssl certificate.
 
+# Docker run
+## Docker-cli
+### Build from source 
+```bash
+docker build -t localhubserver .
+```
+### Run docker container
+```bash
+docker run --name localhub -d \
+-e NODE_ENV=production \
+-e DB_HOST=localhost \
+-e DB_PORT=5432 \
+-e DB_DATABASE=localhub \
+-e DB_USER=localhub \
+-e DB_PASSWORD=localhub \
+-e REDIS_HOST=localhost \
+-e REDIS_PORT=6379 \
+-p 3001:3001 -p 3002:3002 \
+-v /path/to/your/uploads/folder:/home/bun/app/upload \
+localhubserver
+```
+## Parameters
+Containers are configured using parameters passed at runtime (such as those above). These parameters are separated by a colon and indicate <external>:<internal> respectively. For example, -p 8080:80 would expose port 80 from inside the container to be accessible from the host's IP on port 8080 outside the container.
+
+| Parameters  | Functions  |
+|---|---|
+| `-p 3001` | HTTP port |
+| `-p 3002` | HTTPs port |
+| `-e DB_HOST=localhost` | Database server hostname or IP address |
+| `-e DB_PORT=5432` | Database server port |
+| `-e DB_DATABASE=localhub` | Database name |
+| `-e DB_USER=localhub` | Database username |
+| `-e DB_PASSWORD=localhub` | Password associated with database username |
+| `-e REDIS_HOST=localhost` | Redis database server hostname or IP address |
+| `-e REDIS_PORT=6379` | Redis database server port |
+| `-e NODE_ENV=production`  | development or production server  |
+| `-v /app`  | Server files  |
+| `-v /app/upload`  | Files that are uploaded by users  |
+
+
 # TODO:
-- [ ] stats update from redis > cron job
-  - [ ] votes - redis - status update
-- [ ] ip post view count increment limiting
 - [ ] admin page endpoint
 - [ ] endpoint for debugging to clear all database and recreate from scratch
 - [ ] create a docker image 

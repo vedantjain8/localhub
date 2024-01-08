@@ -28,7 +28,7 @@ router.post("/upload", upload.single("uploaded_file"), async (req, res) => {
   });
   const { buffer, originalname } = req.file;
   const ref = `${Date.now()}-${originalname}.webp`;
-//   await sharp(buffer).toFile("./upload/original/" + ref);
+  await sharp(buffer).toFile("./upload/original/" + ref);
   await sharp(buffer)
     .webp({ quality: 20 })
     .toFile("./upload/low/" + ref);

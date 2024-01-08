@@ -1,0 +1,19 @@
+version: '3.9'
+services:
+    localhubapi:
+        image: localhubapi
+        volumes:
+            - '/path/to/your/uploads/folder:/home/bun/app/upload'
+        ports:
+            - '3002:3002'
+            - '3001:3001'
+        environment:
+            - REDIS_PORT=6379
+            - REDIS_HOST=localhost
+            - DB_PASSWORD=localhub
+            - DB_USER=localhub
+            - DB_DATABASE=localhub
+            - DB_PORT=5432
+            - DB_HOST=localhost
+            - NODE_ENV=production
+        container_name: localhub

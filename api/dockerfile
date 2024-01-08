@@ -1,0 +1,22 @@
+FROM oven/bun:slim
+LABEL authors="Vedant Jain"
+
+COPY . .
+
+RUN bun install
+
+ENV NODE_ENV production
+ENV DB_HOST localhost
+ENV DB_PORT 5432
+ENV DB_DATABASE localhub
+ENV DB_USER localhub
+ENV DB_PASSWORD localhub
+ENV REDIS_HOST localhost
+ENV REDIS_PORT 6379
+
+EXPOSE 3001
+EXPOSE 3002
+
+user bun
+CMD ["bun", "index.js"]
+# CMD ["/bin/sh", "-c", "bash"]
