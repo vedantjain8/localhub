@@ -3,8 +3,7 @@ name: ci-docker
 on:
   push:
     branches:
-      - "docker-ci"
-      - "main"
+      - "dev"
 
   workflow_dispatch:
 

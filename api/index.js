@@ -48,7 +48,7 @@ app.set("trust proxy", 1);
 app.get("/ip", (request, response) => response.send(request.ip));
 
 // access images on path
-// http://<ip>:<port>/upload/<low/original>/<image file name>
+// http://<ip>:<port>/files/<low/original>/<image file name>
 app.use("/files", express.static(__dirname + "/upload"));
 
 app.use("/favicon.ico", express.static("./static/favicon.ico"));

@@ -5,9 +5,6 @@
   CREATE INDEX <indexNAME> ON <tableNAME>(<tableFieldName>)
   ```
 
-# Remember:
-- username for user should be min 4 and max 15
-
 # TODO:
 - [ ] code coverage check
 
