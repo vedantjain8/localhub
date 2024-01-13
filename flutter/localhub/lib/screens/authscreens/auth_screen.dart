@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:localhub/screens/authscreens/login_Screen.dart';
 import 'package:localhub/screens/authscreens/register_screen.dart';
+import 'package:localhub/themes/theme.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -34,24 +35,27 @@ class _AuthScreenState extends State<AuthScreen>
 
   @override
   Widget build(BuildContext context) {
-    // final colorScheme = Theme.of(context).colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      // backgroundColor: colorScheme.background,
+      backgroundColor: colorScheme.background,
       body: SingleChildScrollView(
         child: Column(
           children: [
             Container(
               height: MediaQuery.of(context).size.height * 0.3,
-              decoration: const BoxDecoration(
-                // color: Theme.of(context).colorScheme.background,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.background,
               ),
             ),
             Container(
               height: MediaQuery.of(context).size.height * 0.7,
-              decoration: const BoxDecoration(
-                // color: Theme.of(context).colorScheme.secondaryContainer,
-                borderRadius: BorderRadius.only(
+              decoration: BoxDecoration(
+                color: colorScheme.onInverseSurface,
+                // Theme.of(context).colorScheme.brightness == Brightness.dark
+                //     ? Colors.black
+                //     : Colors.white,
+                borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(30),
                   topRight: Radius.circular(30),
                 ),
@@ -64,19 +68,19 @@ class _AuthScreenState extends State<AuthScreen>
                     child: Container(
                       padding: const EdgeInsets.all(4.0),
                       decoration: BoxDecoration(
-                        // color: colorScheme.secondary,
+                        color: colorScheme.background,
                         borderRadius: BorderRadius.circular(60.0),
                       ),
                       child: TabBar(
                         controller: _tabController,
                         tabs: _tabs,
-                        unselectedLabelColor: Colors.black,
-                        labelColor: Colors.black,
+                        unselectedLabelColor: colorScheme.primary,
+                        labelColor: colorScheme.background,
                         indicatorSize: TabBarIndicatorSize.tab,
                         indicatorColor: Colors.transparent,
                         indicator: BoxDecoration(
                           borderRadius: BorderRadius.circular(80.0),
-                          // color: colorScheme.onBackground,
+                          color: colorScheme.primary,
                         ),
                         dividerColor: Colors.transparent,
                       ),

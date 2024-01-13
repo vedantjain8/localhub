@@ -7,9 +7,13 @@ environment:
   sdk: '>=3.2.3 <4.0.0'
 
 dependencies:
+  csc_picker: ^0.2.7
   flutter:
     sdk: flutter
   flutter_secure_storage: ^9.0.0
+  provider: ^6.1.1
+  shared_preferences: ^2.2.2
+  
 
 dev_dependencies:
   flutter_test:

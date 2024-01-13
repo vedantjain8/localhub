@@ -9,7 +9,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _loginController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   @override
   void dispose() {
@@ -28,7 +28,9 @@ class _LoginScreenState extends State<LoginScreen> {
           children: <Widget>[
             TextFieldInput(
               hasPrefix: true,
-              textEditingController: _loginController,
+              isPass: false,
+              // showPass: false,
+              textEditingController: _emailController,
               hintText: "E-Mail",
               textInputType: TextInputType.text,
               prefixIcon: const Icon(Icons.email_rounded),
@@ -55,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () {},
               style: ButtonStyle(
                   backgroundColor:
-                      MaterialStatePropertyAll<Color>(colorScheme.secondary),
+                      MaterialStatePropertyAll<Color>(colorScheme.primary),
                   fixedSize: const MaterialStatePropertyAll(Size(150, 30))),
               child: Text(
                 "Login",

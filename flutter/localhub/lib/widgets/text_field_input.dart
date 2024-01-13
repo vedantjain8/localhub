@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class TextFieldInput extends StatelessWidget {
+class TextFieldInput extends StatefulWidget {
   final TextEditingController textEditingController;
   final bool isPass;
   final bool isLightMode;
@@ -9,7 +9,8 @@ class TextFieldInput extends StatelessWidget {
   final int maxlines;
   final bool hasPrefix;
   final Icon prefixIcon;
-  const TextFieldInput({
+
+  TextFieldInput({
     super.key,
     required this.textEditingController,
     this.isPass = false,
@@ -22,30 +23,45 @@ class TextFieldInput extends StatelessWidget {
   });
 
   @override
+  State<TextFieldInput> createState() => _TextFieldInputState();
+}
+
+class _TextFieldInputState extends State<TextFieldInput> {
+  bool showPass = false;
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      child: hasPrefix
-          ? TextField(
-              decoration: InputDecoration(
-                hintText: hintText,
-                hintStyle: const TextStyle(color: Colors.grey),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(width: 4, color: Colors.blue),
-                ),
-                prefixIcon: prefixIcon,
-              ),
-            )
-          : TextField(
-              decoration: InputDecoration(
-                hintText: hintText,
-                hintStyle: const TextStyle(color: Colors.grey),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                prefixIcon: null,
-              ),
-            ),
+    final colorScheme = Theme.of(context).colorScheme;
+    final inputBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(20.0),
+      borderSide: BorderSide(
+        color: colorScheme.onSurfaceVariant,
+      ),
+    );
+    return TextField(
+      textInputAction: TextInputAction.next,
+      decoration: InputDecoration(
+          hintText: widget.hintText,
+          hintStyle: TextStyle(
+            color: colorScheme.onSurfaceVariant,
+          ),
+          border: inputBorder,
+          focusedBorder: inputBorder,
+          prefixIcon: widget.hasPrefix ? widget.prefixIcon : null,
+          suffixIcon: widget.isPass
+              ? InkWell(
+                  onTap: () {
+                    setState(() {
+                      showPass = !showPass;
+                    });
+                  },
+                  child: showPass
+                      ? const Icon(Icons.visibility_off_rounded)
+                      : const Icon(Icons.visibility_rounded),
+                )
+              : null),
+      style:
+          TextStyle(height: 1, color: Theme.of(context).colorScheme.onSurface),
+      obscureText: widget.isPass && !showPass,
     );
   }
 }
