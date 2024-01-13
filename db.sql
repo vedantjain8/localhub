@@ -36,11 +36,20 @@ CREATE TABLE IF NOT EXISTS
     FOREIGN KEY (community_id) REFERENCES community (community_id)
   );
 
-  CREATE TRIGGER community_stats_insert_trigger
-  AFTER INSERT ON community
-  FOR EACH ROW
+  CREATE OR REPLACE FUNCTION community_stats_insert_function()
+RETURNS TRIGGER AS $$
+BEGIN
   INSERT INTO community_stats (community_id, subscriber_count)
   VALUES (NEW.community_id, 0);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER community_stats_insert_trigger
+AFTER INSERT ON community
+FOR EACH ROW
+EXECUTE FUNCTION community_stats_insert_function();
+
 
 CREATE TABLE IF NOT EXISTS
   users_community_link(
@@ -76,11 +85,20 @@ CREATE TABLE IF NOT EXISTS
       FOREIGN KEY (post_id) REFERENCES posts (post_id)
     );
 
-  CREATE TRIGGER posts_stats_insert_trigger
-  AFTER INSERT ON posts
-  FOR EACH ROW
+  CREATE OR REPLACE FUNCTION posts_stats_insert_function()
+RETURNS TRIGGER AS $$
+BEGIN
   INSERT INTO posts_stats (post_id, total_votes, total_views, total_comments)
   VALUES (NEW.post_id, 0, 0, 0);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER posts_stats_insert_trigger
+AFTER INSERT ON posts
+FOR EACH ROW
+EXECUTE FUNCTION posts_stats_insert_function();
+
 
 CREATE TABLE IF NOT EXISTS
   posts_vote_link (
@@ -124,6 +142,6 @@ CREATE TABLE IF NOT EXISTS
     comment_id INT NOT NULL,
     report_time TIMESTAMP NOT NULL DEFAULT NOW(),
     FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (comment_id) REFERENCES comments_link(comment_id),
+    FOREIGN KEY (comment_id) REFERENCES posts_comments_link(comment_id),
     UNIQUE (user_id, comment_id)
   );
