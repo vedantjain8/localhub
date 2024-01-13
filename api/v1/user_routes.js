@@ -72,7 +72,7 @@ const createUser = async (request, response) => {
 
     // Insert the user
     const insertUserResult = await pool.query(
-      "INSERT INTO users (username, email, password_hash, salt, avatar_url, locality_country, locality_state, locality_city, token) VALUES ($1, $2, $3, $4, $5, $6) RETURNING token",
+      "INSERT INTO users (username, email, password_hash, salt, avatar_url, locality_country, locality_state, locality_city, token) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING token",
       [
         username,
         email,
