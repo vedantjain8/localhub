@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:localhub/screens/authscreens/login_Screen.dart';
+import 'package:localhub/screens/authscreens/login_screen.dart';
 import 'package:localhub/screens/authscreens/register_screen.dart';
-import 'package:localhub/themes/theme.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});

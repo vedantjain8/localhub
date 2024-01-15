@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class TextFieldInput extends StatefulWidget {
+class CustomTextFieldInput extends StatefulWidget {
   final TextEditingController textEditingController;
   final bool isPass;
   final bool isLightMode;
@@ -10,7 +10,7 @@ class TextFieldInput extends StatefulWidget {
   final bool hasPrefix;
   final Icon prefixIcon;
 
-  TextFieldInput({
+  const CustomTextFieldInput({
     super.key,
     required this.textEditingController,
     this.isPass = false,
@@ -23,10 +23,10 @@ class TextFieldInput extends StatefulWidget {
   });
 
   @override
-  State<TextFieldInput> createState() => _TextFieldInputState();
+  State<CustomTextFieldInput> createState() => _CustomTextFieldInputState();
 }
 
-class _TextFieldInputState extends State<TextFieldInput> {
+class _CustomTextFieldInputState extends State<CustomTextFieldInput> {
   bool showPass = false;
   @override
   Widget build(BuildContext context) {
@@ -38,6 +38,7 @@ class _TextFieldInputState extends State<TextFieldInput> {
       ),
     );
     return TextField(
+      controller: widget.textEditingController,
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
           hintText: widget.hintText,

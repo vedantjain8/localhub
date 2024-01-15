@@ -1,9 +1,15 @@
 # localhub
 
-A new Flutter project.
+A community driven app where users can join or create local groups based on interests, hobbies or neighbourhood connections. 
+
+## Requirements
+- Android minimum sdk version 18
+- Flutter 3.16.5
+- Dart 3.2.3
 
 ## Dependencies
-- [flutter_secure_storage](https://pub.dev/packages/flutter_secure_storage)
-- [provider](https://pub.dev/packages/provider)
-- [shared_preferences] (https://pub.dev/packages/shared_preferences)
-- [csc_picker] (https://pub.dev/packages/csc_picker)
+- [flutter_secure_storage 9.0.0](https://pub.dev/packages/flutter_secure_storage)
+- [http 1.1.2](https://pub.dev/packages/http)
+- [provider 6.1.1](https://pub.dev/packages/provider)
+- [shared_preferences 2.2.2](https://pub.dev/packages/shared_preferences)
+- [csc_picker 0.2.7](https://pub.dev/packages/csc_picker)

@@ -19,7 +19,6 @@ class AppTheme {
           savedBrightness == 'dark' ? Brightness.dark : Brightness.light,
     );
     themeNotifier.value = theme;
-    print('app theme initialized');
   }
 
   static Future<void> updateTheme(Color color, Brightness brightness) async {
@@ -38,7 +37,6 @@ class AppTheme {
   static Future<void> selectColor(Color color) async {
     final Brightness currentBrightness = themeNotifier.value.brightness;
     await updateTheme(color, currentBrightness);
-    print('color changed');
   }
 
   static Future<void> toggleBrightness() async {
@@ -55,7 +53,6 @@ class AppTheme {
 
     await updateTheme(color, newBrightness);
 
-    print('brightness changed');
   }
 }
 

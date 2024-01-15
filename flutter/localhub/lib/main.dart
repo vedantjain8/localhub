@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:localhub/auth/auth_service.dart';
 import 'package:localhub/screens/authscreens/auth_screen.dart';
+import 'package:localhub/screens/layout/app_layout.dart';
 import 'package:localhub/themes/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  initializeHostAddress();
   await AppTheme.initialize();
   runApp(MainApp());
+}
+
+Future<void> initializeHostAddress() async {
+  final prefs = await SharedPreferences.getInstance();
+  if (!prefs.containsKey('hostaddress')) {
+    await prefs.setString('hostaddress', "192.168.29.16:3001");
+  }
 }
 
 class MainApp extends StatelessWidget {
@@ -32,7 +42,7 @@ class MainApp extends StatelessWidget {
                 }
 
                 if (snapshot.hasData && snapshot.data == true) {
-                  return const AuthScreen();
+                  return const AppLayout();
                 } else {
                   return const AuthScreen();
                 }

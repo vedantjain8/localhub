@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:localhub/widgets/text_field_input.dart';
+import 'package:localhub/auth/auth_service.dart';
+import 'package:localhub/screens/layout/app_layout.dart';
+import 'package:localhub/widgets/custom_text_field_input.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -9,14 +11,17 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
   }
+
+  final AuthService authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -26,19 +31,18 @@ class _LoginScreenState extends State<LoginScreen> {
       child: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            TextFieldInput(
+            CustomTextFieldInput(
               hasPrefix: true,
               isPass: false,
-              // showPass: false,
-              textEditingController: _emailController,
-              hintText: "E-Mail",
+              textEditingController: _usernameController,
+              hintText: "Username",
               textInputType: TextInputType.text,
-              prefixIcon: const Icon(Icons.email_rounded),
+              prefixIcon: const Icon(Icons.person_rounded),
             ),
             const SizedBox(
               height: 30,
             ),
-            TextFieldInput(
+            CustomTextFieldInput(
               hasPrefix: true,
               textEditingController: _passwordController,
               hintText: "Password",
@@ -46,15 +50,62 @@ class _LoginScreenState extends State<LoginScreen> {
               prefixIcon: const Icon(Icons.lock_rounded),
               isPass: true,
             ),
-            TextButton(
-              onPressed: () {},
-              child: const Text(
-                "Forgot Password",
-                style: TextStyle(color: Colors.blue),
-              ),
+            const SizedBox(
+              height: 30,
             ),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                );
+
+                authService
+                    .login(
+                      username: _usernameController.text,
+                      password: _passwordController.text,
+                    )
+                    .then(
+                      (String? token) => {
+                        Navigator.of(context).pop(),
+                        if (token != null)
+                          {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Login successfull"),
+                              ),
+                            ),
+                            Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const AppLayout()),
+                                (route) => false)
+                          }
+                        else
+                          {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Login Failed'),
+                                  content: const Text(
+                                      'Invalid username or password.'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            )
+                          }
+                      },
+                    );
+              },
               style: ButtonStyle(
                   backgroundColor:
                       MaterialStatePropertyAll<Color>(colorScheme.primary),

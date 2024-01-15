@@ -1,7 +1,9 @@
 import 'package:csc_picker/csc_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:localhub/widgets/text_field_input.dart';
+import 'package:localhub/auth/auth_service.dart';
+import 'package:localhub/screens/layout/app_layout.dart';
+import 'package:localhub/widgets/custom_text_field_input.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -19,11 +21,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? countryName;
   String? stateName;
   String? cityName;
+
+  final AuthService authService = AuthService();
+
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
+    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
   }
 
   @override
@@ -34,7 +41,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            TextFieldInput(
+            CustomTextFieldInput(
               hasPrefix: true,
               textEditingController: _usernameController,
               hintText: "Username",
@@ -44,7 +51,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(
               height: 30,
             ),
-            TextFieldInput(
+            CustomTextFieldInput(
               hasPrefix: true,
               textEditingController: _emailController,
               hintText: "E-Mail",
@@ -54,7 +61,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(
               height: 30,
             ),
-            TextFieldInput(
+            CustomTextFieldInput(
               hasPrefix: true,
               textEditingController: _passwordController,
               hintText: "Password",
@@ -65,7 +72,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(
               height: 30,
             ),
-            TextFieldInput(
+            CustomTextFieldInput(
               hasPrefix: true,
               textEditingController: _confirmPasswordController,
               hintText: "Confirm  Password",
@@ -180,14 +187,69 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             const SizedBox(height: 30),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                );
+
+                authService
+                    .register(
+                      username: _usernameController.text,
+                      email: _emailController.text,
+                      password: _passwordController.text,
+                      localityCountry: countryName!,
+                      localityState: stateName!,
+                      localityCity: cityName!,
+                    )
+                    .then(
+                      (String? token) => {
+                        Navigator.of(context).pop(),
+                        if (token != null)
+                          {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Register Successfull"),
+                              ),
+                            ),
+                            Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const AppLayout()),
+                                (route) => false)
+                          }
+                        else
+                          {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Registration Failed'),
+                                  content: const Text(
+                                      'An error occurred during registration.'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            )
+                          }
+                      },
+                    );
+              },
               style: ButtonStyle(
                 backgroundColor:
                     MaterialStateProperty.all<Color>(colorScheme.primary),
                 fixedSize: MaterialStateProperty.all(const Size(150, 30)),
               ),
               child: Text(
-                "Login",
+                "Register",
                 style: TextStyle(color: colorScheme.onSecondary),
               ),
             ),
