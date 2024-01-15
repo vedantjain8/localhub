@@ -11,9 +11,6 @@
 # TODO:
 - [ ] code coverage check
 
-- [ ] client side hashing with salting [bard response](https://g.co/bard/share/556fcd2d893d) 
-> password + salt = hash_password
-> store hash_password and salt in the db
 
 - [ ] enforce strong password validation on client
 - [ ] bio should be updated from the profile edit page
