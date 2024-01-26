@@ -42,7 +42,7 @@ const communityStats = async (request, response) => {
 };
 
 const postStats = async (request, response) => {
-  const post_id = parseInt(request.body.post_id);
+  const post_id = parseInt(request.params.id);
 
   if (!post_id) {
     return response.status(400).json({ error: "post id is required" });
@@ -50,11 +50,18 @@ const postStats = async (request, response) => {
 
   try {
     if (cachingBool) {
-      postStats = await redisClient.get(`post:stats:${post_id}`);
-      return response.status(200).json(JSON.parse(postCount));
+      const postStats = await redisClient.hGet(
+        "post_stats_data",
+        `post:stats:${post_id}`
+      );
+
+      if (postStats) {
+        const postStatsObject = JSON.parse(postStats);
+        return response.status(200).json(postStatsObject);
+      }
     }
 
-    const { dbPostStats } = await pool.query(
+    const dbPostStats = await pool.query(
       "SELECT total_votes, total_views, total_comments FROM posts_stats WHERE post_id= $1 LIMIT 1",
       [post_id]
     );
@@ -62,16 +69,22 @@ const postStats = async (request, response) => {
     var postStats = dbPostStats.rows[0];
 
     if (cachingBool) {
-      await redisClient.set(`post:stats:${post_id}`, JSON.stringify(postStats));
+      await redisClient.hSet(
+        "post_stats_data",
+        `post:stats:${post_id}`,
+        JSON.stringify(postStats)
+      );
+      // await redisClient.set(`post:stats:${post_id}`, JSON.stringify(postStats));
     }
 
     return response.status(200).json(postStats);
   } catch (error) {
+    console.log(error);
     return response.status(400).json(error);
   }
 };
 
 router.post("/community/stats", communityStats);
-router.post("/post/stats", postStats);
+router.get("/post/stats/:id", postStats);
 
 module.exports = router;
