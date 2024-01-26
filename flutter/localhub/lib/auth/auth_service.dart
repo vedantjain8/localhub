@@ -3,7 +3,7 @@ import 'package:localhub/api/user_service.dart';
 
 class AuthService {
   final _storage = const FlutterSecureStorage();
-  final ApiService apiService = ApiService();
+  final UserApiService apiService = UserApiService();
 
   Future<bool> isAuthenticated() async {
     String? token = await _storage.read(key: 'token');

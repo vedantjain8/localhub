@@ -1,21 +1,16 @@
 import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-// Lazy initialization of hostaddress
-late String hostaddress;
-
-class ApiService {
+class UserApiService {
   void getHostAddress() async {
     final prefs = await SharedPreferences.getInstance();
     hostaddress = prefs.getString('hostaddress')!; // Never null
   }
 
   late String hostaddress;
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
-  ApiService() {
+  UserApiService() {
     getHostAddress(); // Fetch hostaddress once per instance
   }
 
@@ -37,7 +32,7 @@ class ApiService {
         "locality_state": "${localityState}",
         "locality_city": "${localityCity}",
       };
-      var url = Uri.http(hostaddress, '/api/v1/users');
+      var url = Uri.https(hostaddress, '/api/v1/users');
       var response = await http.post(url, body: sendBody);
 
       if (response.statusCode == 200) {
@@ -61,7 +56,7 @@ class ApiService {
         'username': "${username}",
         'password': "${password}",
       };
-      var url = Uri.http(hostaddress, '/api/v1/login');
+      var url = Uri.https(hostaddress, '/api/v1/login');
       var response = await http.post(url, body: sendBody);
 
       if (response.statusCode == 200) {
