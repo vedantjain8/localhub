@@ -23,7 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!_hasMoreData) {
       return; // No more data to load
     }
-    await pas.getHostAddress();
 
     final List<Map<String, dynamic>> data = await pas.getHomePost(
       offsetN: offset,

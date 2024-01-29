@@ -34,7 +34,14 @@ class AuthService {
         localityState: localityState,
       );
 
+      if (httpRegisterResult['token'] == null) {
+        return null;
+      }
+      
       String token = httpRegisterResult['token'];
+
+      // Store the token securely
+      await _storage.write(key: 'token', value: token);
 
       return token; // Return the token to the caller
     } catch (error) {
