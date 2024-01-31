@@ -5,6 +5,7 @@ class CustomTextFieldInput extends StatefulWidget {
   final bool isPass;
   final bool isLightMode;
   final String hintText;
+  final String label;
   final TextInputType textInputType;
   final int maxlines;
   final bool hasPrefix;
@@ -17,9 +18,11 @@ class CustomTextFieldInput extends StatefulWidget {
     this.maxlines = 1,
     this.hasPrefix = false,
     this.isLightMode = false,
-    required this.hintText,
+    this.hintText = '',
+    required this.label,
     required this.textInputType,
     required this.prefixIcon,
+    maxLines = 1,
   });
 
   @override
@@ -42,6 +45,7 @@ class _CustomTextFieldInputState extends State<CustomTextFieldInput> {
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
           hintText: widget.hintText,
+          label: Text(widget.label),
           hintStyle: TextStyle(
             color: colorScheme.onSurfaceVariant,
           ),
