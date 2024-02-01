@@ -43,7 +43,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             CustomTextFieldInput(
               hasPrefix: true,
               textEditingController: _usernameController,
-              hintText: "Username",
+              label: "Username",
               textInputType: TextInputType.text,
               prefixIcon: const Icon(Icons.person_rounded),
             ),
@@ -53,7 +53,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             CustomTextFieldInput(
               hasPrefix: true,
               textEditingController: _emailController,
-              hintText: "E-Mail",
+              label: "E-Mail",
               textInputType: TextInputType.text,
               prefixIcon: const Icon(Icons.email_rounded),
             ),
@@ -63,7 +63,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             CustomTextFieldInput(
               hasPrefix: true,
               textEditingController: _passwordController,
-              hintText: "Password",
+              label: "Password",
               textInputType: TextInputType.text,
               prefixIcon: const Icon(Icons.lock_rounded),
               isPass: true,
@@ -74,7 +74,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             CustomTextFieldInput(
               hasPrefix: true,
               textEditingController: _confirmPasswordController,
-              hintText: "Confirm  Password",
+              label: "Confirm  Password",
               textInputType: TextInputType.text,
               prefixIcon: const Icon(Icons.lock_rounded),
               isPass: true,
