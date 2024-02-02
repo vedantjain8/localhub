@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localhub/api/posts_stats_service.dart';
+import 'package:localhub/api/report_service.dart';
 import 'package:localhub/functions/datetimeoperations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:localhub/screens/post/post_page.dart';
@@ -28,6 +29,7 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
   Map<int, bool> voteStateMap = {};
 
   final PostStatsApiService pass = PostStatsApiService();
+  final ReportApiService ras = ReportApiService();
 
   Future<Map<String, dynamic>> _loadStats(int postID) async {
     await pass.getHostAddress();
@@ -38,13 +40,12 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
 
   Map<int, Map<String, dynamic>> postStatsMap =
       {}; //stores the actual post stats value
-  Set<int> postsWithLoadedStats = Set<int>(); // Track posts with loaded stats
+  Set<int> postsWithLoadedStats = <int>{}; // Track posts with loaded stats
 
   Future<void> _loadStatsLazily(int postID) async {
     if (!postsWithLoadedStats.contains(postID)) {
@@ -59,6 +60,35 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
         postStatsMap[postID] = stats;
       });
     }
+  }
+
+  void showPopUpMenuAtTap(
+      {required BuildContext context,
+      required TapDownDetails details,
+      int? postID}) {
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        details.globalPosition.dx,
+        details.globalPosition.dy,
+        details.globalPosition.dx,
+        details.globalPosition.dy,
+      ),
+      items: [
+        const PopupMenuItem<String>(value: '1', child: Text('Report')),
+        // const PopupMenuItem<String>(value: '1', child: Text('Report')),
+      ],
+      elevation: 8.0,
+    ).then((value) {
+      if (value == null) return;
+
+      if (value == "1") {
+        ras.reportPost(postID: postID!);
+      }
+      // else if(value == "2"){
+      //   //code here
+      // }
+    });
   }
 
   @override
@@ -163,10 +193,16 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                               ),
                               Text(timeAgo(finalPost["created_at"])),
                               const Spacer(),
-                              IconButton(
-                                  onPressed: () {},
-                                  icon: const FaIcon(
-                                      FontAwesomeIcons.ellipsisVertical))
+                              GestureDetector(
+                                onTapDown: (details) {
+                                  showPopUpMenuAtTap(
+                                      context: context,
+                                      details: details,
+                                      postID: journals[index]['post_id']);
+                                },
+                                child: const FaIcon(
+                                    FontAwesomeIcons.ellipsisVertical),
+                              ),
                             ],
                           ),
 
@@ -245,8 +281,7 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                                         }
                                       });
                                       pass.sendVote(
-                                          postID: finalPost['post_id'],
-                                          upvote: true);
+                                          postID: postID, upvote: true);
                                     },
                                     icon: FaIcon(
                                       voteStateMap[postID] == true ||
@@ -268,8 +303,7 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                                         }
                                       });
                                       pass.sendVote(
-                                          postID: finalPost['post_id'],
-                                          upvote: false);
+                                          postID: postID, upvote: false);
                                     },
                                     icon: FaIcon(
                                       voteStateMap[postID] == false ||

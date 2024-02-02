@@ -1,7 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:localhub/api/report_service.dart';
 import 'package:localhub/functions/datetimeoperations.dart';
+
+final ReportApiService ras = ReportApiService();
 
 void showPopUpMenuAtTap(
     {required BuildContext context,
@@ -24,8 +27,7 @@ void showPopUpMenuAtTap(
     if (value == null) return;
 
     if (value == "1") {
-      // TODO: report comment
-      // reportComment(commentID: commentID!);
+      ras.reportComment(commentID: commentID!);
     }
     // else if(value == "2"){
     //   //code here

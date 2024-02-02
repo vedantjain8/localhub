@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:localhub/api/comments/comments_service.dart';
+import 'package:localhub/api/comments_service.dart';
 import 'package:localhub/api/post_service.dart';
-import 'package:localhub/api/posts_stats_service.dart';
 import 'package:localhub/widgets/custom_comment_list_view_builder_widget.dart';
 import 'package:localhub/widgets/custom_post_card_widget.dart';
 
@@ -32,7 +31,6 @@ class _PostPageState extends State<PostPage> {
   bool _hasMoreData = true;
   final formater = NumberFormat.compact(locale: "en_us", explicitSign: true);
 
-  
   bool? voteState;
 
   void _loadData() async {
@@ -112,7 +110,9 @@ class _PostPageState extends State<PostPage> {
                 child: Column(
                   children: [
                     CustomPostCardWidget(
-                        journals: _journals, isFromPostPage: true, voteState: voteState),
+                        journals: _journals,
+                        isFromPostPage: true,
+                        voteState: voteState),
                     Container(
                       decoration: const BoxDecoration(
                           color: Color.fromRGBO(81, 81, 81, 0.494)),
@@ -134,16 +134,28 @@ class _PostPageState extends State<PostPage> {
                           ),
                           ElevatedButton(
                               onPressed: () async {
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (BuildContext context) {
+                                    return const Center(
+                                        child: CircularProgressIndicator());
+                                  },
+                                );
+
                                 await cas.createCommentById(
                                   postID: postID,
                                   commentContent:
                                       _comment.value.text.toString(),
                                 );
+
                                 setState(() {
                                   _comment.clear();
                                 });
 
                                 _refreshData();
+
+                                Navigator.pop(context);
                               },
                               child: const Icon(Icons.send_rounded)),
                         ],
