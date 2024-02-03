@@ -1,0 +1,66 @@
+name: Production App Release
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]'
+
+env:
+  PROPERTIES_PATH: "./android/key.properties"
+
+jobs:
+  build-android:
+    name: Build android APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Java SDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2.10.0
+        with:
+          flutter-version: '3.16.5'
+          channel: stable
+
+      - name: Disable analytics
+        run: flutter --disable-analytics
+        
+      - name: Set project root
+        run: cd flutter/localhub/ && flutter pub get
+
+      - name: Build APPBUNDLE
+        run: cd flutter/localhub/ && flutter build appbundle --release
+
+      - name: Build FAT-APK
+        run: |
+          cd flutter/localhub/ && flutter build apk --release
+
+      - name: Build APK
+        run: cd flutter/localhub/ && flutter build apk --split-per-abi
+      
+      - name: Release Body Content
+        run: |
+          echo "MD5 Check Sum: " >> ./bodyContent.txt
+          md5sum flutter/localhub/build/app/outputs/bundle/release/app-release.aab >> ./bodyContent.txt
+          md5sum flutter/localhub/build/app/outputs/flutter-apk/app-release.apk >> ./bodyContent.txt
+          md5sum flutter/localhub/build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk >> ./bodyContent.txt
+          md5sum flutter/localhub/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk >> ./bodyContent.txt
+          md5sum flutter/localhub/build/app/outputs/flutter-apk/app-x86_64-release.apk >> ./bodyContent.txt
+        
+      - name: Released
+        uses: ncipollo/release-action@v1.12.0
+        with:
+          artifacts: >
+            flutter/localhub/build/app/outputs/bundle/release/app-release.aab,
+            flutter/localhub/build/app/outputs/flutter-apk/app-release.apk,
+            flutter/localhub/build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk,
+            flutter/localhub/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk,
+            flutter/localhub/build/app/outputs/flutter-apk/app-x86_64-release.apk
+          token: ${{ secrets.APP_RELEASE_TOKEN }}
+          bodyFile:  ./bodyContent.txt
