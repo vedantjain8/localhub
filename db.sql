@@ -4,7 +4,6 @@ CREATE TABLE IF NOT EXISTS
     username VARCHAR(15) NOT NULL,
     email VARCHAR(30) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    salt VARCHAR(15) NOT NULL,
     bio TEXT,
     avatar_url VARCHAR(255),
     created_at TIMESTAMP NOT NULL DEFAULT NOW (),
@@ -36,7 +35,7 @@ CREATE TABLE IF NOT EXISTS
     FOREIGN KEY (community_id) REFERENCES community (community_id)
   );
 
-  CREATE OR REPLACE FUNCTION community_stats_insert_function()
+CREATE OR REPLACE FUNCTION community_stats_insert_function()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO community_stats (community_id, subscriber_count)
@@ -49,7 +48,6 @@ CREATE TRIGGER community_stats_insert_trigger
 AFTER INSERT ON community
 FOR EACH ROW
 EXECUTE FUNCTION community_stats_insert_function();
-
 
 CREATE TABLE IF NOT EXISTS
   users_community_link(
@@ -85,7 +83,7 @@ CREATE TABLE IF NOT EXISTS
       FOREIGN KEY (post_id) REFERENCES posts (post_id)
     );
 
-  CREATE OR REPLACE FUNCTION posts_stats_insert_function()
+CREATE OR REPLACE FUNCTION posts_stats_insert_function()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO posts_stats (post_id, total_votes, total_views, total_comments)

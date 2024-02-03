@@ -38,6 +38,10 @@ const createPost = async (request, response) => {
       return response.status(400).json({ error: "Community name is required" });
     }
 
+    if (!is_adult) {
+      is_adult = false;
+    }
+
     if (
       !post_title ||
       !validator.isLength(post_title, { min: 5, max: 200 }) ||
@@ -49,7 +53,7 @@ const createPost = async (request, response) => {
     const user_id = JSON.parse(await getUserData(token))["user_id"];
 
     if (!user_id) {
-      return response.status(400).json({ error: "Invalid  name provided" });
+      return response.status(400).json({ error: "Invalid name provided" });
     }
 
     const community_id = JSON.parse(await getCommunityData(community_name))[
@@ -316,20 +320,19 @@ const getPostById = async (request, response) => {
       [post_id]
     );
 
+    const data = userData;
+
     if (cachingBool) {
-      await redisClient.set(
-        `posts:postID-${post_id}`,
-        JSON.stringify(userData)
-      );
+      await redisClient.set(`posts:postID-${post_id}`, JSON.stringify(data));
     }
 
-    if (token) {
-      const user_id = JSON.parse(await getUserData(token))["user_id"];
-      incrementView(post_id, user_id);
-    }
+    // TODO: implement view increment logic
+    // if (token) {
+    //   const user_id = JSON.parse(await getUserData(token))["user_id"];
+    //   incrementView(post_id, user_id);
+    // }
 
-    response.status(200).json(userData);
-    return;
+    return response.status(200).json(data);
   } catch (error) {
     console.error("Database error:", error);
     response.status(400).json({ error: error.message });
@@ -338,7 +341,8 @@ const getPostById = async (request, response) => {
 
 const updatePost = async (request, response) => {
   const post_id = parseInt(request.params.id);
-  const { post_title, post_content, post_image, is_adult, active, token } = request.body;
+  const { post_title, post_content, post_image, is_adult, active, token } =
+    request.body;
 
   if (!token) {
     return response.status(400).json({ error: "Provide a user token" });
@@ -372,10 +376,14 @@ const updatePost = async (request, response) => {
 
   // Check if any valid fields were provided
   if (setClause.length === 0) {
-    return response.status(400).json({ error: "No valid fields provided for update." });
+    return response
+      .status(400)
+      .json({ error: "No valid fields provided for update." });
   }
 
-  const updateQuery = `UPDATE posts SET ${setClause.join(', ')} WHERE user_id = ${user_id} AND post_id = $1 RETURNING post_id`;
+  const updateQuery = `UPDATE posts SET ${setClause.join(
+    ", "
+  )} WHERE user_id = ${user_id} AND post_id = $1 RETURNING post_id`;
 
   pool.query(updateQuery, values, (error, results) => {
     if (error) {
@@ -383,10 +391,14 @@ const updatePost = async (request, response) => {
     }
 
     if (results.rowCount === 0) {
-      return response.status(404).json({ error: `Post with ID ${post_id} not found for the user.` });
+      return response
+        .status(404)
+        .json({ error: `Post with ID ${post_id} not found for the user.` });
     }
 
-    response.status(200).json({ 200: `Post modified having Post_ID: ${post_id}` });
+    response
+      .status(200)
+      .json({ 200: `Post modified having Post_ID: ${post_id}` });
   });
 };
 

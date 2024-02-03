@@ -3,6 +3,7 @@ const router = express.Router();
 
 const pool = require("../db");
 const redisClient = require("../dbredis");
+const { getUserData } = require("./functions/users");
 const config = require("../config/config.json");
 
 const cachingBool = Boolean(config.caching);
@@ -31,9 +32,37 @@ const createComment = async (request, response) => {
       return response.status(400).json({ error: "enter a valid comment" });
     }
     // Check if the user exists and get the user_id
-    const user_id = JSON.parse(await getUserData(token))["user_id"];
+    const userDataString = await getUserData(token);
+    const user_id = JSON.parse(userDataString)["user_id"];
 
     // Create the comment
+    if (cachingBool) {
+      await redisClient.del(`comments_data:${post_id}`);
+      //TODO: delete the posts comments offset
+
+      const postStats = await redisClient.hGet(
+        "post_stats_data",
+        `post:stats:${post_id}`
+      );
+
+      if (postStats) {
+        const postStatsObject = JSON.parse(postStats);
+        postStatsObject["total_comments"] += 1;
+
+        await redisClient.hSet(
+          "post_stats_data",
+          `post:stats:${post_id}`,
+          JSON.stringify(postStatsObject)
+        );
+      }
+    }
+
+    // TODO: implement caching for update query
+    await pool.query(
+      "UPDATE posts_stats SET total_comments = total_comments + 1 WHERE post_id = $1",
+      [post_id]
+    );
+
     await pool.query(
       "INSERT INTO posts_comments_link (post_id, user_id, comment_content) VALUES ($1, $2, $3) RETURNING comment_id",
       [post_id, user_id, comment_content],
@@ -42,9 +71,6 @@ const createComment = async (request, response) => {
           return response.status(500).json({ error: error });
         }
 
-        if (cachingBool) {
-          redisClient.del(`comments:postID-${post_id}:*`);
-        }
         return response.status(200).json(result.rows[0]);
       }
     );
@@ -55,17 +81,17 @@ const createComment = async (request, response) => {
 };
 
 const getPostComment = async (request, response) => {
-  var offset = parseInt(request.body.offset);
+  var offset = parseInt(request.query.offset);
   var post_id = parseInt(request.body.post_id);
 
   if (!offset) {
     offset = 0;
   }
 
-  if (offset % 20 !== 0) {
+  if (offset % 10 !== 0) {
     return response
       .status(400)
-      .json({ error: "offset should be 20 multiple only" });
+      .json({ error: "offset should be 10 multiple only" });
   }
 
   if (!post_id) {
@@ -76,7 +102,10 @@ const getPostComment = async (request, response) => {
     if (cachingBool) {
       redisClient.select(0);
 
-      const value = await redisClient.get(`comments:postID-${post_id}:${offset}`);
+      const value = await redisClient.hGet(
+        `comments_data:${post_id}`,
+        `comments:postID-${post_id}:${offset}`
+      );
 
       if (value) {
         // Data found in Redis, parse and send response
@@ -98,17 +127,18 @@ const getPostComment = async (request, response) => {
           posts_comments_link.active = 'T' AND posts_comments_link.post_id = $1
         ORDER BY
           posts_comments_link.created_at DESC
-        LIMIT 20
+        LIMIT 10
         OFFSET $2`,
       [post_id, offset],
-      (error, result) => {
+      async (error, result) => {
         if (error) {
           return response.status(500).json({ error: error });
         }
         const userData = result.rows;
 
         if (cachingBool) {
-          redisClient.set(
+          await redisClient.hSet(
+            `comments_data:${post_id}`,
             `comments:postID-${post_id}:${offset}`,
             JSON.stringify(userData)
           );

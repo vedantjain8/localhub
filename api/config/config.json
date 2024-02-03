@@ -1,3 +1,4 @@
 {
-    "caching": false
+    "caching": true,
+    "apkversion": "0.1.0"
 }
