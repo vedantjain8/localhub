@@ -35,9 +35,10 @@ class _LoginScreenState extends State<LoginScreen> {
               hasPrefix: true,
               isPass: false,
               textEditingController: _usernameController,
-              hintText: "Username",
+              label: "Username",
               textInputType: TextInputType.text,
               prefixIcon: const Icon(Icons.person_rounded),
+              hintText: '',
             ),
             const SizedBox(
               height: 30,
@@ -45,10 +46,11 @@ class _LoginScreenState extends State<LoginScreen> {
             CustomTextFieldInput(
               hasPrefix: true,
               textEditingController: _passwordController,
-              hintText: "Password",
+              label: "Password",
               textInputType: TextInputType.text,
               prefixIcon: const Icon(Icons.lock_rounded),
               isPass: true,
+              hintText: '',
             ),
             const SizedBox(
               height: 30,
