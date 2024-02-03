@@ -222,6 +222,8 @@ const leaveCommunity = async (request, response) => {
 cron.schedule("*/10 * * * *", async () => {
   // running task every 10 minutes
   if (cachingBool) {
+    console.log("community cron running");
+
     // user community link insert
     const userData = await redisClient.hGetAll(
       "user_community_data",

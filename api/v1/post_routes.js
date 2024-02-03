@@ -320,20 +320,19 @@ const getPostById = async (request, response) => {
       [post_id]
     );
 
+    const data = userData;
+
     if (cachingBool) {
-      await redisClient.set(
-        `posts:postID-${post_id}`,
-        JSON.stringify(userData)
-      );
+      await redisClient.set(`posts:postID-${post_id}`, JSON.stringify(data));
     }
 
-    if (token) {
-      const user_id = JSON.parse(await getUserData(token))["user_id"];
-      incrementView(post_id, user_id);
-    }
+    // TODO: implement view increment logic
+    // if (token) {
+    //   const user_id = JSON.parse(await getUserData(token))["user_id"];
+    //   incrementView(post_id, user_id);
+    // }
 
-    response.status(200).json(userData);
-    return;
+    return response.status(200).json(data);
   } catch (error) {
     console.error("Database error:", error);
     response.status(400).json({ error: error.message });

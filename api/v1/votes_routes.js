@@ -19,8 +19,10 @@ const createVote = async (request, response, vote_type) => {
     }
 
     const userDataString = await getUserData(token);
-    const user_id = JSON.parse(userDataString)["user_id"];
+    const user_id = await JSON.parse(userDataString)["user_id"];
+    // const user_id = JSON.parse(await getUserData(token))["user_id"];
 
+    // TODO: implement some solution for caching this
     const existingVote = await pool.query(
       "SELECT * FROM posts_vote_link WHERE post_id = $1 AND user_id = $2",
       [post_id, user_id]
@@ -33,6 +35,7 @@ const createVote = async (request, response, vote_type) => {
     }
 
     if (cachingBool) {
+      // fetch posts for updating values
       const postStats = await redisClient.hGet(
         "post_stats_data",
         `post:stats:${post_id}`
@@ -42,6 +45,7 @@ const createVote = async (request, response, vote_type) => {
         const postStatsObject = JSON.parse(postStats);
         postStatsObject["total_votes"] += vote_type === "U" ? 1 : -1;
 
+        // update the vote count in the cache
         await redisClient.hSet(
           "post_stats_data",
           `post:stats:${post_id}`,
@@ -92,6 +96,7 @@ router.post("/posts/vote/downvote/:id", (request, response) =>
 // cron job to sync post stats and vote link with redis and db
 cron.schedule("*/10 * * * *", async () => {
   if (cachingBool) {
+    console.log("vote cron running");
     const userVoteData = await redisClient.hGetAll(
       "user_vote_data",
       "user:*:post:*"

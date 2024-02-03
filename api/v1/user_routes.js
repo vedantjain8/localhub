@@ -64,7 +64,7 @@ const createUser = async (request, response) => {
     }
 
     if (!avatar_url || avatar_url == "null") {
-      avatar_url = `https://api.dicebear.com/7.x/notionists/svg?scale=130?seed=${username}`;
+      avatar_url = `https://api.dicebear.com/7.x/notionists/png?seed=${username}`;
     }
 
     const password_hash = await hashPassword(password);

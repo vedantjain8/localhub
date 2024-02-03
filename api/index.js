@@ -20,6 +20,9 @@ const meRoutes = require("./v1/me");
 const historyRoutes = require("./v1/history");
 const statsRoutes = require("./v1/stats_routes");
 const uploadImageRoutes = require("./v1/uploadImage_route");
+const config = require("./config/config.json");
+
+const apkversion = config.apkversion;
 
 // process.env.NODE_ENV = "development";
 
@@ -46,6 +49,11 @@ createDirectories();
 
 app.set("trust proxy", 1);
 app.get("/ip", (request, response) => response.send(request.ip));
+
+app.get("/version-apk", (request, response) => {
+  console.log("version check request");
+  response.send(apkversion);
+});
 
 // access images on path
 // http://<ip>:<port>/upload/<low/original>/<image file name>

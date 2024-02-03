@@ -86,7 +86,7 @@ Containers are configured using parameters passed at runtime (such as those abov
 - the plan is to use the bycrypt algorithm to generate hash password
 
 # Caching naming scheme and store value
-- **`userData-${userToken}`**
+- **`userData:${userToken}`**
   - user_id, username, email, bio, avatar_url, created_at, locality_country, locality_state, locality_city
 - **`postsPubBy:userID-${user_id}:${offset}`**
   - post_id, post_title, short_content, post_image, community_id, is_adult, created_at, community_name, community_logo_url
