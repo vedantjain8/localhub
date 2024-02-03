@@ -10,7 +10,7 @@ async function getUserData(userToken) {
     if (cachingBool) {
       redisClient.select(0);
 
-      var value = await redisClient.get(`userData-${userToken}`);
+      var value = await redisClient.get(`userData:${userToken}`);
 
       if (value) {
         // Data found in Redis, parse and send response
@@ -31,9 +31,9 @@ async function getUserData(userToken) {
     var userData = userResult.rows[0];
 
     if (cachingBool) {
-      await redisClient.set(`userData-${userToken}`, JSON.stringify(userData));
+      await redisClient.set(`userData:${userToken}`, JSON.stringify(userData));
     }
-    return userData;
+    return JSON.stringify(userData);
   } catch (error) {
     console.error("Database error:", error);
     return error;
