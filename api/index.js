@@ -20,9 +20,12 @@ const meRoutes = require("./v1/me");
 const historyRoutes = require("./v1/history");
 const statsRoutes = require("./v1/stats_routes");
 const uploadImageRoutes = require("./v1/uploadImage_route");
+const freshStartRoutes = require("./v1/freshStart");
 const config = require("./config/config.json");
 
-const apkversion = config.apkversion;
+const redisClient = require("./dbredis");
+
+const cachingBool = Boolean(config.caching);
 
 // process.env.NODE_ENV = "development";
 
@@ -48,15 +51,9 @@ const v1path = subdirectory + latestVersion;
 createDirectories();
 
 app.set("trust proxy", 1);
-app.get("/ip", (request, response) => response.send(request.ip));
-
-app.get("/version-apk", (request, response) => {
-  console.log("version check request");
-  response.send(apkversion);
-});
 
 // access images on path
-// http://<ip>:<port>/upload/<low/original>/<image file name>
+// http://<ip>:<port>/files/<low/original>/<image file name>
 app.use("/files", express.static(__dirname + "/upload"));
 
 app.use("/favicon.ico", express.static("./static/favicon.ico"));
@@ -86,8 +83,29 @@ app.use(v1path, meRoutes);
 app.use(v1path, historyRoutes);
 app.use(v1path, statsRoutes);
 app.use(v1path, uploadImageRoutes);
+app.use(v1path, freshStartRoutes);
 
-process.on("SIGINT", () => {
+app.get("/ip", (request, response) => response.send(request.ip));
+
+app.get("/version-apk", async (request, response) => {
+  console.log("version check request");
+  if (cachingBool) {
+    const apkversion = await redisClient.get(`version-apk`, config.apkversion);
+
+    if (apkversion) {
+      return response.send(apkversion);
+    }
+  }
+  var apkversion = config.apkversion;
+
+  if (cachingBool) {
+    await redisClient.set(`version-apk`, config.apkversion);
+  }
+
+  return response.send(apkversion);
+});
+
+process.on("SIGINT", async () => {
   console.log("Ctrl-C was pressed");
   process.exit();
 });

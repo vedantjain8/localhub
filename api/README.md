@@ -92,7 +92,7 @@ Containers are configured using parameters passed at runtime (such as those abov
   - post_id, post_title, short_content, post_image, community_id, is_adult, created_at, community_name, community_logo_url
 - **`posts:offset-${offset}`**
   - post_id, post_title, short_content, post_image, community_id, created_at, community.community_name, community.logo_url
-- **`community-${community_id}:posts:offset-${offset}`**
+- **`community:${community_id}:posts:offset-${offset}`**
   - post_id, post_title, short_content, post_image, community_id, created_at, community.community_name, community.logo_url
 - **`posts:postID-${post_id}`**
   - !! users.username AS post_username

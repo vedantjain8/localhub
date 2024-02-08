@@ -1,4 +1,5 @@
 {
     "caching": true,
-    "apkversion": "0.1.0"
+    "apkversion": "0.1.0",
+    "rootPassword": "iamgroot"
 }

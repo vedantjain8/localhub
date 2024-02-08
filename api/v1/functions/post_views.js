@@ -7,16 +7,37 @@ const cachingBool = Boolean(config.caching);
 async function incrementView(postId, userId) {
   if (cachingBool)
     try {
-      const hashKey = `postid:${postId}:${userId}`;
-      const exists = await redisClient.exists(hashKey).then(Boolean);
+      // TODO: check for unique user view entry
 
-      if (!exists) {
-        await redisClient.hset(hashKey, "timestamp", Date.now());
-        await redisClient.expire(hashKey, 86400); // Expire after 24 hours
+      const rateLimitCheck = await redisClient.get(
+        `rateLimit:postID-${postId}:userID-${userId}`
+      );
 
-        pool.query(
-          "UPDATE posts_stats SET total_views = total_views + 1 WHERE post_id = $1",
-          [postId]
+      if (rateLimitCheck) {
+        return;
+      }
+      // create new ratelimit for post cache
+      await redisClient.setEx(
+        `rateLimit:postID-${postId}:userID-${userId}`,
+        5400,
+        "T"
+      );
+      console.log("view increment");
+
+      // below coode block will increment view in redis cache
+      const postStats = await redisClient.hGet(
+        "post_stats_data",
+        `post:stats:${postId}`
+      );
+
+      if (postStats) {
+        const postStatsObject = JSON.parse(postStats);
+        postStatsObject["total_views"] += 1;
+
+        await redisClient.hSet(
+          "post_stats_data",
+          `post:stats:${postId}`,
+          JSON.stringify(postStatsObject)
         );
       }
     } catch (error) {

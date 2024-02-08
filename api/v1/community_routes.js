@@ -4,7 +4,7 @@ const router = express.Router();
 const pool = require("../db");
 const redisClient = require("../dbredis");
 var validator = require("validator");
-const { reservedKeywordsF } = require("../tools");
+const { reservedKeywordsFile } = require("../tools");
 const { getUserData } = require("./functions/users");
 const { getCommunityData } = require("./functions/community");
 const config = require("../config/config.json");
@@ -34,7 +34,7 @@ const createCommunity = async (request, response) => {
         .json({ error: "Enter a valid community name" });
     }
 
-    if (reservedKeywordsF().includes(community_name.toLowerCase())) {
+    if (reservedKeywordsFile().includes(community_name.toLowerCase())) {
       return response.status(400).json({
         error: "community name is a reserved keyword and cannot be used.",
       });
@@ -55,9 +55,7 @@ const createCommunity = async (request, response) => {
     }
     const user_id = JSON.parse(await getUserData(token))["user_id"];
 
-    const community_id = JSON.parse(await getCommunityData(community_name))[
-      "community_id"
-    ];
+    const community_id = (await getCommunityData(community_name)) || null;
 
     if (community_id) {
       return response
@@ -67,7 +65,7 @@ const createCommunity = async (request, response) => {
 
     // Create the community
     const createcommunityResult = await pool.query(
-      "INSERT INTO community (community_name, community_description, creator_user_id, banner_url, logo_url) VALUES ($1, $2, $3, $4, $5, $6) RETURNING community_id",
+      "INSERT INTO community (community_name, community_description, creator_user_id, banner_url, logo_url) VALUES ($1, $2, $3, $4, $5) RETURNING community_id",
       [community_name, community_description, user_id, banner_url, logo_url]
     );
 
@@ -80,7 +78,7 @@ const createCommunity = async (request, response) => {
   }
 };
 
-const getcommunity = (request, response) => {
+const communitySearch = (request, response) => {
   var communityName = request.query.communityName;
 
   pool.query(
@@ -96,24 +94,46 @@ const getcommunity = (request, response) => {
   );
 };
 
-// const getcommunityById = (request, response) => {
-//   const community_id = parseInt(request.params.id);
+const getcommunityDataById = async (request, response) => {
+  const community_id = parseInt(request.params.id);
 
-//   if (!community_id) {
-//     return response.status(400).json({ error: "Search id is required" });
-//   }
+  if (!community_id) {
+    return response.status(400).json({ error: "Search id is required" });
+  }
 
-//   pool.query(
-//     "SELECT * FROM community WHERE community_id = $1",
-//     [community_id],
-//     (error, results) => {
-//       if (error) {
-//         response.status(400).json({ error: error });
-//       }
-//       response.status(200).json(results.rows);
-//     }
-//   );
-// };
+  try {
+    if (cachingBool) {
+      const communityData = await redisClient.hGet(
+        "community_data",
+        `community:${community_id}`
+      );
+
+      if (communityData) {
+        return response.status(200).json(JSON.parse(communityData));
+      }
+    }
+
+    const dbCommunityData = await pool.query(
+      "SELECT * FROM community WHERE community_id = $1",
+      [community_id]
+    );
+
+    const communityData = dbCommunityData.rows[0];
+
+    if (cachingBool) {
+      await redisClient.hSet(
+        "community_data",
+        `community:${community_id}`,
+        JSON.stringify(communityData)
+      );
+    }
+
+    return response.status(200).json(communityData);
+  } catch (error) {
+    console.log(error);
+    return response.status(400).json(error);
+  }
+};
 
 const joinCommunity = async (request, response) => {
   const community_id = parseInt(request.body.community_id);
@@ -259,8 +279,8 @@ cron.schedule("*/10 * * * *", async () => {
   }
 });
 
-router.get("/community", getcommunity);
-// router.get("/community/:id", getcommunityById);
+router.get("/community/search", communitySearch);
+router.get("/community/:id", getcommunityDataById);
 router.post("/community", createCommunity);
 router.post("/community/join", joinCommunity);
 router.post("/community/leave", leaveCommunity);

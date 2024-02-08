@@ -149,11 +149,17 @@ const getPosts = async (request, response) => {
 };
 
 const getCommunityPosts = async (request, response) => {
-  var { offset } = parseInt(request.body.offset);
+  var offset = parseInt(request.query.offset);
   var community_id = request.body.community_id;
 
   if (!offset) {
     offset = 0;
+  }
+
+  if (offset % 20 !== 0) {
+    return response
+      .status(400)
+      .json({ error: "offset should be 20 multiple only" });
   }
 
   if (!community_id) {
@@ -164,7 +170,7 @@ const getCommunityPosts = async (request, response) => {
     if (cachingBool) {
       redisClient.select(0);
       const value = await redisClient.get(
-        `community-${community_id}:posts:offset-${offset}`
+        `community:${community_id}:posts:offset-${offset}`
       );
       if (value) {
         response.status(200).json(JSON.parse(value)); // Data found in Redis
@@ -202,7 +208,7 @@ const getCommunityPosts = async (request, response) => {
     // Store data in Redis if caching is enabled
     if (cachingBool) {
       redisClient.set(
-        `community-${community_id}:posts:offset-${offset}`,
+        `community:${community_id}:posts:offset-${offset}`,
         JSON.stringify(userData)
       );
     }
@@ -279,13 +285,21 @@ OFFSET $2
 
 const getPostById = async (request, response) => {
   const post_id = parseInt(request.params.id);
-  const token = request.params.token;
+  const token = parseInt(request.body.token) || null;
 
   if (!post_id) {
     return response.status(400).json({ error: "post id is required" });
   }
 
   try {
+    
+    if (token) {
+      const user_id = JSON.parse(await getUserData(token))["user_id"];
+      if (user_id) {
+        incrementView(post_id, user_id);
+      }
+    }
+
     if (cachingBool) {
       redisClient.select(0);
 
@@ -293,8 +307,7 @@ const getPostById = async (request, response) => {
 
       if (value) {
         // Data found in Redis, parse and send response
-        response.status(200).json(JSON.parse(value));
-        return;
+        return response.status(200).json(JSON.parse(value));
       }
     }
 
@@ -325,12 +338,6 @@ const getPostById = async (request, response) => {
     if (cachingBool) {
       await redisClient.set(`posts:postID-${post_id}`, JSON.stringify(data));
     }
-
-    // TODO: implement view increment logic
-    // if (token) {
-    //   const user_id = JSON.parse(await getUserData(token))["user_id"];
-    //   incrementView(post_id, user_id);
-    // }
 
     return response.status(200).json(data);
   } catch (error) {
@@ -474,7 +481,7 @@ const getUserPubPosts = async (request, response) => {
 };
 
 router.get("/posts", getPosts);
-router.get("/posts/:id", getPostById);
+router.post("/posts/:id", getPostById);
 
 router.post("/posts", createPost);
 router.post("/users/posts", getUserPubPosts);

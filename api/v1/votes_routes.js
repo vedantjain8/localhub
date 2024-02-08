@@ -22,7 +22,18 @@ const createVote = async (request, response, vote_type) => {
     const user_id = await JSON.parse(userDataString)["user_id"];
     // const user_id = JSON.parse(await getUserData(token))["user_id"];
 
-    // TODO: implement some solution for caching this
+    if (cachingBool) {
+      const voteDataValue = await redisClient.hGet(
+        "user_vote_data",
+        `user:${user_id}:post:${post_id}`
+      );
+
+      if (voteDataValue) {
+        return response
+          .status(409)
+          .json({ status: "User already voted this post" });
+      }
+    }
     const existingVote = await pool.query(
       "SELECT * FROM posts_vote_link WHERE post_id = $1 AND user_id = $2",
       [post_id, user_id]
@@ -119,6 +130,7 @@ cron.schedule("*/10 * * * *", async () => {
         continue; // Skip the iteration if all values are zero
       }
 
+      // TODO: make all this query to run in single batch query
       await Promise.all([
         pool.query(
           "UPDATE posts_stats SET total_votes = $2,total_comments = $3, total_views = $4 WHERE post_id = $1",

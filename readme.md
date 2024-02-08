@@ -4,14 +4,3 @@
   ```SQL 
   CREATE INDEX <indexNAME> ON <tableNAME>(<tableFieldName>)
   ```
-
-# Remember:
-- username for user should be min 4 and max 15
-
-# TODO:
-- [ ] code coverage check
-
-
-- [ ] enforce strong password validation on client
-- [ ] bio should be updated from the profile edit page
-- [ ] create a api documentation
