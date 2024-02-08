@@ -7,6 +7,8 @@ import 'package:localhub/screens/layout/agenda_screen.dart';
 import 'package:localhub/screens/layout/explore_screen.dart';
 import 'package:localhub/screens/layout/home_screen.dart';
 import 'package:localhub/screens/layout/profile_screen.dart';
+import 'package:localhub/screens/layout/search_screen.dart';
+import 'package:localhub/screens/layout/create_post.dart';
 import 'package:localhub/widgets/custom_bottom_app_bar.dart';
 
 class AppLayout extends StatefulWidget {
@@ -180,34 +182,43 @@ class _AppLayoutState extends State<AppLayout> {
               ),
             ),
       appBar: AppBar(
+        // title: title,
         actions: [
           (_meJournal.isEmpty)
               ? const SizedBox.shrink()
-              : ElevatedButton(
+              : IconButton(
                   onPressed: () {
-                    scaffoldKey.currentState!.openEndDrawer();
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const SearchScreen()));
                   },
-                  child: Container(
-                    margin: const EdgeInsets.only(right: 6.0, bottom: 5.0),
-                    height: 33,
-                    width: 33,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: CachedNetworkImageProvider(
-                          _meJournal["avatar_url"],
-                        ),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                  icon: const FaIcon(FontAwesomeIcons.magnifyingGlass),
+                ),
+          InkWell(
+            onTap: () {
+              scaffoldKey.currentState!.openEndDrawer();
+            },
+            overlayColor: MaterialStateProperty.all(Colors.transparent),
+            child: Container(
+              height: 33,
+              width: 33,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.onInverseSurface,
+                shape: BoxShape.circle,
+                image: DecorationImage(
+                  image: CachedNetworkImageProvider(
+                    _meJournal["avatar_url"],
                   ),
-                )
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          )
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigator.of(context)
-          //     .push(MaterialPageRoute(builder: (context) => const CreatePost()));
+          Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const CreatePost()));
         },
         shape: const CircleBorder(),
         child: const FaIcon(FontAwesomeIcons.plus),
