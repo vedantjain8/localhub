@@ -31,6 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: SingleChildScrollView(
         child: Column(
           children: <Widget>[
+            const SizedBox(height: 5),
             CustomTextFieldInput(
               hasPrefix: true,
               isPass: false,

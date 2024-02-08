@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:localhub/api/post_service.dart';
-// import 'package:localhub/themes/theme.dart';
 import 'package:localhub/widgets/custom_post_card_widget.dart';
 
 class HomeScreen extends StatefulWidget {
