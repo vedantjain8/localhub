@@ -47,9 +47,9 @@ async function getCommunityData(communityName) {
         JSON.stringify(communityData)
       );
     }
-    return communityData;
+
+    return JSON.stringify(communityData);
   } catch (error) {
-    console.error("Database error:", error);
     return error;
   }
 }

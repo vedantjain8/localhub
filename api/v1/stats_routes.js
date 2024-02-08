@@ -9,7 +9,7 @@ const config = require("../config/config.json");
 const cachingBool = Boolean(config.caching);
 
 const communityStats = async (request, response) => {
-  const community_id = parseInt(request.body.community_id);
+  const community_id = parseInt(request.params.id);
 
   if (!community_id) {
     return response.status(400).json({ error: "community id is required" });
@@ -17,25 +17,30 @@ const communityStats = async (request, response) => {
 
   try {
     if (cachingBool) {
-      communityCount = await redisClient.get(`community:stats:${community_id}`);
-      return response.status(200).json(JSON.parse(communityCount));
+      const communityStats = await redisClient.hGet(
+        "community_stats_data",
+        `community:stats:${community_id}`
+      );
+
+      if (communityStats) {
+        return response.status(200).json(JSON.parse(communityStats));
+      }
     }
 
-    const { dbcommunityCount } = await pool.query(
+    const { rows: dbcommunityCount } = await pool.query(
       "SELECT subscriber_count FROM community_stats WHERE community_id= $1 LIMIT 1",
       [community_id]
     );
 
-    var communityCount = dbcommunityCount.rows[0];
-
     if (cachingBool) {
-      await redisClient.set(
+      await redisClient.hSet(
+        "community_stats_data",
         `community:stats:${community_id}`,
-        JSON.stringify(communityCount)
+        JSON.stringify(dbcommunityCount[0])
       );
     }
 
-    return response.status(200).json(communityCount);
+    return response.status(200).json(dbcommunityCount[0]);
   } catch (error) {
     return response.status(400).json(error);
   }
@@ -74,7 +79,6 @@ const postStats = async (request, response) => {
         `post:stats:${post_id}`,
         JSON.stringify(postStats)
       );
-      // await redisClient.set(`post:stats:${post_id}`, JSON.stringify(postStats));
     }
 
     return response.status(200).json(postStats);
@@ -84,7 +88,7 @@ const postStats = async (request, response) => {
   }
 };
 
-router.post("/community/stats", communityStats);
+router.get("/community/stats/:id", communityStats);
 router.get("/post/stats/:id", postStats);
 
 module.exports = router;

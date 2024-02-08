@@ -38,7 +38,6 @@ const createComment = async (request, response) => {
     // Create the comment
     if (cachingBool) {
       await redisClient.del(`comments_data:${post_id}`);
-      //TODO: delete the posts comments offset
 
       const postStats = await redisClient.hGet(
         "post_stats_data",
@@ -57,11 +56,11 @@ const createComment = async (request, response) => {
       }
     }
 
-    // TODO: implement caching for update query
-    await pool.query(
-      "UPDATE posts_stats SET total_comments = total_comments + 1 WHERE post_id = $1",
-      [post_id]
-    );
+    // TODO: implement caching when cahing bool is true
+    // await pool.query(
+    //   "UPDATE posts_stats SET total_comments = total_comments + 1 WHERE post_id = $1",
+    //   [post_id]
+    // );
 
     await pool.query(
       "INSERT INTO posts_comments_link (post_id, user_id, comment_content) VALUES ($1, $2, $3) RETURNING comment_id",

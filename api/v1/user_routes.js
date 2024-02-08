@@ -160,7 +160,7 @@ const loginUser = async (request, response) => {
       );
     } else {
       return response
-        .status(400)
+        .status(401)
         .json({ error: "Invalid username and password" });
     }
   } catch (error) {
