@@ -7,19 +7,23 @@ import 'package:localhub/api/posts_stats_service.dart';
 import 'package:localhub/api/report_service.dart';
 import 'package:localhub/functions/datetimeoperations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:localhub/screens/community/community_page.dart';
 import 'package:localhub/screens/post/post_page.dart';
 
 class CustomPostCardWidget extends StatefulWidget {
   final List<Map<String, dynamic>> journals;
   final bool? hasMoreData;
   final bool isFromPostPage;
+  final bool isFromSubPage;
   final bool? voteState;
-  const CustomPostCardWidget(
-      {super.key,
-      required this.journals,
-      this.hasMoreData,
-      this.isFromPostPage = false,
-      this.voteState});
+  const CustomPostCardWidget({
+    super.key,
+    required this.journals,
+    this.hasMoreData,
+    this.isFromPostPage = false,
+    this.isFromSubPage = false,
+    this.voteState,
+  });
 
   @override
   State<CustomPostCardWidget> createState() => _CustomPostCardWidgetState();
@@ -99,6 +103,7 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
     List<Map<String, dynamic>> journals = widget.journals;
     bool? hasMoreData = widget.hasMoreData;
     bool? isFromPostPage = widget.isFromPostPage;
+    bool? isFromSubPage = widget.isFromSubPage;
 
     return (journals.isEmpty)
         ? const Center(child: Text("NO DATA FOUND"))
@@ -165,28 +170,46 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                           Row(
                             children: [
                               const SizedBox(width: 5),
-                              Container(
-                                margin: const EdgeInsets.only(
-                                    right: 6.0, bottom: 5.0),
-                                height: 33,
-                                width: 33,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                    // image: NetworkImage(finalPost["logo_url"]),
-                                    image: CachedNetworkImageProvider(
-                                        finalPost["logo_url"]),
-                                    fit: BoxFit.cover,
-                                  ),
+                              InkWell(
+                                onTap: () {
+                                  if (!isFromSubPage) {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => CommunityPage(
+                                          communityID:
+                                              finalPost["community_id"],
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      margin: const EdgeInsets.only(
+                                          right: 6.0, bottom: 5.0),
+                                      height: 33,
+                                      width: 33,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: DecorationImage(
+                                          // image: NetworkImage(finalPost["logo_url"]),
+                                          image: CachedNetworkImageProvider(
+                                              finalPost["logo_url"]),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      width: 10,
+                                    ),
+                                    Text(
+                                      finalPost["community_name"],
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                finalPost["community_name"],
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
                               ),
                               const SizedBox(
                                 width: 10,
