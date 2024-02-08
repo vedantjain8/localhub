@@ -40,6 +40,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: SingleChildScrollView(
         child: Column(
           children: <Widget>[
+            const SizedBox(height: 5),
             CustomTextFieldInput(
               hasPrefix: true,
               textEditingController: _usernameController,

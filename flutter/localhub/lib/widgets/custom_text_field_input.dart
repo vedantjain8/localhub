@@ -7,7 +7,7 @@ class CustomTextFieldInput extends StatefulWidget {
   final String hintText;
   final String label;
   final TextInputType textInputType;
-  final int maxlines;
+  final int maxLines;
   final bool hasPrefix;
   final Icon prefixIcon;
 
@@ -15,14 +15,13 @@ class CustomTextFieldInput extends StatefulWidget {
     super.key,
     required this.textEditingController,
     this.isPass = false,
-    this.maxlines = 1,
+    this.maxLines = 1,
     this.hasPrefix = false,
     this.isLightMode = false,
     this.hintText = '',
     required this.label,
     required this.textInputType,
     required this.prefixIcon,
-    maxLines = 1,
   });
 
   @override
@@ -41,6 +40,8 @@ class _CustomTextFieldInputState extends State<CustomTextFieldInput> {
       ),
     );
     return TextField(
+      minLines: 1,
+      maxLines: widget.maxLines,
       controller: widget.textEditingController,
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(

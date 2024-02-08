@@ -23,3 +23,4 @@ A community driven app where users can join or create local groups based on inte
 - [flutter_markdown 0.6.18+3](https://pub.dev/packages/flutter_markdown)
 - [package_info_plus 5.0.1](https://pub.dev/packages/package_info_plus)
 - [url_launcher 6.2.4](https://pub.dev/packages/url_launcher)
+- [image_provider 1.0.7](https://pub.dev/packages/image_picker)

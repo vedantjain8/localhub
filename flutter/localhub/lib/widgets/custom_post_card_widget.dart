@@ -7,19 +7,24 @@ import 'package:localhub/api/posts_stats_service.dart';
 import 'package:localhub/api/report_service.dart';
 import 'package:localhub/functions/datetimeoperations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:localhub/screens/community/community_page.dart';
 import 'package:localhub/screens/post/post_page.dart';
+import 'package:localhub/widgets/custom_shimmer.dart';
 
 class CustomPostCardWidget extends StatefulWidget {
   final List<Map<String, dynamic>> journals;
   final bool? hasMoreData;
   final bool isFromPostPage;
+  final bool isFromSubPage;
   final bool? voteState;
-  const CustomPostCardWidget(
-      {super.key,
-      required this.journals,
-      this.hasMoreData,
-      this.isFromPostPage = false,
-      this.voteState});
+  const CustomPostCardWidget({
+    super.key,
+    required this.journals,
+    this.hasMoreData,
+    this.isFromPostPage = false,
+    this.isFromSubPage = false,
+    this.voteState,
+  });
 
   @override
   State<CustomPostCardWidget> createState() => _CustomPostCardWidgetState();
@@ -99,9 +104,10 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
     List<Map<String, dynamic>> journals = widget.journals;
     bool? hasMoreData = widget.hasMoreData;
     bool? isFromPostPage = widget.isFromPostPage;
+    bool? isFromSubPage = widget.isFromSubPage;
 
     return (journals.isEmpty)
-        ? const Center(child: Text("NO DATA FOUND"))
+        ? CustomShimmer()
         : ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -139,7 +145,7 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                 padding: const EdgeInsets.all(8.0),
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(30),
                     color: colorScheme.onInverseSurface,
                   ),
                   width: double.maxFinite,
@@ -156,191 +162,224 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                         );
                       }
                     },
+                    overlayColor: MaterialStateProperty.all(Colors.transparent),
                     child: Padding(
-                      padding: const EdgeInsets.all(5.0),
+                      padding: const EdgeInsets.all(10.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // community name
-                          Row(
-                            children: [
-                              const SizedBox(width: 5),
-                              Container(
-                                margin: const EdgeInsets.only(
-                                    right: 6.0, bottom: 5.0),
-                                height: 33,
-                                width: 33,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                    // image: NetworkImage(finalPost["logo_url"]),
-                                    image: CachedNetworkImageProvider(
-                                        finalPost["logo_url"]),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                finalPost["community_name"],
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Text(timeAgo(finalPost["created_at"])),
-                              const Spacer(),
-                              GestureDetector(
-                                onTapDown: (details) {
-                                  showPopUpMenuAtTap(
-                                      context: context,
-                                      details: details,
-                                      postID: journals[index]['post_id']);
-                                },
-                                child: const FaIcon(
-                                    FontAwesomeIcons.ellipsisVertical),
-                              ),
-                            ],
-                          ),
-
-                          // Title
-                          Text(
-                            finalPost["post_title"],
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge!
-                                .copyWith(fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.start,
-                          ),
-                          // if finalPost["post_description"] is not empty
-                          isFromPostPage
-                              ? MarkdownBody(
-                                  data: finalPost["post_content"].toString(),
-                                )
-                              : Column(
-                                  children: [
-                                    Visibility(
-                                      visible:
-                                          finalPost["short_content"] != null,
-                                      child: Text(finalPost["short_content"]!),
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(top: 10.0, left: 10.0),
+                            child: InkWell(
+                              onTap: () {
+                                if (!isFromSubPage) {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => CommunityPage(
+                                        communityID: finalPost["community_id"],
+                                      ),
                                     ),
-                                    SizedBox(
-                                        height: finalPost["short_content"]!
-                                                .isNotEmpty
-                                            ? 5
-                                            : 0),
-                                  ],
-                                ),
-                          // if imgUrl is not empty
-                          Visibility(
-                            visible: finalPost["post_image"] != null &&
-                                finalPost["post_image"]!.isNotEmpty,
-                            child: Container(
-                              width: double.maxFinite,
-                              constraints: const BoxConstraints(
-                                maxHeight: 200,
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(15),
-                                child: CachedNetworkImage(
-                                  fit: BoxFit.fitWidth,
-                                  imageUrl: finalPost["post_image"]!,
-                                  progressIndicatorBuilder:
-                                      (context, url, downloadProgress) =>
-                                          Center(
-                                    child: CircularProgressIndicator(
-                                        value: downloadProgress.progress),
+                                  );
+                                }
+                              },
+                              child: Row(
+                                children: [
+                                  // const SizedBox(width: 10),
+                                  Container(
+                                    height: 33,
+                                    width: 33,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                        // image: NetworkImage(finalPost["logo_url"]),
+                                        image: CachedNetworkImageProvider(
+                                            finalPost["logo_url"]),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
                                   ),
-                                  errorWidget: (context, url, error) =>
-                                      const Icon(Icons.error),
-                                ),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(
+                                    finalPost["community_name"],
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(timeAgo(finalPost["created_at"])),
+                                  const Spacer(),
+                                  GestureDetector(
+                                    onTapDown: (details) {
+                                      showPopUpMenuAtTap(
+                                          context: context,
+                                          details: details,
+                                          postID: journals[index]['post_id']);
+                                    },
+                                    child: const FaIcon(
+                                        FontAwesomeIcons.ellipsisVertical),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                          SizedBox(
-                              height:
-                                  finalPost["post_image"]!.isNotEmpty ? 7 : 0),
-                          // Bottom Icons
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            // mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Row(
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        if (!voteStateMap.containsKey(postID) &&
-                                            widget.voteState == null) {
-                                          voteStateMap[postID] = true;
-                                          postStatsMap[postID]![
-                                              'total_votes'] += 1;
-                                        }
-                                      });
-                                      pass.sendVote(
-                                          postID: postID, upvote: true);
-                                    },
-                                    icon: FaIcon(
-                                      voteStateMap[postID] == true ||
-                                              widget.voteState == true
-                                          ? FontAwesomeIcons.solidThumbsUp
-                                          : FontAwesomeIcons.thumbsUp,
+
+                          // Title
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  finalPost["post_title"],
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge!
+                                      .copyWith(fontWeight: FontWeight.bold),
+                                  textAlign: TextAlign.start,
+                                ),
+                                // if finalPost["post_description"] is not empty
+                                isFromPostPage
+                                    ? MarkdownBody(
+                                        data: finalPost["post_content"]
+                                            .toString(),
+                                      )
+                                    : Column(
+                                        children: [
+                                          Visibility(
+                                            visible:
+                                                finalPost["short_content"] !=
+                                                    null,
+                                            child: Text(
+                                                finalPost["short_content"]!),
+                                          ),
+                                          SizedBox(
+                                              height:
+                                                  finalPost["short_content"]!
+                                                          .isNotEmpty
+                                                      ? 7
+                                                      : 0),
+                                        ],
+                                      ),
+                                // if imgUrl is not empty
+                                Visibility(
+                                  visible: finalPost["post_image"] != null &&
+                                      finalPost["post_image"]!.isNotEmpty,
+                                  child: Container(
+                                    width: double.maxFinite,
+                                    constraints: const BoxConstraints(
+                                      maxHeight: 200,
                                     ),
-                                    color: colorScheme.secondary,
-                                  ),
-                                  Text(formater.format(totalVotes)),
-                                  IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        if (!voteStateMap.containsKey(postID) &&
-                                            widget.voteState == null) {
-                                          voteStateMap[postID] = false;
-                                          postStatsMap[postID]![
-                                              'total_votes'] -= 1;
-                                        }
-                                      });
-                                      pass.sendVote(
-                                          postID: postID, upvote: false);
-                                    },
-                                    icon: FaIcon(
-                                      voteStateMap[postID] == false ||
-                                              widget.voteState == false
-                                          ? FontAwesomeIcons.solidThumbsDown
-                                          : FontAwesomeIcons.thumbsDown,
-                                    ),
-                                    color: colorScheme.secondary,
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  IconButton(
-                                    onPressed: () {},
-                                    icon: const FaIcon(
-                                      FontAwesomeIcons.message,
-                                    ),
-                                  ),
-                                  Text(formater.format(totalComments)),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  IconButton(
-                                    onPressed: () {},
-                                    icon: const FaIcon(
-                                      FontAwesomeIcons.paperPlane,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(15),
+                                      child: CachedNetworkImage(
+                                        fit: BoxFit.fitWidth,
+                                        imageUrl: finalPost["post_image"]!,
+                                        progressIndicatorBuilder:
+                                            (context, url, downloadProgress) =>
+                                                Center(
+                                          child: CircularProgressIndicator(
+                                              value: downloadProgress.progress),
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            const Icon(Icons.error),
+                                      ),
                                     ),
                                   ),
-                                  const Text('Send'),
-                                  const Padding(
-                                    padding: EdgeInsets.only(right: 2.0),
-                                  )
-                                ],
-                              ),
-                            ],
+                                ),
+                                SizedBox(
+                                    height: finalPost["post_image"]!.isNotEmpty
+                                        ? 7
+                                        : 0),
+                                // Bottom Icons
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        IconButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              if (!voteStateMap
+                                                      .containsKey(postID) &&
+                                                  widget.voteState == null) {
+                                                voteStateMap[postID] = true;
+                                                postStatsMap[postID]![
+                                                    'total_votes'] += 1;
+                                              }
+                                            });
+                                            pass.sendVote(
+                                                postID: postID, upvote: true);
+                                          },
+                                          icon: FaIcon(
+                                            voteStateMap[postID] == true ||
+                                                    widget.voteState == true
+                                                ? FontAwesomeIcons.solidThumbsUp
+                                                : FontAwesomeIcons.thumbsUp,
+                                          ),
+                                          color: colorScheme.secondary,
+                                        ),
+                                        Text(formater.format(totalVotes)),
+                                        IconButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              if (!voteStateMap
+                                                      .containsKey(postID) &&
+                                                  widget.voteState == null) {
+                                                voteStateMap[postID] = false;
+                                                postStatsMap[postID]![
+                                                    'total_votes'] -= 1;
+                                              }
+                                            });
+                                            pass.sendVote(
+                                                postID: postID, upvote: false);
+                                          },
+                                          icon: FaIcon(
+                                            voteStateMap[postID] == false ||
+                                                    widget.voteState == false
+                                                ? FontAwesomeIcons
+                                                    .solidThumbsDown
+                                                : FontAwesomeIcons.thumbsDown,
+                                          ),
+                                          color: colorScheme.secondary,
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        IconButton(
+                                          onPressed: () {},
+                                          icon: const FaIcon(
+                                            FontAwesomeIcons.message,
+                                          ),
+                                        ),
+                                        Text(formater.format(totalComments)),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        IconButton(
+                                          onPressed: () {},
+                                          icon: const FaIcon(
+                                            FontAwesomeIcons.paperPlane,
+                                          ),
+                                        ),
+                                        const Text('Send'),
+                                        const Padding(
+                                          padding: EdgeInsets.only(right: 2.0),
+                                        )
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),

@@ -1,7 +1,7 @@
 name: localhub
 description: "A new Flutter project."
 publish_to: 'none'
-version: 0.1.0
+version: 0.1.1
 
 environment:
   sdk: '>=3.2.3 <4.0.0'
@@ -20,6 +20,8 @@ dependencies:
   flutter_markdown: ^0.6.18+3
   package_info_plus: ^5.0.1
   url_launcher: ^6.2.4
+  dropdown_search: ^5.0.6
+  image_picker: ^1.0.7
 
 dev_dependencies:
   flutter_test:

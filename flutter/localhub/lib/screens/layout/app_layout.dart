@@ -2,11 +2,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localhub/api/about_user_service.dart';
-import 'package:localhub/screens/layout/community_screen.dart';
+import 'package:localhub/screens/layout/agenda_screen.dart';
 // import 'package:localhub/screens/posts/create_post.dart';
 import 'package:localhub/screens/layout/explore_screen.dart';
 import 'package:localhub/screens/layout/home_screen.dart';
 import 'package:localhub/screens/layout/profile_screen.dart';
+import 'package:localhub/screens/layout/search_screen.dart';
+import 'package:localhub/screens/layout/create_post.dart';
 import 'package:localhub/widgets/custom_bottom_app_bar.dart';
 
 class AppLayout extends StatefulWidget {
@@ -25,31 +27,29 @@ class _AppLayoutState extends State<AppLayout> {
   final AboutUserApiService auas = AboutUserApiService();
   Map<String, dynamic> _meJournal = {};
 
+  void _loadMeData() async {
+    Map<String, dynamic> data = await auas.aboutUserData();
+    setState(() {
+      _meJournal = data;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    _loadMeData();
   }
 
   @override
   Widget build(BuildContext context) {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-    return FutureBuilder(
-      future: auas.aboutUserData(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          // Show loading indicator while waiting for data
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          // Handle error case
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else {
-          // Data fetched successfully, update _meJournal
-          _meJournal = snapshot.data as Map<String, dynamic>;
 
-          // Build the UI using the fetched data
-          return Scaffold(
-            key: scaffoldKey,
-            endDrawer: Drawer(
+    // Build the UI using the fetched data
+    return Scaffold(
+      key: scaffoldKey,
+      endDrawer: (_meJournal.isEmpty)
+          ? const Drawer()
+          : Drawer(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -181,63 +181,70 @@ class _AppLayoutState extends State<AppLayout> {
                 ),
               ),
             ),
-            appBar: AppBar(
-              actions: [
-                ElevatedButton(
+      appBar: AppBar(
+        // title: title,
+        actions: [
+          (_meJournal.isEmpty)
+              ? const SizedBox.shrink()
+              : IconButton(
                   onPressed: () {
-                    scaffoldKey.currentState!.openEndDrawer();
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const SearchScreen()));
                   },
-                  child: Container(
-                    margin: const EdgeInsets.only(right: 6.0, bottom: 5.0),
-                    height: 33,
-                    width: 33,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: CachedNetworkImageProvider(
-                          _meJournal["avatar_url"],
-                        ),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                  icon: const FaIcon(FontAwesomeIcons.magnifyingGlass),
+                ),
+          InkWell(
+            onTap: () {
+              scaffoldKey.currentState!.openEndDrawer();
+            },
+            overlayColor: MaterialStateProperty.all(Colors.transparent),
+            child: Container(
+              height: 33,
+              width: 33,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.onInverseSurface,
+                shape: BoxShape.circle,
+                image: DecorationImage(
+                  image: CachedNetworkImageProvider(
+                    _meJournal["avatar_url"],
                   ),
-                )
-              ],
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                // Navigator.of(context)
-                //     .push(MaterialPageRoute(builder: (context) => const CreatePost()));
-              },
-              shape: const CircleBorder(),
-              child: const FaIcon(FontAwesomeIcons.plus),
-            ),
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerDocked,
-            body: PageView(
-              physics: const NeverScrollableScrollPhysics(),
-              controller: _pageController,
-              children: const [
-                HomeScreen(),
-                ExploreScreen(),
-                CommunityScreen(),
-                ProfileScreen(),
-              ],
-            ),
-            bottomNavigationBar: CustomBottomAppBar(
-              onTabSelected: (index) {
-                _selectedTab(index);
-              },
-              items: [
-                CustomAppBarItem(icon: FontAwesomeIcons.house),
-                CustomAppBarItem(icon: FontAwesomeIcons.solidCompass),
-                CustomAppBarItem(icon: FontAwesomeIcons.usersLine),
-                CustomAppBarItem(icon: FontAwesomeIcons.solidCircleUser),
-              ],
-            ),
-          );
-        }
-      },
+          )
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const CreatePost()));
+        },
+        shape: const CircleBorder(),
+        child: const FaIcon(FontAwesomeIcons.plus),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      body: PageView(
+        physics: const NeverScrollableScrollPhysics(),
+        controller: _pageController,
+        children: const [
+          HomeScreen(),
+          ExploreScreen(),
+          AgendaScreen(),
+          ProfileScreen(),
+        ],
+      ),
+      bottomNavigationBar: CustomBottomAppBar(
+        onTabSelected: (index) {
+          _selectedTab(index);
+        },
+        items: [
+          CustomAppBarItem(icon: FontAwesomeIcons.house),
+          CustomAppBarItem(icon: FontAwesomeIcons.solidCompass),
+          CustomAppBarItem(icon: FontAwesomeIcons.usersLine),
+          CustomAppBarItem(icon: FontAwesomeIcons.solidCircleUser),
+        ],
+      ),
     );
   }
 }
