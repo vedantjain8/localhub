@@ -123,4 +123,43 @@ class PostApiService {
     }
     return responseData;
   }
+
+  Future<Map<String, dynamic>> createNewPost({
+    required String communityName,
+    required String postTitle,
+    String? postContent,
+    String? imageUrl = "",
+  }) async {
+    await getHostAddress();
+    await getUserToken();
+    Map<String, dynamic> responseData = {};
+    try {
+      Map<String, dynamic> sendBody = {
+        'post_title': "$postTitle",
+        'post_content': "$postContent",
+        'community_name': "$communityName",
+        'post_image': "$imageUrl",
+        'token': "$token",
+      };
+      print(sendBody);
+      var url = Uri.https(hostaddress, '/api/v1/posts');
+      var response = await http.post(url, body: sendBody);
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        responseData = jsonResponse;
+      } else {
+        print('Request failed with status: ${response.statusCode}.');
+        print(responseData);
+
+        responseData = {
+          'error': 'else Request failed with status: ${response.statusCode}'
+        };
+      }
+    } catch (e) {
+      print('Error: $e');
+      responseData = {'error': 'catch Request failed with status: $e'};
+    }
+    return responseData;
+  }
 }
