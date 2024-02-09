@@ -7,7 +7,6 @@ const cachingBool = Boolean(config.caching);
 async function incrementView(postId, userId) {
   if (cachingBool)
     try {
-      // TODO: check for unique user view entry
 
       const rateLimitCheck = await redisClient.get(
         `rateLimit:postID-${postId}:userID-${userId}`
@@ -22,7 +21,6 @@ async function incrementView(postId, userId) {
         5400,
         "T"
       );
-      console.log("view increment");
 
       // below coode block will increment view in redis cache
       const postStats = await redisClient.hGet(

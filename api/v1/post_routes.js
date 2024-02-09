@@ -30,6 +30,9 @@ const createPost = async (request, response) => {
       return response.status(400).json({ error: "Token is required" });
     }
 
+    if (post_image == null || post_image == "null") {
+      post_image = "";
+    }
 
     if (!community_name) {
       return response.status(400).json({ error: "Community name is required" });
@@ -78,16 +81,24 @@ const createPost = async (request, response) => {
       [post_title, post_content, post_image, user_id, community_id, is_adult]
     );
 
-    response
-      .status(200)
-      .json({ 200: `Post added with ID: ${createPostResult.rows[0].post_id}` });
-
     if (cachingBool) {
-      redisClient.del("posts:offset-*");
+      // Get all keys matching the pattern 'post:offset-*'
+      const keys = await redisClient.keys("posts:offset-*");
+
+      // Delete each key
+      const deletePromises = keys.map((key) => redisClient.del(key));
+
+      // Wait for all keys to be deleted
+      await Promise.all(deletePromises);
     }
+
+    response.status(200).json({
+      status: 200,
+      response: `Post added with ID - ${createPostResult.rows[0].post_id}`,
+    });
   } catch (error) {
     console.error("Error creating post error:", error);
-    response.status(500).json({ error: "Error creating post" });
+    response.status(500).json({ status: 500, response: error });
   }
 };
 
@@ -282,21 +293,20 @@ OFFSET $2
 
 const getPostById = async (request, response) => {
   const post_id = parseInt(request.params.id);
-  const token = parseInt(request.body.token) || null;
+  const token = request.body.token || null;
 
   if (!post_id) {
     return response.status(400).json({ error: "post id is required" });
   }
 
   try {
-    if (token) {
-      const user_id = JSON.parse(getUserData(token))["user_id"];
-      if (user_id) {
-        incrementView(post_id, user_id);
-      }
-    }
-
     if (cachingBool) {
+      if (token) {
+        const user_id = JSON.parse(await getUserData(token))["user_id"];
+        if (user_id) {
+          incrementView(post_id, user_id);
+        }
+      }
       redisClient.select(0);
 
       const value = await redisClient.get(`posts:postID-${post_id}`);
