@@ -50,6 +50,8 @@ const v1path = subdirectory + latestVersion;
 
 createDirectories();
 
+app.use(v1path, statsRoutes);
+
 app.set("trust proxy", 1);
 
 // access images on path
@@ -81,9 +83,8 @@ app.use(v1path, votesRoutes);
 app.use(v1path, reportRoutes);
 app.use(v1path, meRoutes);
 app.use(v1path, historyRoutes);
-app.use(v1path, statsRoutes);
-app.use(v1path, uploadImageRoutes);
 app.use(v1path, freshStartRoutes);
+app.use(uploadImageRoutes);
 
 app.get("/ip", (request, response) => response.send(request.ip));
 

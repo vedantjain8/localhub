@@ -36,7 +36,7 @@ const meInfo = async (request, response) => {
     if (cachingBool) {
       await redisClient.set(`userData:${userToken}`, JSON.stringify(userData));
     }
-    return response.status(200).json(JSON.parse(userData));
+    return response.status(200).json(userData);
   } catch (error) {
     console.error("Database error:", error);
     response.status(400).json({ error: error.message });
