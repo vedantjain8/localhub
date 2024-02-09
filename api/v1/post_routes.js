@@ -30,9 +30,6 @@ const createPost = async (request, response) => {
       return response.status(400).json({ error: "Token is required" });
     }
 
-    if (post_image == "") {
-      post_image = null;
-    }
 
     if (!community_name) {
       return response.status(400).json({ error: "Community name is required" });
@@ -292,9 +289,8 @@ const getPostById = async (request, response) => {
   }
 
   try {
-    
     if (token) {
-      const user_id = JSON.parse(await getUserData(token))["user_id"];
+      const user_id = JSON.parse(getUserData(token))["user_id"];
       if (user_id) {
         incrementView(post_id, user_id);
       }
