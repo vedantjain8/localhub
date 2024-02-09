@@ -184,35 +184,35 @@ class _AppLayoutState extends State<AppLayout> {
       appBar: AppBar(
         // title: title,
         actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => const SearchScreen()));
+            },
+            icon: const FaIcon(FontAwesomeIcons.magnifyingGlass),
+          ),
           (_meJournal.isEmpty)
               ? const SizedBox.shrink()
-              : IconButton(
-                  onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const SearchScreen()));
+              : InkWell(
+                  onTap: () {
+                    scaffoldKey.currentState!.openEndDrawer();
                   },
-                  icon: const FaIcon(FontAwesomeIcons.magnifyingGlass),
-                ),
-          InkWell(
-            onTap: () {
-              scaffoldKey.currentState!.openEndDrawer();
-            },
-            overlayColor: MaterialStateProperty.all(Colors.transparent),
-            child: Container(
-              height: 33,
-              width: 33,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.onInverseSurface,
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                  image: CachedNetworkImageProvider(
-                    _meJournal["avatar_url"],
+                  overlayColor: MaterialStateProperty.all(Colors.transparent),
+                  child: Container(
+                    height: 33,
+                    width: 33,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.onInverseSurface,
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: CachedNetworkImageProvider(
+                          _meJournal["avatar_url"],
+                        ),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          )
+                )
         ],
       ),
       floatingActionButton: FloatingActionButton(

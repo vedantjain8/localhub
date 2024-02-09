@@ -1,8 +1,9 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:localhub/api/post_service.dart';
+import 'package:localhub/api/upload_image_service.dart';
 import 'package:localhub/widgets/custom_text_field_input.dart';
 
 class CreatePost extends StatefulWidget {
@@ -15,6 +16,10 @@ class CreatePost extends StatefulWidget {
 class _CreatePostState extends State<CreatePost> {
   TextEditingController _postTitleController = TextEditingController();
   TextEditingController _postDescriptionController = TextEditingController();
+  late String imageUrl;
+
+  final ImageUploadService ius = ImageUploadService();
+  final PostApiService pas = PostApiService();
 
   XFile? pickedImage;
   final _picker = ImagePicker();
@@ -43,13 +48,47 @@ class _CreatePostState extends State<CreatePost> {
     _postDescriptionController.dispose();
   }
 
+  void _createPost() async {
+    if (pickedImage != null) {
+      Map<String, dynamic> imageUrl =
+          await ius.uploadImageHTTP(File(pickedImage!.path));
+
+      pas.createNewPost(
+        communityName: "global",
+        postTitle: _postTitleController.text,
+        postContent: _postDescriptionController.text,
+        imageUrl: imageUrl["link"],
+      );
+    }
+
+    pas.createNewPost(
+      communityName: "global",
+      postTitle: _postTitleController.text,
+      postContent: _postDescriptionController.text,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Post'),
         actions: [
-          ElevatedButton(onPressed: () {}, child: const Text('Next')),
+          ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                );
+
+                _createPost();
+
+                Navigator.of(context).pop();
+              },
+              child: const Text('Next')),
           const SizedBox(width: 15)
         ],
       ),
