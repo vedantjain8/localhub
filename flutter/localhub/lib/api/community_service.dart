@@ -22,7 +22,8 @@ class CommunityApiService {
     getUserToken();
   }
 
-  Future<Map<String, dynamic>> getCommunityData({required int communityID}) async {
+  Future<Map<String, dynamic>> getCommunityData(
+      {required int communityID}) async {
     await getHostAddress();
     Map<String, dynamic> responseData = {};
     try {
@@ -73,6 +74,43 @@ class CommunityApiService {
         ];
       }
     } catch (e) {
+      responseData = [
+        {'error': 'catch Request failed with status: $e'}
+      ];
+    }
+    return responseData;
+  }
+
+  Future<List<Map<String, dynamic>>> getCommunityList(
+      {String? communityName}) async {
+    await getHostAddress();
+    List<Map<String, dynamic>> responseData = [];
+    try {
+      var url = Uri.https(hostaddress, '/api/v1/community/search',
+          {'communityName': '$communityName'});
+      var response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        if (jsonResponse is List) {
+          // Check if jsonResponse is a List
+          responseData = jsonResponse.cast<Map<String, dynamic>>().toList();
+        } else {
+          // Handle the case where jsonResponse is not a List
+          print('Unexpected response format: $jsonResponse');
+          responseData = [
+            {'error': 'Unexpected response format'}
+          ];
+        }
+      } else {
+        print('Request failed with status: ${response.statusCode}.');
+
+        responseData = [
+          {'error': 'else Request failed with status: ${response.statusCode}'}
+        ];
+      }
+    } catch (e) {
+      print('Error: $e');
       responseData = [
         {'error': 'catch Request failed with status: $e'}
       ];

@@ -141,7 +141,6 @@ class PostApiService {
         'post_image': "$imageUrl",
         'token': "$token",
       };
-      print(sendBody);
       var url = Uri.https(hostaddress, '/api/v1/posts');
       var response = await http.post(url, body: sendBody);
 

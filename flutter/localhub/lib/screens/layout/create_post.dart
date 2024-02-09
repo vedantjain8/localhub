@@ -1,9 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:localhub/api/community_service.dart';
 import 'package:localhub/api/post_service.dart';
 import 'package:localhub/api/upload_image_service.dart';
+import 'package:localhub/screens/layout/app_layout.dart';
 import 'package:localhub/widgets/custom_text_field_input.dart';
 
 class CreatePost extends StatefulWidget {
@@ -14,12 +17,18 @@ class CreatePost extends StatefulWidget {
 }
 
 class _CreatePostState extends State<CreatePost> {
-  TextEditingController _postTitleController = TextEditingController();
-  TextEditingController _postDescriptionController = TextEditingController();
+  final TextEditingController _postTitleController = TextEditingController();
+  final TextEditingController _postDescriptionController =
+      TextEditingController();
+
+  List<String> community = [];
+  String selectedCommunity = "";
+
   late String imageUrl;
 
   final ImageUploadService ius = ImageUploadService();
   final PostApiService pas = PostApiService();
+  final CommunityApiService cas = CommunityApiService();
 
   XFile? pickedImage;
   final _picker = ImagePicker();
@@ -41,6 +50,24 @@ class _CreatePostState extends State<CreatePost> {
     // Navigator.pop(context);
   }
 
+  Future<List<String>> _loadCommunityList(String? communityName) async {
+    List<String> community = [];
+    final List<Map<String, dynamic>> data =
+        await cas.getCommunityList(communityName: communityName);
+
+    for (var element in data) {
+      community.add(element['community_name'] as String);
+    }
+
+    return community;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCommunityList("");
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -48,24 +75,24 @@ class _CreatePostState extends State<CreatePost> {
     _postDescriptionController.dispose();
   }
 
-  void _createPost() async {
+  Future<Map<String, dynamic>> _createPost() async {
+    // Upload image if pickedImage is not null
+    String? imageUrl;
     if (pickedImage != null) {
-      Map<String, dynamic> imageUrl =
+      Map<String, dynamic>? uploadResult =
           await ius.uploadImageHTTP(File(pickedImage!.path));
-
-      pas.createNewPost(
-        communityName: "global",
-        postTitle: _postTitleController.text,
-        postContent: _postDescriptionController.text,
-        imageUrl: imageUrl["link"],
-      );
+      imageUrl = uploadResult?["link"];
     }
 
-    pas.createNewPost(
-      communityName: "global",
+    // Create new post
+    Map<String, dynamic> res = await pas.createNewPost(
+      communityName: selectedCommunity,
       postTitle: _postTitleController.text,
       postContent: _postDescriptionController.text,
+      imageUrl: imageUrl,
     );
+
+    return res;
   }
 
   @override
@@ -75,7 +102,7 @@ class _CreatePostState extends State<CreatePost> {
         title: const Text('Create Post'),
         actions: [
           ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 showDialog(
                   context: context,
                   barrierDismissible: false,
@@ -84,9 +111,43 @@ class _CreatePostState extends State<CreatePost> {
                   },
                 );
 
-                _createPost();
-
-                Navigator.of(context).pop();
+                await _createPost().then(
+                  (Map<String, dynamic> status) => {
+                    if (status['status'] != null)
+                      {
+                        if (status['status'] == 200)
+                          {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(status['response']),
+                              ),
+                            ),
+                            Navigator.of(context).pop(),
+                            Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const AppLayout()),
+                                (route) => false),
+                          }
+                        else
+                          (
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(status['response']),
+                              ),
+                            ),
+                          )
+                      }
+                    else
+                      (
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("some error"),
+                          ),
+                        ),
+                      )
+                  },
+                );
               },
               child: const Text('Next')),
           const SizedBox(width: 15)
@@ -154,6 +215,35 @@ class _CreatePostState extends State<CreatePost> {
                 prefixIcon: const Icon(Icons.notes_rounded),
                 maxLines: 10,
                 label: 'Description',
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              DropdownSearch<String>(
+                popupProps: const PopupProps.menu(
+                  showSearchBox: true,
+                  searchDelay: Duration(seconds: 3),
+                  isFilterOnline: true,
+                  showSelectedItems: true,
+                ),
+                asyncItems: (value) {
+                  return _loadCommunityList(value);
+                },
+                clearButtonProps: const ClearButtonProps(
+                  isVisible: true,
+                ),
+                dropdownDecoratorProps: const DropDownDecoratorProps(
+                  dropdownSearchDecoration: InputDecoration(
+                    labelText: "Select Community",
+                  ),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    if (value!.isNotEmpty) {
+                      selectedCommunity = value;
+                    }
+                  });
+                },
               ),
               const SizedBox(
                 height: 10,
