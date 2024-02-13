@@ -81,7 +81,7 @@ class _CreatePostState extends State<CreatePost> {
     if (pickedImage != null) {
       Map<String, dynamic>? uploadResult =
           await ius.uploadImageHTTP(File(pickedImage!.path));
-      imageUrl = uploadResult?["link"];
+      imageUrl = uploadResult["link"];
     }
 
     // Create new post
@@ -239,7 +239,7 @@ class _CreatePostState extends State<CreatePost> {
                 ),
                 onChanged: (value) {
                   setState(() {
-                    if (value!.isNotEmpty) {
+                    if (value != null) {
                       selectedCommunity = value;
                     }
                   });

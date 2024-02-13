@@ -9,7 +9,7 @@ class CommunityApiService {
     hostaddress = prefs.getString('hostaddress')!;
   }
 
-  void getUserToken() async {
+  Future<void> getUserToken() async {
     token = await _storage.read(key: 'token');
   }
 
@@ -22,6 +22,7 @@ class CommunityApiService {
     getUserToken();
   }
 
+// get data like community name, banner, logo_url, community_description, created_at, active
   Future<Map<String, dynamic>> getCommunityData(
       {required int communityID}) async {
     await getHostAddress();
@@ -47,6 +48,7 @@ class CommunityApiService {
     return responseData;
   }
 
+// get community posts data
   Future<List<Map<String, dynamic>>> getCommunityPost(
       {int offset = 0, required int communityID}) async {
     await getHostAddress();
@@ -114,6 +116,44 @@ class CommunityApiService {
       responseData = [
         {'error': 'catch Request failed with status: $e'}
       ];
+    }
+    return responseData;
+  }
+
+  Future<Map<String, dynamic>> createCommunity({
+    required String communityName,
+    required String communityDescription,
+    required String logoUrl,
+    String? bannerUrl = "",
+  }) async {
+    await getHostAddress();
+    await getUserToken();
+    Map<String, dynamic> responseData = {};
+    try {
+      Map<String, dynamic> sendBody = {
+        'community_name': "$communityName",
+        'community_description': "$communityDescription",
+        'token': "$token",
+        'logo_url': "$logoUrl",
+        'banner_url': "$bannerUrl"
+      };
+      var url = Uri.https(hostaddress, '/api/v1/community');
+      var response = await http.post(url, body: sendBody);
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        responseData = jsonResponse;
+      } else {
+        print('Request failed with status: ${response.statusCode}.');
+
+        responseData = {
+          'error': 'else Request failed with status: ${response.statusCode}',
+          'error_body': '${response.body}'
+        };
+      }
+    } catch (e) {
+      print('Error: $e');
+      responseData = {'error': 'catch Request failed with status: $e'};
     }
     return responseData;
   }
