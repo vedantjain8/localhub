@@ -31,19 +31,21 @@ const createCommunity = async (request, response) => {
     ) {
       return response
         .status(400)
-        .json({ error: "Enter a valid community name" });
+        .json({ status: 400, response: "Enter a valid community name" });
     }
 
     if (reservedKeywordsFile().includes(community_name.toLowerCase())) {
       return response.status(400).json({
-        error: "community name is a reserved keyword and cannot be used.",
+        status: 400,
+        response: "community name is a reserved keyword and cannot be used.",
       });
     }
 
     if (!token) {
-      return response
-        .status(400)
-        .json({ error: "community cant be created without owner user" });
+      return response.status(400).json({
+        status: 400,
+        response: "community cant be created without owner user",
+      });
     }
 
     if (!logo_url) {
@@ -60,7 +62,7 @@ const createCommunity = async (request, response) => {
     if (community_id) {
       return response
         .status(400)
-        .json({ error: "community name is not available" });
+        .json({ status: 400, response: "community name is not available" });
     }
 
     // Create the community
@@ -70,11 +72,12 @@ const createCommunity = async (request, response) => {
     );
 
     response.status(200).json({
-      200: `community created with ID: ${createcommunityResult.rows[0].community_id}`,
+      status: 200,
+      response: `community created with ID: ${createcommunityResult.rows[0].community_id}`,
     });
   } catch (error) {
     console.error("Error creating community:", error);
-    response.status(500).json({ error: "Error creating community" });
+    response.status(500).json({  status: 500, response: "Error creating community" });
   }
 };
 
