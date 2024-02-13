@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localhub/api/about_user_service.dart';
 import 'package:localhub/screens/layout/agenda_screen.dart';
+import 'package:localhub/screens/layout/create_community.dart';
 // import 'package:localhub/screens/posts/create_post.dart';
 import 'package:localhub/screens/layout/explore_screen.dart';
 import 'package:localhub/screens/layout/home_screen.dart';
@@ -37,6 +38,7 @@ class _AppLayoutState extends State<AppLayout> {
   @override
   void initState() {
     super.initState();
+    FocusManager.instance.primaryFocus?.unfocus();
     _loadMeData();
   }
 
@@ -112,8 +114,8 @@ class _AppLayoutState extends State<AppLayout> {
                     // create a subreddit
                     InkWell(
                       onTap: () {
-                        // Navigator.of(context).push(MaterialPageRoute(
-                        //     builder: (context) => const CreateNewSubreddit()));
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const CreateCommunity()));
                       },
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 10.0),
