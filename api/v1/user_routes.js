@@ -32,13 +32,18 @@ const createUser = async (request, response) => {
       !validator.isLength(username, { min: 4, max: 15 }) ||
       !allowedCharactersRegex.test(username)
     ) {
-      return response.status(400).json({ error: "Enter a valid username" });
+      return response
+        .status(400)
+        .json({ status: 400, response: "Enter a valid username" });
     }
 
     if (reservedKeywordsFile().includes(username.toLowerCase())) {
       return response
         .status(400)
-        .json({ error: "Username is a reserved keyword and cannot be used." });
+        .json({
+          status: 400,
+          response: "Username is a reserved keyword and cannot be used.",
+        });
     }
 
     // Check if the username is available
@@ -48,19 +53,23 @@ const createUser = async (request, response) => {
     );
 
     if (usernameCheckResult.rows.length > 0) {
-      return response.status(400).json({ error: "Username not available" });
+      return response
+        .status(400)
+        .json({ status: 400, response: "Username not available" });
     }
 
     // email validation
     if (!email || !validator.isEmail(email)) {
-      return response.status(400).json({ error: "Enter a valid email" });
+      return response
+        .status(400)
+        .json({ status: 400, response: "Enter a valid email" });
     }
 
     // password validation
     if (!password || !validator.isLength(password, { min: 4, max: 255 })) {
       return response
         .status(400)
-        .json({ error: "Enter a valid password hash" });
+        .json({ status: 400, response: "Enter a valid password hash" });
     }
 
     if (!avatar_url || avatar_url == "null") {
@@ -84,10 +93,12 @@ const createUser = async (request, response) => {
       ]
     );
 
-    response.status(200).json({ token: insertUserResult.rows[0].token });
+    response
+      .status(200)
+      .json({ status: 200, response: insertUserResult.rows[0].token });
   } catch (error) {
-    console.error("Error creating user:", error);
-    response.status(500).json({ error: "Error creating user" });
+    console.error(error);
+    return response.status(500).json({ status: 500, response: "Error creating user" });
   }
 };
 
@@ -96,7 +107,9 @@ const deleteUser = async (request, response) => {
   const token = request.params.token;
 
   if (!token) {
-    return response.status(400).json({ error: "token can not be null" });
+    return response
+      .status(400)
+      .json({ status: 400, response: "token can not be null" });
   }
   const user_id = JSON.parse(await getUserData(token))["user_id"];
 
@@ -105,11 +118,12 @@ const deleteUser = async (request, response) => {
     [user_id],
     (error, results) => {
       if (error) {
-        throw error;
+        console.error(error);
+        return response.status(500).json({ status: 500, response: error });
       }
       return response
         .status(200)
-        .json({ 200: `User deleted with token: ${token}` });
+        .json({ status: 200, response: `User deleted with token: ${token}` });
     }
   );
 };
@@ -123,11 +137,15 @@ const loginUser = async (request, response) => {
       !validator.isLength(username, { min: 4, max: 15 }) ||
       !allowedCharactersRegex.test(username)
     ) {
-      return response.status(400).json({ error: "Enter a valid username" });
+      return response
+        .status(400)
+        .json({ status: 400, response: "Enter a valid username" });
     }
 
     if (!password) {
-      return response.status(400).json({ error: "Password is required" });
+      return response
+        .status(400)
+        .json({ status: 400, response: "Password is required" });
     }
 
     // Check if the user exists and get the user_id
@@ -139,7 +157,9 @@ const loginUser = async (request, response) => {
     const user = userResult.rows[0];
 
     if (!user) {
-      return response.status(400).json({ error: "Invalid username" });
+      return response
+        .status(400)
+        .json({ status: 400, response: "Invalid username" });
     }
 
     const checkPasswordBool = await checkPassword(password, user.password_hash);
@@ -153,19 +173,22 @@ const loginUser = async (request, response) => {
         [now, user_id],
         (error, result) => {
           if (error) {
-            response.status(500);
+            console.error(error);
+            return response.status(500).json({ status: 500, response: error });
           }
-          return response.status(200).json({ token: token });
+          return response.status(200).json({ status: 200, response: token });
         }
       );
     } else {
       return response
         .status(401)
-        .json({ error: "Invalid username and password" });
+        .json({ status: 401, response: "Invalid username and password" });
     }
   } catch (error) {
-    console.error("Error creating post error:", error);
-    response.status(500).send("Error creating post");
+    console.error(error);
+    return response
+      .status(500)
+      .json({ status: 500, response: "Error creating post" });
   }
 };
 

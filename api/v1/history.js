@@ -44,7 +44,9 @@ const history_upvote = async (request, response) => {
   }
 
   if (!token) {
-    return response.status(400).json({ error: "Provide a user token" });
+    return response
+      .status(400)
+      .json({ status: 400, response: "Provide a user token" });
   }
 
   const user_id = JSON.parse(await getUserData(token))["user_id"];
@@ -54,12 +56,13 @@ const history_upvote = async (request, response) => {
       const value = await redisClient.get(
         `user${user_id}:voteType${vote}:${offset}`
       );
-      return response.status(200).json(value);
+      return response.status(200).json({ status: 200, response: value });
     }
 
     pool.query(filterQuery(user_id, offset, vote), (error, results) => {
       if (error) {
-        response.status(400).json({ error: error });
+        console.error(error);
+        return response.status(400).json({ status: 400, response: error });
       }
 
       const userData = results.rows;
@@ -70,10 +73,10 @@ const history_upvote = async (request, response) => {
           JSON.stringify(userData)
         );
       }
-      return response.status(200).json(userData);
+      return response.status(200).json({ status: 200, response: userData });
     });
   } catch (e) {
-    return response.status(400).json({ error: e });
+    return response.status(400).json({ status: 400, response: e });
   }
 };
 
@@ -87,7 +90,9 @@ const history_downvote = async (request, response) => {
   }
 
   if (!token) {
-    return response.status(400).json({ error: "Provide a user token" });
+    return response
+      .status(400)
+      .json({ status: 400, response: "Provide a user token" });
   }
 
   const user_id = JSON.parse(await getUserData(token))["user_id"];
@@ -97,12 +102,13 @@ const history_downvote = async (request, response) => {
       const value = await redisClient.get(
         `user${user_id}:voteType${vote}:${offset}`
       );
-      return response.status(200).json(value);
+      return response.status(200).json({ status: 200, response: value });
     }
 
     pool.query(filterQuery(user_id, offset, vote), (error, results) => {
       if (error) {
-        response.status(400).json({ error: error });
+        console.error(error);
+        return response.status(400).json({ status: 400, response: error });
       }
 
       const userData = results.rows;
@@ -113,10 +119,10 @@ const history_downvote = async (request, response) => {
           JSON.stringify(userData)
         );
       }
-      return response.status(200).json(userData);
+      return response.status(200).json({ status: 200, response: userData });
     });
   } catch (e) {
-    return response.status(400).json({ error: e });
+    return response.status(400).json({ status: 400, response: e });
   }
 };
 

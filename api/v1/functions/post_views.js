@@ -39,7 +39,7 @@ async function incrementView(postId, userId) {
         );
       }
     } catch (error) {
-      console.error("error view count increment:", error);
+      console.error(error);
     }
 }
 

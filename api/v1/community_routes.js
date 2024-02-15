@@ -71,13 +71,15 @@ const createCommunity = async (request, response) => {
       [community_name, community_description, user_id, banner_url, logo_url]
     );
 
-    response.status(200).json({
+    return response.status(200).json({
       status: 200,
       response: `community created with ID: ${createcommunityResult.rows[0].community_id}`,
     });
   } catch (error) {
-    console.error("Error creating community:", error);
-    response.status(500).json({  status: 500, response: "Error creating community" });
+    console.error(error);
+    return response
+      .status(500)
+      .json({ status: 500, response: "Error creating community" });
   }
 };
 
@@ -89,10 +91,10 @@ const communitySearch = (request, response) => {
     [communityName],
     (error, result) => {
       if (error) {
-        console.log(error);
-        return response.status(500).json({ error: error });
+        console.error(error);
+        return response.status(500).json({ status: 500, response: error });
       }
-      response.status(200).json(result.rows);
+      return response.status(200).json({ status: 200, response: result.rows });
     }
   );
 };
@@ -101,7 +103,9 @@ const getcommunityDataById = async (request, response) => {
   const community_id = parseInt(request.params.id);
 
   if (!community_id) {
-    return response.status(400).json({ error: "Search id is required" });
+    return response
+      .status(400)
+      .json({ status: 400, response: "Search id is required" });
   }
 
   try {
@@ -112,7 +116,9 @@ const getcommunityDataById = async (request, response) => {
       );
 
       if (communityData) {
-        return response.status(200).json(JSON.parse(communityData));
+        return response
+          .status(200)
+          .json({ status: 200, response: JSON.parse(communityData) });
       }
     }
 
@@ -131,10 +137,10 @@ const getcommunityDataById = async (request, response) => {
       );
     }
 
-    return response.status(200).json(communityData);
+    return response.status(200).json({ status: 200, response: communityData });
   } catch (error) {
-    console.log(error);
-    return response.status(400).json(error);
+    console.error(error);
+    return response.status(400).json({ status: 400, response: error });
   }
 };
 
@@ -143,11 +149,15 @@ const joinCommunity = async (request, response) => {
   const token = request.body.token;
 
   if (!community_id) {
-    return response.status(400).json({ error: "community id is required" });
+    return response
+      .status(400)
+      .json({ status: 400, response: "community id is required" });
   }
 
   if (!token) {
-    return response.status(400).json({ error: "user token is required" });
+    return response
+      .status(400)
+      .json({ status: 400, response: "user token is required" });
   }
 
   const user_id = JSON.parse(await getUserData(token))["user_id"];
@@ -186,7 +196,7 @@ const joinCommunity = async (request, response) => {
       );
     }
   } catch (error) {
-    console.log("redis failed to insert community:joinedCount");
+    console.error(error);
   }
 };
 
@@ -195,11 +205,15 @@ const leaveCommunity = async (request, response) => {
   const token = request.body.token;
 
   if (!community_id) {
-    return response.status(400).json({ error: "community id is required" });
+    return response
+      .status(400)
+      .json({ status: 400, response: "community id is required" });
   }
 
   if (!token) {
-    return response.status(400).json({ error: "user token is required" });
+    return response
+      .status(400)
+      .json({ status: 400, response: "user token is required" });
   }
 
   const user_id = JSON.parse(await getUserData(token))["user_id"];
@@ -236,8 +250,11 @@ const leaveCommunity = async (request, response) => {
         [community_id]
       );
     }
+    return response
+      .status(200)
+      .json({ status: 200, response: "Successfully left the community" });
   } catch (error) {
-    console.log("redis failed to insert community:joinedCount");
+    console.error(error);
   }
 };
 
@@ -278,6 +295,31 @@ cron.schedule("*/10 * * * *", async () => {
           [community_id, newCount]
         );
       }
+    }
+  }
+});
+
+cron.schedule("* * * * *", async () => {
+  // running task every /10 minutes
+  if (cachingBool) {
+    console.log("upload image log cron running");
+
+    // user community link insert
+    const imageLogData = await redisClient.hGetAll("ImageUploadLog", "*");
+
+    for (const singleData in imageLogData) {
+      data = JSON.parse(userData[singleData]);
+      console.log(data);
+      pool.query(
+        "INSERT INTO image_upload_log (user_id, image_name, image_url) VALUES ($1, $2, $3)",
+        [data.userId, data.image_name, data.image_url],
+        (error, result) => {
+          if (error) {
+            console.error(error);
+          }
+        }
+      );
+      await redisClient.hDel("ImageUploadLog", `${singleData}`);
     }
   }
 });

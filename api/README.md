@@ -57,6 +57,7 @@ Containers are configured using parameters passed at runtime (such as those abov
 
 # TODO:
 - [ ] admin page endpoint
+- [ ] add db migration code
 - [ ] endpoint for debugging to clear all database and recreate from scratch
 - [ ] create a docker image 
   - [ ] read [this](https://dev.to/duncanlew/best-practices-for-reducing-the-docker-image-size-for-a-nodejs-application-2m7a) article and [this, along with recommended articles at end](https://blog.devgenius.io/reduce-the-size-of-your-node-js-docker-image-by-up-to-90-53aad23890e2)

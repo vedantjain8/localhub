@@ -16,16 +16,22 @@ const clearAllComments = async (request, response) => {
         redisClient.sendCommand(["flushall"]);
       }
       await pool.query(`DELETE FROM report_comment`);
-      await pool.query("UPDATE posts_stats SET total_comments = 0 WHERE total_comments != 0");
+      await pool.query(
+        "UPDATE posts_stats SET total_comments = 0 WHERE total_comments != 0"
+      );
       await pool.query(`DELETE FROM posts_comments_link`);
 
-      return response.status(200).json({ status: "Done" });
+      return response.status(200).json({ status: 200, response: "Done" });
     } catch (error) {
-      console.error("Database error:", error);
-      throw new Error(error.message);
+      console.error(error);
+      return response
+        .status(400)
+        .json({ status: 400, response: error.message });
     }
   } else {
-    return response.status(401).json({ error: "Not authorised" });
+    return response
+      .status(401)
+      .json({ status: 401, response: "Not authorised" });
   }
 };
 
@@ -36,16 +42,20 @@ const clearAllVotes = async (request, response) => {
       if (cachingBool) {
         redisClient.sendCommand(["flushall"]);
       }
-      await pool.query("UPDATE posts_stats SET total_votes = 0 WHERE total_votes != 0");
+      await pool.query(
+        "UPDATE posts_stats SET total_votes = 0 WHERE total_votes != 0"
+      );
       await pool.query(`DELETE FROM posts_vote_link`);
 
-      return response.status(200).json({ status: "Done" });
+      return response.status(200).json({ status: 200, response: "Done" });
     } catch (error) {
-      console.error("Database error:", error);
+      console.error(error);
       throw new Error(error.message);
     }
   } else {
-    return response.status(401).json({ error: "Not authorised" });
+    return response
+      .status(401)
+      .json({ status: 401, response: "Not authorised" });
   }
 };
 
@@ -67,13 +77,17 @@ const clearAll = async (request, response) => {
       await pool.query(`DELETE FROM community`);
       await pool.query(`DELETE FROM users`);
 
-      return response.status(200).json({ status: "Done" });
+      return response.status(200).json({ status: 200, response: "Done" });
     } catch (error) {
-      console.error("Database error:", error);
-      throw new Error(error.message);
+      console.error(error);
+      return response
+        .status(400)
+        .json({ status: 400, response: error.message });
     }
   } else {
-    return response.status(401).json({ error: "Not authorised" });
+    return response
+      .status(401)
+      .json({ status: 401, response: "Not authorised" });
   }
 };
 

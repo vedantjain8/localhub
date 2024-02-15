@@ -9,7 +9,7 @@ const createDirectories = async () => {
     await mkdirAsync('./upload/low', { recursive: true });
     await mkdirAsync('./upload/original', { recursive: true });
   } catch (error) {
-    console.error('Error creating directories:', error.message);
+    console.error(error);
   }
 };
 

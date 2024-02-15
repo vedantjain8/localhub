@@ -12,7 +12,9 @@ const communityStats = async (request, response) => {
   const community_id = parseInt(request.params.id);
 
   if (!community_id) {
-    return response.status(400).json({ error: "community id is required" });
+    return response
+      .status(400)
+      .json({ status: 400, response: "community id is required" });
   }
 
   try {
@@ -23,7 +25,9 @@ const communityStats = async (request, response) => {
       );
 
       if (communityStats) {
-        return response.status(200).json(JSON.parse(communityStats));
+        return response
+          .status(200)
+          .json({ status: 200, response: JSON.parse(communityStats) });
       }
     }
 
@@ -40,9 +44,12 @@ const communityStats = async (request, response) => {
       );
     }
 
-    return response.status(200).json(dbcommunityCount[0]);
+    return response
+      .status(200)
+      .json({ status: 200, response: dbcommunityCount[0] });
   } catch (error) {
-    return response.status(400).json(error);
+    console.error(error);
+    return response.status(400).json({ status: 400, response: error });
   }
 };
 
@@ -50,7 +57,9 @@ const postStats = async (request, response) => {
   const post_id = parseInt(request.params.id);
 
   if (!post_id) {
-    return response.status(400).json({ error: "post id is required" });
+    return response
+      .status(400)
+      .json({ status: 400, response: "post id is required" });
   }
 
   try {
@@ -62,7 +71,9 @@ const postStats = async (request, response) => {
 
       if (postStats) {
         const postStatsObject = JSON.parse(postStats);
-        return response.status(200).json(postStatsObject);
+        return response
+          .status(200)
+          .json({ status: 200, response: postStatsObject });
       }
     }
 
@@ -81,10 +92,10 @@ const postStats = async (request, response) => {
       );
     }
 
-    return response.status(200).json(postStats);
+    return response.status(200).json({ status: 200, response: postStats });
   } catch (error) {
-    console.log(error);
-    return response.status(400).json(error);
+    console.error(error);
+    return response.status(400).json({ status: 400, response: error });
   }
 };
 

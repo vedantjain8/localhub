@@ -15,7 +15,9 @@ const createVote = async (request, response, vote_type) => {
     const post_id = parseInt(request.params.id);
 
     if (!token || !post_id || !vote_type) {
-      return response.status(400).json({ error: "Invalid input data" });
+      return response
+        .status(400)
+        .json({ status: 400, response: "Invalid input data" });
     }
 
     const userDataString = await getUserData(token);
@@ -31,7 +33,7 @@ const createVote = async (request, response, vote_type) => {
       if (voteDataValue) {
         return response
           .status(409)
-          .json({ status: "User already voted this post" });
+          .json({ status: 409, response: "User already voted this post" });
       }
     }
     const existingVote = await pool.query(
@@ -42,7 +44,7 @@ const createVote = async (request, response, vote_type) => {
     if (existingVote.rows.length > 0) {
       return response
         .status(409)
-        .json({ status: "User already voted this post" });
+        .json({ status: 409, response: "User already voted this post" });
     }
 
     if (cachingBool) {
@@ -87,12 +89,15 @@ const createVote = async (request, response, vote_type) => {
       );
     }
 
-    response.status(200).json({
-      message: `Vote submitted for post_id: ${post_id}`,
+    return response.status(200).json({
+      status: 200,
+      response: `Vote submitted for post_id: ${post_id}`,
     });
   } catch (error) {
-    console.error("Error in voting post:", error);
-    response.status(500).json({ error: "Error voting for post" });
+    console.error(error);
+    response
+      .status(500)
+      .json({ status: 500, response: "Error voting for post" });
   }
 };
 

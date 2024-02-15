@@ -14,10 +14,10 @@ const reportComment = async (request, response) => {
     const { token, comment_id } = request.body;
 
     if (!token) {
-      return response.status(400).json({ error: "token is required" });
+      return response.status(400).json({ status: 400, response: "token is required" });
     }
     if (!comment_id) {
-      return response.status(400).json({ error: "commentID is required" });
+      return response.status(400).json({ status: 400, response: "commentID is required" });
     }
 
     // Check if the user exists and get the user_id
@@ -43,10 +43,11 @@ const reportComment = async (request, response) => {
               // Unique violation error, the record already exists
               response
                 .status(409)
-                .json({ status: "User already reported this comment" });
+                .json({ status: 409, response: "User already reported this comment" });
             } else {
               // Other error
-              response.status(400).json({ status: "Error in reporting" });
+              console.error(error);
+              return response.status(400).json({ status: 400, response: "Error in reporting" });
             }
           }
         }
@@ -54,10 +55,10 @@ const reportComment = async (request, response) => {
     }
     return response
       .status(200)
-      .json({ status: "Successfully reported comment" });
+      .json({ status: 200, response: "Successfully reported comment" });
   } catch (error) {
-    console.error("Error reporting comment with error:", error);
-    response.status(500).json({ error: "Error reporting comment" });
+    console.error(error);
+    return response.status(500).json({ status: 500, response: "Error reporting comment" });
   }
 };
 
@@ -66,10 +67,10 @@ const reportPost = async (request, response) => {
     const { token, post_id } = request.body;
 
     if (!token) {
-      return response.status(400).json({ error: "token is required" });
+      return response.status(400).json({ status: 400, response: "token is required" });
     }
     if (!post_id) {
-      return response.status(400).json({ error: "post_id is required" });
+      return response.status(400).json({ status: 400, response: "post_id is required" });
     }
 
     // Check if the user exists and get the user_id
@@ -95,19 +96,20 @@ const reportPost = async (request, response) => {
               // Unique violation error, the record already exists
               response
                 .status(409)
-                .json({ status: "User already reported this post" });
+                .json({ status: 409, response: "User already reported this post" });
             } else {
               // Other error
-              response.status(400).json({ status: "Error in reporting" });
+              console.error(error);
+              return response.status(400).json({ status: 400, response: "Error in reporting" });
             }
           }
         }
       );
     }
-    return response.status(200).json({ status: "Successfully reported post" });
+    return response.status(200).json({ status: 200, response: "Successfully reported post" });
   } catch (error) {
-    console.error("Error reporting post with error:", error);
-    response.status(500).json({ error: "Error reporting post" });
+    console.error(error);
+    return response.status(500).json({ status: 500, response: "Error reporting post" });
   }
 };
 
@@ -137,7 +139,7 @@ cron.schedule("*/30 * * * *", async () => {
               return;
             } else {
               // Other error
-              console.log("report cron error", error);
+              console.error(error);
               return;
             }
           }
@@ -165,7 +167,7 @@ cron.schedule("*/30 * * * *", async () => {
               return;
             } else {
               // Other error
-              console.log("report cron error", error);
+              console.error(error);
               return;
             }
           }

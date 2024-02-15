@@ -140,6 +140,15 @@ CREATE TABLE IF NOT EXISTS
     comment_id INT NOT NULL,
     report_time TIMESTAMP NOT NULL DEFAULT NOW(),
     FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (comment_id) REFERENCES comments_link(comment_id),
+    FOREIGN KEY (comment_id) REFERENCES posts_comments_link(comment_id),
     UNIQUE (user_id, comment_id)
+  );
+
+CREATE TABLE IF NOT EXISTS
+  image_upload_log(
+    upload_tag SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    image_name VARCHAR NOT NULL,
+    image_url TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
   );
