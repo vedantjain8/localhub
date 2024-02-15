@@ -42,8 +42,20 @@ class _AppLayoutState extends State<AppLayout> {
     _loadMeData();
   }
 
+  Widget _endDrawerItem(icon, text) {
+    return ListTile(
+      leading: SizedBox(
+        height: 20,
+        width: 20,
+        child: FaIcon(icon),
+      ),
+      title: Text(text),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     // Build the UI using the fetched data
@@ -61,26 +73,30 @@ class _AppLayoutState extends State<AppLayout> {
                     const SizedBox(
                       height: 50.0,
                     ),
-                    Container(
-                      margin: const EdgeInsets.only(right: 6.0, bottom: 5.0),
-                      height: 80,
-                      width: 80,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                          image: CachedNetworkImageProvider(
-                            _meJournal["avatar_url"],
+                    Center(
+                      child: Container(
+                        height: 100,
+                        width: 100,
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary,
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            image: CachedNetworkImageProvider(
+                              _meJournal["avatar_url"],
+                            ),
+                            fit: BoxFit.cover,
                           ),
-                          fit: BoxFit.cover,
                         ),
                       ),
+                    ),
+                    const SizedBox(
+                      height: 20,
                     ),
                     Center(
                       child: Text(
                         'u/${_meJournal["username"]}',
                         style: const TextStyle(
-                          fontSize: 20.0,
-                        ),
+                            fontSize: 20.0, fontWeight: FontWeight.bold),
                       ),
                     ),
 
@@ -91,24 +107,12 @@ class _AppLayoutState extends State<AppLayout> {
                     // myprofile
                     InkWell(
                       onTap: () {
-                        // Navigator.of(context).push(MaterialPageRoute(
-                        //     builder: (context) => const MyProfilePage()));
+                        scaffoldKey.currentState!.closeEndDrawer();
+                        _selectedTab(3);
+                        customBottomAppBarKey.currentState?.updateIndex(3);
                       },
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 10.0),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.person),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Text(
-                              "My Profile",
-                              style: TextStyle(fontSize: 18.0),
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: _endDrawerItem(
+                          FontAwesomeIcons.solidUser, 'My Account'),
                     ),
 
                     // create a subreddit
@@ -117,21 +121,8 @@ class _AppLayoutState extends State<AppLayout> {
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => const CreateCommunity()));
                       },
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 10.0),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.groups_rounded),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Text(
-                              "Create a Community",
-                              style: TextStyle(fontSize: 18.0),
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: _endDrawerItem(
+                          FontAwesomeIcons.usersLine, 'Create Community'),
                     ),
 
                     // history
@@ -140,20 +131,9 @@ class _AppLayoutState extends State<AppLayout> {
                         // Navigator.of(context).push(MaterialPageRoute(
                         //     builder: (context) => const HistoryPage()));
                       },
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 10.0),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.history_rounded),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Text(
-                              "History",
-                              style: TextStyle(fontSize: 18.0),
-                            ),
-                          ],
-                        ),
+                      child: _endDrawerItem(
+                        FontAwesomeIcons.clockRotateLeft,
+                        'History',
                       ),
                     ),
 
@@ -163,21 +143,7 @@ class _AppLayoutState extends State<AppLayout> {
                         // Navigator.of(context).push(MaterialPageRoute(
                         //     builder: (context) => const UserSettingsPage()));
                       },
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 10.0),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.settings_rounded),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Text(
-                              "Settings",
-                              style: TextStyle(fontSize: 18.0),
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: _endDrawerItem(FontAwesomeIcons.gear, 'Settings'),
                     ),
                   ],
                 ),
@@ -204,7 +170,7 @@ class _AppLayoutState extends State<AppLayout> {
                     height: 33,
                     width: 33,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.onInverseSurface,
+                      color: colorScheme.onInverseSurface,
                       shape: BoxShape.circle,
                       image: DecorationImage(
                         image: CachedNetworkImageProvider(
@@ -214,7 +180,8 @@ class _AppLayoutState extends State<AppLayout> {
                       ),
                     ),
                   ),
-                )
+                ),
+          const SizedBox(width: 13),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -237,6 +204,7 @@ class _AppLayoutState extends State<AppLayout> {
         ],
       ),
       bottomNavigationBar: CustomBottomAppBar(
+        key: customBottomAppBarKey,
         onTabSelected: (index) {
           _selectedTab(index);
         },

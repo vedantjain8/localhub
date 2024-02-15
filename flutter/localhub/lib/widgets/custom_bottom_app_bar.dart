@@ -22,7 +22,7 @@ class CustomBottomAppBar extends StatefulWidget {
 class _CustomBottomAppBarState extends State<CustomBottomAppBar> {
   int _selectedIndex = 0;
 
-  void _updateIndex(int index) {
+  void updateIndex(int index) {
     widget.onTabSelected(index);
     setState(() {
       _selectedIndex = index;
@@ -35,12 +35,12 @@ class _CustomBottomAppBarState extends State<CustomBottomAppBar> {
       return _buildTabIcon(
           index: index,
           item: widget.items[index],
-          onPressed: _updateIndex,
+          onPressed: updateIndex,
           context: context);
     });
     items.insert(items.length >> 1, _buildMiddleSeperator());
     return BottomAppBar(
-      shape: CircularNotchedRectangle(),
+      shape: const CircularNotchedRectangle(),
       notchMargin: 10,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -76,3 +76,7 @@ class _CustomBottomAppBarState extends State<CustomBottomAppBar> {
     );
   }
 }
+
+// Global key to access CustomBottomAppBarState from other files
+final GlobalKey<_CustomBottomAppBarState> customBottomAppBarKey =
+    GlobalKey<_CustomBottomAppBarState>();
