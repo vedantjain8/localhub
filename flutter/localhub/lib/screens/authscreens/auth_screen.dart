@@ -12,6 +12,7 @@ class AuthScreen extends StatefulWidget {
 class _AuthScreenState extends State<AuthScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late int tabIndex = 0;
 
   final _tabs = const [
     Tab(text: 'Login'),
@@ -22,6 +23,11 @@ class _AuthScreenState extends State<AuthScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      setState(() {
+        tabIndex = _tabController.index;
+      });
+    });
   }
 
   @override
@@ -44,14 +50,17 @@ class _AuthScreenState extends State<AuthScreen>
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.background,
               ),
+              child: Image.asset(
+                tabIndex == 0
+                    ? 'assets/images/login.png'
+                    : 'assets/images/register.png',
+                fit: BoxFit.contain,
+              ),
             ),
             Container(
               height: MediaQuery.of(context).size.height * 0.7,
               decoration: BoxDecoration(
                 color: colorScheme.onInverseSurface,
-                // Theme.of(context).colorScheme.brightness == Brightness.dark
-                //     ? Colors.black
-                //     : Colors.white,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(30),
                   topRight: Radius.circular(30),
