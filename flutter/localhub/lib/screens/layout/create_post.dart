@@ -2,12 +2,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:localhub/api/community_service.dart';
 import 'package:localhub/api/post_service.dart';
 import 'package:localhub/api/upload_image_service.dart';
 import 'package:localhub/screens/layout/app_layout.dart';
-import 'package:localhub/widgets/custom_text_field_input.dart';
+import 'package:localhub/widgets/custom_input_decoration.dart';
 
 class CreatePost extends StatefulWidget {
   const CreatePost({super.key});
@@ -36,7 +37,27 @@ class _CreatePostState extends State<CreatePost> {
   Future<void> _openGallery() async {
     Navigator.of(context).pop();
     pickedImage = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedImage != null) {
+    CroppedFile? croppedImage = await ImageCropper().cropImage(
+      sourcePath: pickedImage!.path,
+      aspectRatioPresets: [
+        CropAspectRatioPreset.ratio16x9,
+        CropAspectRatioPreset.ratio3x2,
+        CropAspectRatioPreset.original,
+        CropAspectRatioPreset.ratio4x3,
+        CropAspectRatioPreset.ratio5x4,
+      ],
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Crop Banner Image',
+          toolbarColor: Colors.blue,
+          toolbarWidgetColor: Colors.white,
+          initAspectRatio: CropAspectRatioPreset.original,
+          lockAspectRatio: false,
+        )
+      ],
+    );
+    if (croppedImage != null) {
+      pickedImage = XFile(croppedImage.path);
       setState(() {});
     }
   }
@@ -44,10 +65,29 @@ class _CreatePostState extends State<CreatePost> {
   Future<void> _openCamera() async {
     Navigator.of(context).pop();
     pickedImage = await _picker.pickImage(source: ImageSource.camera);
-    if (pickedImage != null) {
+    CroppedFile? croppedImage = await ImageCropper().cropImage(
+      sourcePath: pickedImage!.path,
+      aspectRatioPresets: [
+        CropAspectRatioPreset.ratio16x9,
+        CropAspectRatioPreset.ratio3x2,
+        CropAspectRatioPreset.original,
+        CropAspectRatioPreset.ratio4x3,
+        CropAspectRatioPreset.ratio5x4,
+      ],
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Crop Banner Image',
+          toolbarColor: Colors.blue,
+          toolbarWidgetColor: Colors.white,
+          initAspectRatio: CropAspectRatioPreset.original,
+          lockAspectRatio: true,
+        )
+      ],
+    );
+    if (croppedImage != null) {
+      pickedImage = XFile(croppedImage.path);
       setState(() {});
     }
-    // Navigator.pop(context);
   }
 
   Future<List<String>> _loadCommunityList(String? communityName) async {
@@ -99,6 +139,7 @@ class _CreatePostState extends State<CreatePost> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Post'),
@@ -151,7 +192,7 @@ class _CreatePostState extends State<CreatePost> {
                   },
                 );
               },
-              child: const Text('Next')),
+              child: const Text('Post')),
           const SizedBox(width: 15)
         ],
       ),
@@ -168,21 +209,37 @@ class _CreatePostState extends State<CreatePost> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            IconButton.filled(
-                              onPressed: _openGallery,
-                              icon: const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: FaIcon(FontAwesomeIcons.image),
-                              ),
-                              tooltip: 'Choose from gallery',
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton.filled(
+                                  onPressed: _openGallery,
+                                  icon: const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: FaIcon(FontAwesomeIcons.image),
+                                  ),
+                                  tooltip: 'Choose from gallery',
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                const Text('Choose from gallery')
+                              ],
                             ),
-                            IconButton.filled(
-                              onPressed: _openCamera,
-                              icon: const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: FaIcon(FontAwesomeIcons.camera),
-                              ),
-                              tooltip: 'click a image',
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton.filled(
+                                  onPressed: _openCamera,
+                                  icon: const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: FaIcon(FontAwesomeIcons.camera),
+                                  ),
+                                  tooltip: 'click a image',
+                                ),
+                                const SizedBox(height: 10),
+                                const Text('Choose from camera'),
+                              ],
                             ),
                           ],
                         ),
@@ -198,33 +255,57 @@ class _CreatePostState extends State<CreatePost> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CustomTextFieldInput(
-                hasPrefix: false,
-                textEditingController: _postTitleController,
-                textInputType: TextInputType.text,
-                prefixIcon: const Icon(Icons.short_text_rounded),
-                label: 'Title',
-                hintText: '',
+              TextFormField(
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter username';
+                  }
+                  return null;
+                },
+                controller: _postTitleController,
+                decoration: CustomInputDecoration.inputDecoration(
+                  context: context,
+                  label: 'Title',
+                ),
+                textInputAction: TextInputAction.next,
               ),
               const SizedBox(
-                height: 10,
+                height: 20,
               ),
-              CustomTextFieldInput(
-                hasPrefix: false,
-                textEditingController: _postDescriptionController,
-                hintText: '(optional)',
-                textInputType: TextInputType.text,
-                prefixIcon: const Icon(Icons.notes_rounded),
-                maxLines: 10,
-                label: 'Description',
+              TextFormField(
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter username';
+                  }
+                  return null;
+                },
+                maxLines: 20,
+                minLines: 1,
+                controller: _postDescriptionController,
+                decoration: CustomInputDecoration.inputDecoration(
+                  context: context,
+                  label: 'Description',
+                  hintText: '(optional)',
+                ),
+                textInputAction: TextInputAction.next,
               ),
               const SizedBox(
-                height: 10,
+                height: 20,
               ),
               DropdownSearch<String>(
-                popupProps: const PopupProps.menu(
+                popupProps: PopupProps.menu(
+                  searchFieldProps: TextFieldProps(
+                    decoration: CustomInputDecoration.inputDecoration(
+                      context: context,
+                      label: 'Search',
+                      prefixIcon: const Icon(FontAwesomeIcons.magnifyingGlass),
+                    ),
+                  ),
+                  menuProps: MenuProps(
+                      backgroundColor: colorScheme.onInverseSurface,
+                      borderRadius: BorderRadius.circular(30)),
                   showSearchBox: true,
-                  searchDelay: Duration(seconds: 3),
+                  searchDelay: const Duration(seconds: 1),
                   isFilterOnline: true,
                   showSelectedItems: true,
                 ),
@@ -234,10 +315,13 @@ class _CreatePostState extends State<CreatePost> {
                 clearButtonProps: const ClearButtonProps(
                   isVisible: true,
                 ),
-                dropdownDecoratorProps: const DropDownDecoratorProps(
+                dropdownButtonProps: const DropdownButtonProps(
+                    icon: Icon(FontAwesomeIcons.caretDown)),
+                dropdownDecoratorProps: DropDownDecoratorProps(
                   dropdownSearchDecoration: InputDecoration(
-                    labelText: "Select Community",
-                  ),
+                      labelText: "Select Community",
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20))),
                 ),
                 onChanged: (value) {
                   setState(() {
@@ -248,11 +332,34 @@ class _CreatePostState extends State<CreatePost> {
                 },
               ),
               const SizedBox(
-                height: 10,
+                height: 20,
               ),
               pickedImage == null
                   ? Container()
-                  : Image.file(File(pickedImage!.path))
+                  : ClipRRect(
+                      borderRadius: BorderRadius.circular(30),
+                      child: Stack(
+                        children: [
+                          Image.file(
+                            File(pickedImage!.path),
+                          ),
+                          Positioned(
+                            top: 10,
+                            right: 10,
+                            child: IconButton.filledTonal(
+                              onPressed: () {
+                                setState(() {
+                                  pickedImage = null;
+                                });
+                              },
+                              icon: const Icon(
+                                FontAwesomeIcons.minus,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
             ],
           ),
         ),

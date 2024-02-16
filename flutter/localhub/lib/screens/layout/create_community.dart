@@ -6,11 +6,13 @@
 
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:localhub/api/community_service.dart';
 import 'package:localhub/api/upload_image_service.dart';
 import 'package:localhub/screens/layout/app_layout.dart';
-import 'package:localhub/widgets/custom_text_field_input.dart';
+import 'package:localhub/widgets/custom_input_decoration.dart';
 
 class CreateCommunity extends StatefulWidget {
   const CreateCommunity({super.key});
@@ -24,13 +26,13 @@ class _CreateCommunityState extends State<CreateCommunity> {
       TextEditingController();
   final TextEditingController _communityDescriptionController =
       TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   final ImageUploadService ius = ImageUploadService();
   final CommunityApiService cas = CommunityApiService();
 
   XFile? pickedLogo;
   XFile? pickedBanner;
-
   final _picker = ImagePicker();
 
   Future<void> _openGallery({required int forImage}) async {
@@ -38,28 +40,40 @@ class _CreateCommunityState extends State<CreateCommunity> {
     // 1 for banner
     if (forImage == 0) {
       pickedLogo = await _picker.pickImage(source: ImageSource.gallery);
-      if (pickedLogo != null) {
+      CroppedFile? croppedLogo = await ImageCropper().cropImage(
+        sourcePath: pickedLogo!.path,
+        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Crop Logo Image',
+            toolbarColor: Colors.blue,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.original,
+            lockAspectRatio: true,
+          )
+        ],
+      );
+      if (croppedLogo != null) {
+        pickedLogo = XFile(croppedLogo.path);
         setState(() {});
       }
     } else if (forImage == 1) {
       pickedBanner = await _picker.pickImage(source: ImageSource.gallery);
-      if (pickedBanner != null) {
-        setState(() {});
-      }
-    }
-  }
-
-  Future<void> _openCamera({required int forImage}) async {
-    // 0 for logo
-    // 1 for banner
-    if (forImage == 0) {
-      pickedLogo = await _picker.pickImage(source: ImageSource.camera);
-      if (pickedLogo != null) {
-        setState(() {});
-      }
-    } else if (forImage == 1) {
-      pickedBanner = await _picker.pickImage(source: ImageSource.camera);
-      if (pickedBanner != null) {
+      CroppedFile? croppedBanner = await ImageCropper().cropImage(
+        sourcePath: pickedBanner!.path,
+        aspectRatio: const CropAspectRatio(ratioX: 4, ratioY: 1),
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Crop Banner Image',
+            toolbarColor: Colors.blue,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.original,
+            lockAspectRatio: true,
+          )
+        ],
+      );
+      if (croppedBanner != null) {
+        pickedBanner = XFile(croppedBanner.path);
         setState(() {});
       }
     }
@@ -100,92 +114,156 @@ class _CreateCommunityState extends State<CreateCommunity> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Create new community"),
         actions: [
           ElevatedButton(
               onPressed: () {
-                _createCommunity().then(
-                  (Map<String, dynamic> status) => {
-                    if (status['status'] != null)
-                      {
-                        if (status['status'] == 200)
-                          {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(status['response']),
+                if (_formKey.currentState!.validate()) {
+                  _createCommunity().then(
+                    (Map<String, dynamic> status) => {
+                      if (status['status'] != null)
+                        {
+                          if (status['status'] == 200)
+                            {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(status['response']),
+                                ),
                               ),
-                            ),
-                            Navigator.of(context).pop(),
-                            Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const AppLayout()),
-                                (route) => false),
-                          }
-                        else
-                          (
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(status['response']),
+                              Navigator.of(context).pop(),
+                              Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const AppLayout()),
+                                  (route) => false),
+                            }
+                          else
+                            (
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(status['response']),
+                                ),
                               ),
+                            )
+                        }
+                      else
+                        (
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("some error"),
                             ),
-                          )
-                      }
-                    else
-                      (
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("some error"),
                           ),
-                        ),
-                      )
-                  },
-                );
+                        )
+                    },
+                  );
+                }
               },
-              child: const Text("Next"))
+              child: const Text("Create"))
         ],
       ),
       body: SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.all(10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CustomTextFieldInput(
-                textEditingController: _communityNameController,
-                label: "Community Name",
-                textInputType: TextInputType.text,
-                prefixIcon: const Icon(Icons.groups_rounded),
-                hasPrefix: false,
-                hintText: "",
-              ),
-              CustomTextFieldInput(
-                textEditingController: _communityDescriptionController,
-                label: "Community Description",
-                textInputType: TextInputType.text,
-                prefixIcon: const Icon(Icons.groups_rounded),
-                hasPrefix: false,
-                hintText: "",
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                    _openGallery(forImage: 0);
+          child: Form(
+            key: _formKey,
+            child: Column(
+              // crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Stack(
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        if (pickedBanner == null) {
+                          _openGallery(forImage: 1);
+                        }
+                      },
+                      overlayColor:
+                          MaterialStateProperty.all(Colors.transparent),
+                      child: AspectRatio(
+                        aspectRatio: 4 / 1,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: colorScheme.primary,
+                          ),
+                          child: pickedBanner == null
+                              ? const Icon(FontAwesomeIcons.plus)
+                              : ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.file(
+                                    File(pickedBanner!.path),
+                                    fit: BoxFit.fitWidth,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 70, left: 20),
+                      child: CircleAvatar(
+                        radius: 40,
+                        child: pickedLogo == null
+                            ? InkWell(
+                                onTap: () {
+                                  _openGallery(forImage: 0);
+                                },
+                                overlayColor: MaterialStateProperty.all(
+                                    Colors.transparent),
+                                child: const SizedBox(
+                                  width: double.maxFinite,
+                                  height: double.maxFinite,
+                                  child: Icon(FontAwesomeIcons.plus),
+                                ),
+                              )
+                            : SizedBox(
+                                height: double.maxFinite,
+                                width: double.maxFinite,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(50),
+                                  child: Image.file(
+                                    File(pickedLogo!.path),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30),
+                TextFormField(
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Enter Community Name';
+                    } else if (!RegExp(r"^[a-zA-Z0-9_]*$").hasMatch(value)) {
+                      return 'Enter valid Community Name';
+                    }
+                    return null;
                   },
-                  child: const Text("select logo")),
-              ElevatedButton(
-                  onPressed: () {
-                    _openGallery(forImage: 1);
-                  },
-                  child: const Text("select banner")),
-              pickedLogo == null
-                  ? Container()
-                  : Image.file(File(pickedLogo!.path)),
-              pickedBanner == null
-                  ? Container()
-                  : Image.file(File(pickedBanner!.path))
-            ],
+                  controller: _communityNameController,
+                  decoration: CustomInputDecoration.inputDecoration(
+                      context: context, label: 'Community Name', hintText: ''),
+                  textInputAction: TextInputAction.next,
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                TextFormField(
+                  maxLines: 20,
+                  minLines: 1,
+                  controller: _communityDescriptionController,
+                  decoration: CustomInputDecoration.inputDecoration(
+                    context: context,
+                    label: 'Community Description',
+                    hintText: '(optional)',
+                  ),
+                  textInputAction: TextInputAction.next,
+                ),
+              ],
+            ),
           ),
         ),
       ),
