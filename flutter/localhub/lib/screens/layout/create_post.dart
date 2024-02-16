@@ -84,8 +84,6 @@ class _CreatePostState extends State<CreatePost> {
       if (uploadResult['status'] != 200) {
         return {"status": 400};
       }
-      print("result");
-      print(uploadResult);
       imageUrl = uploadResult["response"];
     }
 
@@ -96,8 +94,6 @@ class _CreatePostState extends State<CreatePost> {
       postContent: _postDescriptionController.text,
       imageUrl: imageUrl,
     );
-    print('response');
-    print(res);
     return res;
   }
 

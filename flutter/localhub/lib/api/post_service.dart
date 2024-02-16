@@ -148,9 +148,9 @@ class PostApiService {
 
       if (response.statusCode == 200) {
         var jsonResponse = jsonDecode(response.body);
-        responseData = jsonResponse['response'];
+        responseData = jsonResponse;
       } else {
-        print('Request failed with status: ${response.statusCode}.');
+        print('Request failed with status: ${response.statusCode} ${response.body}.');
         print(responseData);
 
         responseData = {

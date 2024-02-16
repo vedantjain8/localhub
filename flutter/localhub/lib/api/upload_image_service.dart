@@ -39,7 +39,7 @@ class ImageUploadService {
 
     if (response.statusCode == 200) {
       // Response successful, return the response body
-      return jsonDecode(response.body)['response'];
+      return jsonDecode(response.body);
     } else {
       // Response not successful, throw an error or handle it accordingly
       throw Exception('Failed to upload image: ${response.reasonPhrase}');

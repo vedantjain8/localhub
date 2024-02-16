@@ -78,13 +78,13 @@ class _CreateCommunityState extends State<CreateCommunity> {
     if (pickedLogo != null) {
       Map<String, dynamic> uploadLogoResult =
           await ius.uploadImageHTTP(File(pickedLogo!.path));
-      logoUrl = uploadLogoResult["link"];
+      logoUrl = uploadLogoResult["response"];
     }
 
     if (pickedBanner != null) {
       Map<String, dynamic>? uploadBannerResult =
           await ius.uploadImageHTTP(File(pickedBanner!.path));
-      bannerUrl = uploadBannerResult["link"];
+      bannerUrl = uploadBannerResult["response"];
     }
 
     // Create new community
