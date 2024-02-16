@@ -54,7 +54,7 @@ router.post("/upload", upload.single("uploaded_file"), async (req, res) => {
 
     await redisClient.hSet(
       "ImageUploadLog",
-      `${token}:${ref}`,
+      `${ref}`,
       JSON.stringify(out)
     );
 

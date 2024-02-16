@@ -299,27 +299,28 @@ cron.schedule("*/10 * * * *", async () => {
   }
 });
 
-cron.schedule("* * * * *", async () => {
-  // running task every /10 minutes
+cron.schedule("*/20 * * * *", async () => {
+  // running task every 20 minutes
   if (cachingBool) {
-    console.log("upload image log cron running");
+    if (cachingBool) {
+      console.log("upload image log cron running");
 
-    // user community link insert
-    const imageLogData = await redisClient.hGetAll("ImageUploadLog", "*");
+      // user community link insert
+      const imageLogData = await redisClient.hGetAll("ImageUploadLog", "*");
+      for (const singleData in imageLogData) {
+        data = JSON.parse(imageLogData[singleData]);
 
-    for (const singleData in imageLogData) {
-      data = JSON.parse(userData[singleData]);
-      console.log(data);
-      pool.query(
-        "INSERT INTO image_upload_log (user_id, image_name, image_url) VALUES ($1, $2, $3)",
-        [data.userId, data.image_name, data.image_url],
-        (error, result) => {
-          if (error) {
-            console.error(error);
+        pool.query(
+          "INSERT INTO image_upload_log (user_id, image_name, image_url) VALUES ($1, $2, $3)",
+          [data.user_id, data.image_name, data.image_url],
+          (error, result) => {
+            if (error) {
+              console.error(error);
+            }
           }
-        }
-      );
-      await redisClient.hDel("ImageUploadLog", `${singleData}`);
+        );
+        await redisClient.hDel("ImageUploadLog", `${singleData}`);
+      }
     }
   }
 });
