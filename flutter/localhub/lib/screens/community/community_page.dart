@@ -115,58 +115,63 @@ class _CommunityPageState extends State<CommunityPage> {
               onRefresh: () => _refreshData(),
               child: SingleChildScrollView(
                 controller: _scrollController,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    (_communityData.isEmpty)
-                        ? const Center(child: CircularProgressIndicator())
-                        : Column(
-                            children: [
-                              Container(
-                                width: MediaQuery.of(context).size.width,
-                                height: 65,
-                                decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                    fit: BoxFit.fill,
-                                    image: CachedNetworkImageProvider(
-                                        _communityData["banner_url"]),
-                                  ),
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  Container(
-                                    margin: const EdgeInsets.only(
-                                        right: 6.0, bottom: 5.0),
-                                    height: 55,
-                                    width: 55,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      (_communityData.isEmpty)
+                          ? const Center(child: CircularProgressIndicator())
+                          : Stack(
+                              children: [
+                                AspectRatio(
+                                  aspectRatio: 4 / 1,
+                                  child: Container(
                                     decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
+                                      borderRadius: BorderRadius.circular(10),
                                       image: DecorationImage(
-                                        // image: NetworkImage(finalPost["logo_url"]),
-                                        image: CachedNetworkImageProvider(
-                                            _communityData["logo_url"]),
                                         fit: BoxFit.cover,
+                                        image: CachedNetworkImageProvider(
+                                            _communityData["banner_url"]),
                                       ),
                                     ),
                                   ),
-                                  Text("c/${_communityData['community_name']}"),
-                                ],
-                              ),
-                              (_communityStats.isEmpty)
-                                  ? const SizedBox.shrink()
-                                  : Text(formater.format(
-                                      _communityStats['subscriber_count'])),
-                              Text(_communityData['community_description']),
-                              Text(timeAgo(_communityData['created_at'])),
-                            ],
-                          ),
-                    CustomPostCardWidget(
-                      journals: _journals,
-                      isFromSubPage: true,
-                      hasMoreData: _hasMoreData,
-                    ),
-                  ],
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.only(top: 70, left: 20),
+                                  child: CircleAvatar(
+                                    radius: 40,
+                                    child: SizedBox(
+                                        height: double.maxFinite,
+                                        width: double.maxFinite,
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(50),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              image: DecorationImage(
+                                                image:
+                                                    CachedNetworkImageProvider(
+                                                        _communityData[
+                                                            "logo_url"]),
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                        )),
+                                  ),
+                                ),
+                              ],
+                            ),
+                      CustomPostCardWidget(
+                        journals: _journals,
+                        isFromSubPage: true,
+                        hasMoreData: _hasMoreData,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
