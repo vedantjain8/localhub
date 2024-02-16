@@ -5,7 +5,7 @@ class CustomInputDecoration {
     hintText = '',
     label,
     prefixIcon,
-    context,
+    required context,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
     final inputBorder = OutlineInputBorder(

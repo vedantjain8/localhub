@@ -193,7 +193,6 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       image: DecorationImage(
-                                        // image: NetworkImage(finalPost["logo_url"]),
                                         image: CachedNetworkImageProvider(
                                             finalPost["logo_url"]),
                                         fit: BoxFit.cover,
@@ -272,7 +271,7 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                                   child: Container(
                                     width: double.maxFinite,
                                     constraints: const BoxConstraints(
-                                      maxHeight: 200,
+                                      maxHeight: 500,
                                     ),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(15),
