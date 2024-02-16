@@ -150,9 +150,6 @@ class PostApiService {
         var jsonResponse = jsonDecode(response.body);
         responseData = jsonResponse;
       } else {
-        print('Request failed with status: ${response.statusCode} ${response.body}.');
-        print(responseData);
-
         responseData = {
           'error': 'else Request failed with status: ${response.statusCode}'
         };
