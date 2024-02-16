@@ -33,7 +33,7 @@ class PostStatsApiService {
       var response = await http.get(url);
 
       if (response.statusCode == 200) {
-        jsonResponse = jsonDecode(response.body);
+        jsonResponse = jsonDecode(response.body)['response'];
       }
     } catch (e) {
       rethrow;
@@ -53,14 +53,14 @@ class PostStatsApiService {
         var response = await http.post(url, body: {'token': '$token'});
 
         if (response.statusCode == 200) {
-          jsonResponse = jsonDecode(response.body);
+          jsonResponse = jsonDecode(response.body)['response'];
         }
       } else if (!upvote) {
         var url = Uri.https(hostaddress, '/api/v1/posts/vote/downvote/$postID');
         var response = await http.post(url, body: {'token': '$token'});
 
         if (response.statusCode == 200) {
-          jsonResponse = jsonDecode(response.body);
+          jsonResponse = jsonDecode(response.body)['response'];
         }
       }
     } catch (e) {

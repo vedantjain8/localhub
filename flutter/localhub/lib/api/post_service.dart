@@ -33,7 +33,7 @@ class PostApiService {
       var url = Uri.https(hostaddress, '/api/v1/posts/$postId');
       var response = await http.post(url, body: {'token': '${token}'});
       if (response.statusCode == 200) {
-        var jsonResponse = jsonDecode(response.body);
+        var jsonResponse = jsonDecode(response.body)['response'];
         if (jsonResponse is List) {
           // Check if jsonResponse is a List
           responseData = jsonResponse.cast<Map<String, dynamic>>().toList();
@@ -66,6 +66,7 @@ class PostApiService {
 
       if (response.statusCode == 200) {
         var jsonResponse = jsonDecode(response.body);
+        jsonResponse = jsonResponse['response'];
         if (jsonResponse is List) {
           // Check if jsonResponse is a List
           responseData = jsonResponse.cast<Map<String, dynamic>>().toList();
@@ -98,6 +99,7 @@ class PostApiService {
           body: {'offset': '$offsetN', 'subreddit_id': '$subredditID'});
       if (response.statusCode == 200) {
         var jsonResponse = jsonDecode(response.body);
+        jsonResponse = jsonResponse['response'];
         if (jsonResponse is List) {
           // Check if jsonResponse is a List
           responseData = jsonResponse.cast<Map<String, dynamic>>().toList();
@@ -148,9 +150,6 @@ class PostApiService {
         var jsonResponse = jsonDecode(response.body);
         responseData = jsonResponse;
       } else {
-        print('Request failed with status: ${response.statusCode}.');
-        print(responseData);
-
         responseData = {
           'error': 'else Request failed with status: ${response.statusCode}'
         };
