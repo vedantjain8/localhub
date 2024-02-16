@@ -36,7 +36,7 @@ class UserApiService {
       var response = await http.post(url, body: sendBody);
 
       if (response.statusCode == 200) {
-        jsonResponse = jsonDecode(response.body);
+        jsonResponse = jsonDecode(response.body)['response'];
       } else {
         throw "response code: ${response.statusCode}";
       }
@@ -60,7 +60,7 @@ class UserApiService {
       var response = await http.post(url, body: sendBody);
 
       if (response.statusCode == 200) {
-        jsonResponse = jsonDecode(response.body);
+        jsonResponse = jsonDecode(response.body)['response'];
       }
     } catch (e) {
       rethrow;

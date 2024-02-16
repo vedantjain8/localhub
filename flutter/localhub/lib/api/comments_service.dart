@@ -34,6 +34,7 @@ class CommentsApiService {
 
       if (response.statusCode == 200) {
         var jsonResponse = jsonDecode(response.body);
+        jsonResponse = jsonResponse['response'];
         if (jsonResponse is List) {
           // Check if jsonResponse is a List
           responseData = jsonResponse.cast<Map<String, dynamic>>().toList();
@@ -69,7 +70,7 @@ class CommentsApiService {
       var response = await http.post(url, body: sendBody);
 
       if (response.statusCode == 200) {
-        jsonResponse = jsonDecode(response.body);
+        jsonResponse = jsonDecode(response.body)['response'];
       }
     } catch (e) {
       jsonResponse = {"error creating comment": e};

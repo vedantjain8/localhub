@@ -35,7 +35,7 @@ class AboutUserApiService {
       var response = await http.post(url, body: sendBody);
 
       if (response.statusCode == 200) {
-        var jsonResponse = jsonDecode(response.body);
+        var jsonResponse = jsonDecode(response.body)['response'];
         responseData = jsonResponse;
       } else {
         print('Request failed with status: ${response.statusCode}.');

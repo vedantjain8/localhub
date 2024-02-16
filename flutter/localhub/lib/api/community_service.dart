@@ -32,7 +32,7 @@ class CommunityApiService {
       var response = await http.get(url);
 
       if (response.statusCode == 200) {
-        var jsonResponse = jsonDecode(response.body);
+        var jsonResponse = jsonDecode(response.body)['response'];
         responseData = jsonResponse;
       } else {
         print('Request failed with status: ${response.statusCode}.');
@@ -60,7 +60,7 @@ class CommunityApiService {
           await http.post(url, body: {'community_id': '$communityID'});
 
       if (response.statusCode == 200) {
-        var jsonResponse = jsonDecode(response.body);
+        var jsonResponse = jsonDecode(response.body)['response'];
         if (jsonResponse is List) {
           // Check if jsonResponse is a List
           responseData = jsonResponse.cast<Map<String, dynamic>>().toList();
@@ -93,7 +93,7 @@ class CommunityApiService {
       var response = await http.get(url);
 
       if (response.statusCode == 200) {
-        var jsonResponse = jsonDecode(response.body);
+        var jsonResponse = jsonDecode(response.body)["response"];
         if (jsonResponse is List) {
           // Check if jsonResponse is a List
           responseData = jsonResponse.cast<Map<String, dynamic>>().toList();
@@ -141,7 +141,7 @@ class CommunityApiService {
       var response = await http.post(url, body: sendBody);
 
       if (response.statusCode == 200) {
-        var jsonResponse = jsonDecode(response.body);
+        var jsonResponse = jsonDecode(response.body)['response'];
         responseData = jsonResponse;
       } else {
         print('Request failed with status: ${response.statusCode}.');

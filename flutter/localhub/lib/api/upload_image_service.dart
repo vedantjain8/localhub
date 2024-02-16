@@ -29,13 +29,17 @@ class ImageUploadService {
         http.MultipartRequest('POST', Uri.https(hostaddress, '/upload'));
     request.files
         .add(await http.MultipartFile.fromPath('uploaded_file', file.path));
+    if (token == null) {
+      getUserToken();
+    }
+    request.fields['token'] = token!;
     var streamedResponse = await request.send();
 
     var response = await http.Response.fromStream(streamedResponse);
 
     if (response.statusCode == 200) {
       // Response successful, return the response body
-      return jsonDecode(response.body);
+      return jsonDecode(response.body)['response'];
     } else {
       // Response not successful, throw an error or handle it accordingly
       throw Exception('Failed to upload image: ${response.reasonPhrase}');

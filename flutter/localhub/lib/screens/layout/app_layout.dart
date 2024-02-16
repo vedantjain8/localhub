@@ -38,7 +38,6 @@ class _AppLayoutState extends State<AppLayout> {
   @override
   void initState() {
     super.initState();
-    FocusManager.instance.primaryFocus?.unfocus();
     _loadMeData();
   }
 

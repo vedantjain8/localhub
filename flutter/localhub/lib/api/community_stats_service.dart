@@ -24,7 +24,7 @@ class CommunityStatsApiService {
       var response = await http.get(url);
 
       if (response.statusCode == 200) {
-        jsonResponse = jsonDecode(response.body);
+        jsonResponse = jsonDecode(response.body)['response'];
       }
     } catch (e) {
       rethrow;

@@ -81,7 +81,12 @@ class _CreatePostState extends State<CreatePost> {
     if (pickedImage != null) {
       Map<String, dynamic>? uploadResult =
           await ius.uploadImageHTTP(File(pickedImage!.path));
-      imageUrl = uploadResult["link"];
+      if (uploadResult['status'] != 200) {
+        return {"status": 400};
+      }
+      print("result");
+      print(uploadResult);
+      imageUrl = uploadResult["response"];
     }
 
     // Create new post
@@ -91,7 +96,8 @@ class _CreatePostState extends State<CreatePost> {
       postContent: _postDescriptionController.text,
       imageUrl: imageUrl,
     );
-
+    print('response');
+    print(res);
     return res;
   }
 

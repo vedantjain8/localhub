@@ -107,7 +107,7 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
     bool? isFromSubPage = widget.isFromSubPage;
 
     return (journals.isEmpty)
-        ? CustomShimmer()
+        ? const CustomShimmer()
         : ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
