@@ -377,7 +377,7 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                                           onPressed: () {},
                                           icon: FaIcon(
                                             color: colorScheme.secondary,
-                                            FontAwesomeIcons.paperPlane,
+                                            FontAwesomeIcons.shareFromSquare,
                                           ),
                                         ),
                                         Text(

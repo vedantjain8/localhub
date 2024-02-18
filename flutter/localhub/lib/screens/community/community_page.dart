@@ -193,14 +193,13 @@ class _CommunityPageState extends State<CommunityPage> {
                         children: [
                           Text(
                             "c/${_communityData['community_name']}",
-                            style: Theme.of(context).textTheme.displaySmall,
+                            style: Theme.of(context).textTheme.headlineLarge,
                           ),
                           _communityData['community_description'].isEmpty
                               ? const SizedBox.shrink()
                               : Text(
                                   _communityData['community_description'],
-                                  style:
-                                      Theme.of(context).textTheme.titleLarge,
+                                  style: Theme.of(context).textTheme.bodyLarge,
                                 ),
                           Row(
                             children: [
