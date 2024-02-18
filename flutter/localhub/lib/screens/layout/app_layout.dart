@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localhub/api/about_user_service.dart';
 import 'package:localhub/screens/layout/agenda_screen.dart';
-import 'package:localhub/screens/layout/create_community.dart';
+import 'package:localhub/screens/community/create_community.dart';
 // import 'package:localhub/screens/posts/create_post.dart';
 import 'package:localhub/screens/layout/explore_screen.dart';
 import 'package:localhub/screens/layout/home_screen.dart';
 import 'package:localhub/screens/layout/profile_screen.dart';
 import 'package:localhub/screens/layout/search_screen.dart';
-import 'package:localhub/screens/layout/create_post.dart';
+import 'package:localhub/screens/post/create_post.dart';
+import 'package:localhub/themes/theme.dart';
 import 'package:localhub/widgets/custom_bottom_app_bar.dart';
 
 class AppLayout extends StatefulWidget {
@@ -59,6 +60,7 @@ class _AppLayoutState extends State<AppLayout> {
 
     // Build the UI using the fetched data
     return Scaffold(
+      extendBody: true,
       key: scaffoldKey,
       endDrawer: (_meJournal.isEmpty)
           ? const Drawer()
@@ -143,6 +145,15 @@ class _AppLayoutState extends State<AppLayout> {
                         //     builder: (context) => const UserSettingsPage()));
                       },
                       child: _endDrawerItem(FontAwesomeIcons.gear, 'Settings'),
+                    ),
+                    IconButton(
+                      onPressed: () async {
+                        await AppTheme.toggleBrightness();
+                      },
+                      icon: AppTheme.themeNotifier.value.brightness ==
+                              Brightness.dark
+                          ? const Icon(Icons.light_mode_outlined)
+                          : const Icon(Icons.dark_mode_rounded),
                     ),
                   ],
                 ),
