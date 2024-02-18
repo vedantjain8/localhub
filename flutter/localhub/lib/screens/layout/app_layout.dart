@@ -9,6 +9,7 @@ import 'package:localhub/screens/layout/explore_screen.dart';
 import 'package:localhub/screens/layout/home_screen.dart';
 import 'package:localhub/screens/layout/profile_screen.dart';
 import 'package:localhub/screens/layout/search_screen.dart';
+import 'package:localhub/screens/layout/settings/settings_screen.dart';
 import 'package:localhub/screens/post/create_post.dart';
 import 'package:localhub/themes/theme.dart';
 import 'package:localhub/widgets/custom_bottom_app_bar.dart';
@@ -141,19 +142,10 @@ class _AppLayoutState extends State<AppLayout> {
                     // settings
                     InkWell(
                       onTap: () {
-                        // Navigator.of(context).push(MaterialPageRoute(
-                        //     builder: (context) => const UserSettingsPage()));
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const SettingsScreen()));
                       },
                       child: _endDrawerItem(FontAwesomeIcons.gear, 'Settings'),
-                    ),
-                    IconButton(
-                      onPressed: () async {
-                        await AppTheme.toggleBrightness();
-                      },
-                      icon: AppTheme.themeNotifier.value.brightness ==
-                              Brightness.dark
-                          ? const Icon(Icons.light_mode_outlined)
-                          : const Icon(Icons.dark_mode_rounded),
                     ),
                   ],
                 ),
