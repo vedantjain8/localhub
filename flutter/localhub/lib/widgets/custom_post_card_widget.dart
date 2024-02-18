@@ -324,7 +324,11 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                                           ),
                                           color: colorScheme.secondary,
                                         ),
-                                        Text(formater.format(totalVotes)),
+                                        Text(
+                                          formater.format(totalVotes),
+                                          style: TextStyle(
+                                              color: colorScheme.secondary),
+                                        ),
                                         IconButton(
                                           onPressed: () {
                                             setState(() {
@@ -354,22 +358,34 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                                       children: [
                                         IconButton(
                                           onPressed: () {},
-                                          icon: const FaIcon(
+                                          icon: FaIcon(
                                             FontAwesomeIcons.message,
+                                            color: colorScheme.secondary,
                                           ),
                                         ),
-                                        Text(formater.format(totalComments)),
+                                        Text(
+                                          formater.format(totalComments),
+                                          style: TextStyle(
+                                            color: colorScheme.secondary,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                     Row(
                                       children: [
                                         IconButton(
                                           onPressed: () {},
-                                          icon: const FaIcon(
+                                          icon: FaIcon(
+                                            color: colorScheme.secondary,
                                             FontAwesomeIcons.paperPlane,
                                           ),
                                         ),
-                                        const Text('Send'),
+                                        Text(
+                                          'Send',
+                                          style: TextStyle(
+                                            color: colorScheme.secondary,
+                                          ),
+                                        ),
                                         const Padding(
                                           padding: EdgeInsets.only(right: 2.0),
                                         )
