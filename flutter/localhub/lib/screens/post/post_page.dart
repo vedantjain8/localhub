@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:localhub/api/comments_service.dart';
 import 'package:localhub/api/post_service.dart';
 import 'package:localhub/widgets/custom_comment_list_view_builder_widget.dart';
-import 'package:localhub/widgets/custom_input_decoration.dart';
 import 'package:localhub/widgets/custom_post_card_widget.dart';
 
 class PostPage extends StatefulWidget {
