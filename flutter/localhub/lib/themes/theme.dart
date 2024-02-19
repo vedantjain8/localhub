@@ -4,19 +4,26 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AppTheme {
   static const String _brightness = 'brightness';
   static const String _color = 'color';
+  static const String _colorSeed = 'colorSeed'; // New variable for color seed
   static ValueNotifier<ThemeData> themeNotifier = ValueNotifier(ThemeData());
+  static ColorSeed currentColorSeed = ColorSeed.values[0];
 
   static Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
     final savedColor = prefs.getString(_color);
     final savedBrightness = prefs.getString(_brightness);
+    final savedColorSeed = prefs.getString(_colorSeed);
+
+    currentColorSeed = savedColorSeed != null
+        ? ColorSeed.values.firstWhere((seed) => seed.label == savedColorSeed)
+        : ColorSeed.values[0];
 
     final theme = ThemeData(
       colorSchemeSeed: savedColor != null
           ? Color(int.parse(savedColor))
-          : ColorSeed.values[0].color,
+          : currentColorSeed.color,
       brightness:
-          savedBrightness == 'dark' ? Brightness.dark : Brightness.light,
+          savedBrightness == 'light' ? Brightness.light : Brightness.dark,
     );
     themeNotifier.value = theme;
   }
@@ -26,6 +33,7 @@ class AppTheme {
     await prefs.setString(_color, color.value.toString());
     await prefs.setString(
         _brightness, brightness == Brightness.dark ? 'dark' : 'light');
+    await prefs.setString(_colorSeed, currentColorSeed.label);
 
     final updatedTheme = ThemeData(
       colorSchemeSeed: color,
@@ -36,6 +44,8 @@ class AppTheme {
 
   static Future<void> selectColor(Color color) async {
     final Brightness currentBrightness = themeNotifier.value.brightness;
+    currentColorSeed =
+        ColorSeed.values.firstWhere((seed) => seed.color == color);
     await updateTheme(color, currentBrightness);
   }
 
@@ -49,10 +59,9 @@ class AppTheme {
 
     final color = currentSeedColor != null
         ? Color(int.parse(currentSeedColor))
-        : ColorSeed.values[0].color;
+        : currentColorSeed.color;
 
     await updateTheme(color, newBrightness);
-
   }
 }
 

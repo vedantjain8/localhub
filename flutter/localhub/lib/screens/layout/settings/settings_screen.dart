@@ -15,6 +15,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool isDark = AppTheme.themeNotifier.value.brightness == Brightness.dark;
 
   @override
+  void initState() {
+    AppTheme.initialize();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
@@ -25,93 +31,121 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            Container(
-                width: double.maxFinite,
-                height: 70,
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Theme',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      Transform.scale(
-                        scale: 1.3,
-                        child: Switch(
-                          trackOutlineColor: MaterialStatePropertyAll(
-                              colorScheme.secondaryContainer),
-                          inactiveTrackColor: colorScheme.secondaryContainer,
-                          activeTrackColor: colorScheme.secondaryContainer,
-                          thumbColor:
-                              MaterialStatePropertyAll(colorScheme.secondary),
-                          value: isDark,
-                          onChanged: (value) async {
-                            setState(() {
-                              isDark = !isDark;
-                            });
-                            await AppTheme.toggleBrightness();
-                          },
-                          thumbIcon: MaterialStatePropertyAll(
-                            isDark
-                                ? Icon(
-                                    FontAwesomeIcons.solidSun,
-                                    color: colorScheme.onInverseSurface,
-                                  )
-                                : Icon(
-                                    FontAwesomeIcons.solidMoon,
-                                    color: colorScheme.onInverseSurface,
-                                  ),
+            Column(
+              children: [
+                _section(title: 'Theme Settings', items: [
+                  _sectionItem(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Theme',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        Transform.scale(
+                          scale: 1.3,
+                          child: Switch(
+                            trackOutlineColor: MaterialStatePropertyAll(
+                                colorScheme.secondaryContainer),
+                            inactiveTrackColor: colorScheme.secondaryContainer,
+                            activeTrackColor: colorScheme.secondaryContainer,
+                            thumbColor:
+                                MaterialStatePropertyAll(colorScheme.secondary),
+                            value: isDark,
+                            onChanged: (value) async {
+                              setState(() {
+                                isDark = !isDark;
+                              });
+                              await AppTheme.toggleBrightness();
+                            },
+                            thumbIcon: MaterialStatePropertyAll(
+                              isDark
+                                  ? Icon(
+                                      FontAwesomeIcons.solidSun,
+                                      color: colorScheme.onInverseSurface,
+                                    )
+                                  : Icon(
+                                      FontAwesomeIcons.solidMoon,
+                                      color: colorScheme.onInverseSurface,
+                                    ),
+                            ),
                           ),
-                        ),
-                      )
-                    ],
+                        )
+                      ],
+                    ),
                   ),
-                )),
-            const Divider(),
-            Container(
-                width: double.maxFinite,
-                height: 70,
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Colors',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      PopupMenuButton<Color>(
-                        onSelected: (color) async {
-                          await AppTheme.selectColor(color);
-                        },
-                        icon: Icon(
-                          FontAwesomeIcons.palette,
-                          color: colorScheme.secondary,
+                  const Divider(),
+                  _sectionItem(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Colors',
+                          style: Theme.of(context).textTheme.titleLarge,
                         ),
-                        itemBuilder: (context) =>
-                            ColorSeed.values.map((colorSeed) {
-                          return PopupMenuItem(
-                              value: colorSeed.color,
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 24,
-                                    height: 24,
-                                    color: colorSeed.color,
+                        Row(
+                          children: [
+                            DropdownButton<Color>(
+                              value: AppTheme.currentColorSeed.color,
+                              icon: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Icon(
+                                  FontAwesomeIcons.angleDown,
+                                  color: colorScheme.secondary,
+                                ),
+                              ),
+                              items: ColorSeed.values.map((colorSeed) {
+                                return DropdownMenuItem(
+                                  value: colorSeed.color,
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 10,
+                                        backgroundColor: colorSeed.color,
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Text(colorSeed.label),
+                                    ],
                                   ),
-                                  const SizedBox(width: 10),
-                                  Text(colorSeed.label),
-                                ],
-                              ));
-                        }).toList(),
-                      ),
-                    ],
+                                );
+                              }).toList(),
+                              onChanged: (color) {
+                                AppTheme.selectColor(color!);
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                )),
+                ]),
+              ],
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _section({title, final List<Widget>? items}) {
+    return Column(
+      children: [
+        if (title != null) Text(title),
+        if (items != null)
+          Column(
+            children: items,
+          )
+      ],
+    );
+  }
+
+  Widget _sectionItem({required child}) {
+    return Container(
+      width: double.maxFinite,
+      height: 70,
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: child,
       ),
     );
   }
