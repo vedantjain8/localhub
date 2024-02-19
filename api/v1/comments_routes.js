@@ -62,12 +62,6 @@ const createComment = async (request, response) => {
       }
     }
 
-    // TODO: implement caching when cahing bool is true
-    // await pool.query(
-    //   "UPDATE posts_stats SET total_comments = total_comments + 1 WHERE post_id = $1",
-    //   [post_id]
-    // );
-
     await pool.query(
       "INSERT INTO posts_comments_link (post_id, user_id, comment_content) VALUES ($1, $2, $3) RETURNING comment_id",
       [post_id, user_id, comment_content],

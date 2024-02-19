@@ -16,13 +16,8 @@ const cachingBool = Boolean(config.caching);
 const allowedCharactersRegex = /^[a-zA-Z0-9_]*$/;
 const createCommunity = async (request, response) => {
   try {
-    var {
-      community_name,
-      community_description,
-      logo_url,
-      token,
-      banner_url = null,
-    } = request.body;
+    var { community_name, community_description, logo_url, token, banner_url } =
+      request.body;
 
     if (
       !community_name ||
@@ -49,10 +44,13 @@ const createCommunity = async (request, response) => {
     }
 
     if (!logo_url) {
-      logo_url = `https://api.dicebear.com/7.x/initials/svg?seed=${community_name}`;
+      return response.status(400).json({
+        status: 400,
+        response: "community needs a logo",
+      });
     }
 
-    if (!banner_url) {
+    if (!banner_url || banner_url == null) {
       banner_url = "https://picsum.photos/1175/235";
     }
     const user_id = JSON.parse(await getUserData(token))["user_id"];
@@ -87,7 +85,7 @@ const communitySearch = (request, response) => {
   var communityName = request.query.communityName;
 
   pool.query(
-    "SELECT * FROM community WHERE community_name LIKE LOWER($1 || '%') AND active = 'T' ORDER BY community_id ASC LIMIT 8",
+    "SELECT * FROM community WHERE LOWER(community_name) LIKE LOWER($1 || '%') AND active = 'T' ORDER BY community_id ASC LIMIT 8",
     [communityName],
     (error, result) => {
       if (error) {

@@ -122,8 +122,9 @@ const getPosts = async (request, response) => {
       redisClient.select(0);
       const value = await redisClient.get(`posts:offset-${offset}`);
       if (value) {
-        return response.status(200).json({ status: 200, response: JSON.parse(value) }); // Data found in Redis
-        return;
+        return response
+          .status(200)
+          .json({ status: 200, response: JSON.parse(value) }); // Data found in Redis
       }
     }
 
@@ -190,7 +191,9 @@ const getCommunityPosts = async (request, response) => {
         `community:${community_id}:posts:offset-${offset}`
       );
       if (value) {
-        return response.status(200).json({ status: 200, response: JSON.parse(value) }); // Data found in Redis
+        return response
+          .status(200)
+          .json({ status: 200, response: JSON.parse(value) }); // Data found in Redis
         return;
       }
     }
@@ -231,7 +234,6 @@ const getCommunityPosts = async (request, response) => {
     }
 
     return response.status(200).json({ status: 200, response: userData });
-
   } catch (error) {
     console.error(error);
     return response.status(400).json({ status: 400, response: error.message });
@@ -424,20 +426,16 @@ const updatePost = async (request, response) => {
     }
 
     if (results.rowCount === 0) {
-      return response
-        .status(404)
-        .json({
-          status: 404,
-          response: `Post with ID ${post_id} not found for the user.`,
-        });
+      return response.status(404).json({
+        status: 404,
+        response: `Post with ID ${post_id} not found for the user.`,
+      });
     }
 
-    response
-      .status(200)
-      .json({
-        status: 200,
-        response: `Post modified having Post_ID: ${post_id}`,
-      });
+    response.status(200).json({
+      status: 200,
+      response: `Post modified having Post_ID: ${post_id}`,
+    });
   });
 };
 
@@ -465,11 +463,13 @@ const getUserPubPosts = async (request, response) => {
 
       if (value) {
         // Data found in Redis, parse and send response
-        return response.status(200).json({ status: 200, response: JSON.parse(value) });
+        return response
+          .status(200)
+          .json({ status: 200, response: JSON.parse(value) });
       }
-    } else {
-      pool.query(
-        `SELECT
+    }
+    pool.query(
+      `SELECT
     posts.post_id,
     posts.post_title,
     LEFT(posts.post_content, 159) as short_content,
@@ -478,11 +478,11 @@ const getUserPubPosts = async (request, response) => {
     posts.is_adult,
     posts.created_at,
     community.community_name,
-    community.logo_url,
+    community.logo_url
   FROM
     posts
-  INNER JOIN
-    subreddit ON posts.subreddit_id = subreddit.subreddit_id
+  JOIN
+    community ON posts.community_id = community.community_id
   WHERE
     posts.user_id = $1
       AND
@@ -491,24 +491,23 @@ const getUserPubPosts = async (request, response) => {
     posts.created_at DESC
   LIMIT 20
   OFFSET $2`,
-        [user_id, offset],
-        (error, result) => {
-          if (error) {
-            console.error(error);
-            return response.status(500).json({ status: 500, response: error });
-          }
-          userData = result.rows;
-          if (cachingBool) {
-            redisClient.setEx(
-              `postsPubBy:userID-${user_id}:${offset}`,
-              1800,
-              JSON.stringify(userData)
-            );
-          }
-          return response.status(200).json({ status: 200, response: userData });
+      [user_id, offset],
+      (error, result) => {
+        if (error) {
+          console.error(error);
+          return response.status(500).json({ status: 500, response: error });
         }
-      );
-    }
+        userData = result.rows;
+        if (cachingBool) {
+          redisClient.setEx(
+            `postsPubBy:userID-${user_id}:${offset}`,
+            1800,
+            JSON.stringify(userData)
+          );
+        }
+        return response.status(200).json({ status: 200, response: userData });
+      }
+    );
   } catch (error) {
     console.error(error);
     return response.status(400).json({ status: 400, response: error.message });
@@ -519,7 +518,7 @@ router.get("/posts", getPosts);
 router.post("/posts/:id", getPostById);
 
 router.post("/posts", createPost);
-router.post("/users/posts", getUserPubPosts);
+router.post("/posts-by-user/", getUserPubPosts);
 
 router.put("/posts/:id", updatePost);
 
