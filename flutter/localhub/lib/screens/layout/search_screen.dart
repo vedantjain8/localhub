@@ -38,7 +38,6 @@ class _SearchScreenState extends State<SearchScreen> {
         setState(() {
           searchList = data;
         });
-        print(data);
       });
     }
   }

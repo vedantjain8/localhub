@@ -1,9 +1,3 @@
-// ++++++++++++++++++++++++++
-// TODO:
-// - UI
-// - logo image is required field, also add validation for that
-// ++++++++++++++++++++++++++
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -27,7 +21,7 @@ class _CreateCommunityState extends State<CreateCommunity> {
   final TextEditingController _communityDescriptionController =
       TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  late bool isLogoPicked = true;
+  late bool isLogoPicked = false;
 
   final ImageUploadService ius = ImageUploadService();
   final CommunityApiService cas = CommunityApiService();
@@ -122,50 +116,61 @@ class _CreateCommunityState extends State<CreateCommunity> {
         actions: [
           ElevatedButton(
               onPressed: () {
-                if (!_formKey.currentState!.validate()) {
-                  if (pickedLogo == null) {
-                    setState(() {
-                      isLogoPicked = false;
-                    });
-                  }
-                } else if (!_formKey.currentState!.validate()) {
-                  _createCommunity().then(
-                    (Map<String, dynamic> status) => {
-                      if (status['status'] != null)
-                        {
-                          if (status['status'] == 200)
-                            {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(status['response']),
+                if (_formKey.currentState!.validate()) {
+                  if (isLogoPicked) {
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext context) {
+                        return const Center(child: CircularProgressIndicator());
+                      },
+                    );
+                    _createCommunity().then(
+                      (Map<String, dynamic> status) => {
+                        Navigator.of(context).pop(),
+                        if (status['status'] != null)
+                          {
+                            if (status['status'] == 200)
+                              {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(status['response']),
+                                  ),
                                 ),
-                              ),
-                              Navigator.of(context).pop(),
-                              Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const AppLayout()),
-                                  (route) => false),
-                            }
-                          else
-                            (
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(status['response']),
+                                Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const AppLayout()),
+                                    (route) => false),
+                              }
+                            else
+                              (
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(status['response']),
+                                  ),
                                 ),
+                              )
+                          }
+                        else
+                          (
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                // content: Text("some error"),
+                                content: Text(status.toString()),
                               ),
-                            )
-                        }
-                      else
-                        (
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("some error"),
                             ),
-                          ),
-                        )
-                    },
-                  );
+                          )
+                      },
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("A logo is required for the community"),
+                      ),
+                    );
+                  }
                 }
               },
               child: const Text("Create"))
@@ -183,9 +188,7 @@ class _CreateCommunityState extends State<CreateCommunity> {
                   children: [
                     InkWell(
                       onTap: () {
-                        if (pickedBanner == null) {
-                          _openGallery(forImage: 1);
-                        }
+                        _openGallery(forImage: 1);
                       },
                       overlayColor:
                           MaterialStateProperty.all(Colors.transparent),
@@ -211,40 +214,40 @@ class _CreateCommunityState extends State<CreateCommunity> {
                     Padding(
                       padding: const EdgeInsets.only(top: 70, left: 20),
                       child: CircleAvatar(
-                        radius: 50,
-                        backgroundColor: colorScheme.background,
-                        child: pickedLogo == null
-                            ? InkWell(
-                                onTap: () {
-                                  _openGallery(forImage: 0);
-                                },
-                                overlayColor: MaterialStateProperty.all(
-                                    Colors.transparent),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: isLogoPicked
-                                        ? null
-                                        : Border.all(color: colorScheme.error),
-                                    color: colorScheme.primaryContainer,
+                          radius: 50,
+                          backgroundColor: colorScheme.background,
+                          child: InkWell(
+                            onTap: () {
+                              _openGallery(forImage: 0);
+                            },
+                            overlayColor:
+                                MaterialStateProperty.all(Colors.transparent),
+                            child: pickedLogo == null
+                                ? Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: isLogoPicked
+                                          ? null
+                                          : Border.all(
+                                              color: colorScheme.error),
+                                      color: colorScheme.primaryContainer,
+                                    ),
+                                    width: 80,
+                                    height: 80,
+                                    child: const Icon(FontAwesomeIcons.plus),
+                                  )
+                                : SizedBox(
+                                    width: 80,
+                                    height: 80,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(50),
+                                      child: Image.file(
+                                        File(pickedLogo!.path),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
                                   ),
-                                  width: 80,
-                                  height: 80,
-                                  child: const Icon(FontAwesomeIcons.plus),
-                                ),
-                              )
-                            : SizedBox(
-                                width: 80,
-                                height: 80,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(50),
-                                  child: Image.file(
-                                    File(pickedLogo!.path),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                      ),
+                          )),
                     ),
                   ],
                 ),
@@ -254,7 +257,7 @@ class _CreateCommunityState extends State<CreateCommunity> {
                     if (value == null || value.isEmpty) {
                       return 'Enter Community Name';
                     } else if (!RegExp(r"^[a-zA-Z0-9_]*$").hasMatch(value)) {
-                      return 'Enter valid Community Name';
+                      return 'Community name can only contain a-zA-z0-9_';
                     }
                     return null;
                   },
@@ -267,12 +270,6 @@ class _CreateCommunityState extends State<CreateCommunity> {
                   height: 30,
                 ),
                 TextFormField(
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Enter Community Description';
-                    }
-                    return null;
-                  },
                   maxLines: 20,
                   minLines: 1,
                   controller: _communityDescriptionController,

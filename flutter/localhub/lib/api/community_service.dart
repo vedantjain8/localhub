@@ -146,10 +146,7 @@ class CommunityApiService {
       } else {
         print('Request failed with status: ${response.statusCode}.');
 
-        responseData = {
-          'error': 'else Request failed with status: ${response.statusCode}',
-          'error_body': '${response.body}'
-        };
+        responseData = jsonDecode(response.body);
       }
     } catch (e) {
       print('Error: $e');
