@@ -2,7 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:localhub/api/version_check.dart';
 import 'package:localhub/themes/theme.dart';
+import 'package:localhub/widgets/custom_input_decoration.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -13,11 +16,105 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool isDark = AppTheme.themeNotifier.value.brightness == Brightness.dark;
+  TextEditingController _hostAddressController = TextEditingController();
+  late String previousHostAddress;
+
+  void _loadHostAddress() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String hostAddress = prefs.getString('hostaddress')!;
+    previousHostAddress = hostAddress;
+    setState(() {
+      _hostAddressController = TextEditingController(text: hostAddress);
+    });
+  }
+
+  bool _submited = false;
+  String _errorText = "";
+
+  void _checkUrl() async {
+    // validation
+    if (_hostAddressController.text.isEmpty) {
+      setState(() {
+        _submited = true;
+        _errorText = "Enter a valid url";
+      });
+      return;
+    }
+
+    // parse URL to URI
+    final uri = Uri.tryParse("https://${_hostAddressController.text}") ?? false;
+
+    // URI validation
+    if (uri == false) {
+      setState(() {
+        _submited = true;
+        _errorText = "Enter a valid url";
+      });
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+
+    // skip save if same host address
+    if (previousHostAddress == _hostAddressController.text) {
+      setState(() {
+        _submited = false;
+      });
+      return;
+    }
+    // save hostaddress to storage
+    await prefs.setString('hostaddress', _hostAddressController.text);
+    setState(() {
+      _submited = false;
+    });
+
+    // check for api server status
+    final VersionCheckApiService vcas = VersionCheckApiService();
+    final String? versionFromApi = await vcas.versionCheck();
+
+    // api server return status validation
+    if (versionFromApi == null || versionFromApi.isEmpty) {
+      setState(() {
+        _submited = true;
+        _errorText = "Host is down or not responding";
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              "Server returned with response: ${versionFromApi.toString()}"),
+        ),
+      );
+      return;
+    } else if (versionFromApi.toString().contains("Failed")) {
+      setState(() {
+        _submited = true;
+        _errorText = "Check the hostaddress";
+        // undo the hostaddress change || fallback to previous hostaddress
+        // _hostAddressController =
+        //     TextEditingController(text: previousHostAddress);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              "Server returned with response: ${versionFromApi.toString()}"),
+        ),
+      );
+      return;
+    }
+  }
 
   @override
   void initState() {
     AppTheme.initialize();
     super.initState();
+    _loadHostAddress();
+  }
+
+  @override
+  void dispose() {
+    _hostAddressController.dispose();
+    super.dispose();
   }
 
   @override
@@ -34,6 +131,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Column(
               children: [
                 _section(title: 'Theme Settings', items: [
+                  // TODO: fix  this item when error message pops up
+                  _sectionItem(
+                    child: TextField(
+                      controller: _hostAddressController,
+                      decoration: CustomInputDecoration.inputDecoration(
+                        context: context, label: ("HostAddress"),
+                        errorText: _submited ? _errorText : null,
+                        // hintText: 'hostaddress',
+                      ),
+                    ),
+                  ),
+                  _sectionItem(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _checkUrl();
+                      },
+                      child: const Icon(Icons.save_rounded),
+                    ),
+                  ),
                   _sectionItem(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -140,7 +256,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _sectionItem({required child}) {
-    return Container(
+    return SizedBox(
       width: double.maxFinite,
       height: 70,
       child: Padding(

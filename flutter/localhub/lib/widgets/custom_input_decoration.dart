@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class CustomInputDecoration {
   static InputDecoration inputDecoration({
-    hintText = '',
-    label,
+    String hintText = '',
+    String label = '',
+    String? errorText,
     prefixIcon,
     required context,
   }) {
@@ -16,15 +17,16 @@ class CustomInputDecoration {
     );
 
     return InputDecoration(
-        hintText: hintText,
-        label: Text(label),
-        hintStyle: TextStyle(
-          color: colorScheme.onSurfaceVariant,
-        ),
-        border: inputBorder,
-        focusedBorder: inputBorder,
-        prefixIcon: prefixIcon
-        // prefixIcon: Icon(hasPrefix == false ? null : prefixIcon),
-        );
+      hintText: hintText,
+      label: Text(label),
+      hintStyle: TextStyle(
+        color: colorScheme.onSurfaceVariant,
+      ),
+      border: inputBorder,
+      focusedBorder: inputBorder,
+      prefixIcon: prefixIcon,
+      errorText: errorText,
+      // prefixIcon: Icon(hasPrefix == false ? null : prefixIcon),
+    );
   }
 }

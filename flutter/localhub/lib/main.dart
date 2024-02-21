@@ -3,12 +3,11 @@ import 'package:localhub/api/version_check.dart';
 import 'package:localhub/auth/auth_service.dart';
 import 'package:localhub/screens/authscreens/auth_screen.dart';
 import 'package:localhub/screens/layout/app_layout.dart';
+import 'package:localhub/screens/layout/settings/settings_screen.dart';
 import 'package:localhub/themes/theme.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,12 +38,27 @@ Future<void> checkAppVersion() async {
   final String? versionFromApi = await vcas.versionCheck();
 
   if (versionFromApi == null) {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
     runApp(
-      const MaterialApp(
+      MaterialApp(
+        navigatorKey: navigatorKey,
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-          body: Center(
-            child: Text("server is down"),
+          body: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Center(child: Text("server is down")),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    navigatorKey.currentState!.push(MaterialPageRoute(
+                        builder: (context) => const SettingsScreen()));
+                  },
+                  child: const Icon(Icons.settings),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -64,6 +78,8 @@ Future<void> checkAppVersion() async {
     // print(buildNumber); //1
 
     if (version != versionFromApi) {
+      final GlobalKey<NavigatorState> navigatorKey =
+          GlobalKey<NavigatorState>();
       runApp(MaterialApp(
         navigatorKey: navigatorKey,
         debugShowCheckedModeBanner: false,
@@ -76,10 +92,15 @@ Future<void> checkAppVersion() async {
               TextButton(
                 onPressed: () {
                   _launchURL();
-
-                  // Navigator.pop(navigatorKey.currentContext!);
                 },
                 child: const Text('Update'),
+              ),
+              TextButton(
+                onPressed: () {
+                  navigatorKey.currentState!.push(MaterialPageRoute(
+                      builder: (context) => const SettingsScreen()));
+                },
+                child: const Text('Settings'),
               ),
             ],
           ),

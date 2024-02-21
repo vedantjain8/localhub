@@ -4,14 +4,12 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localhub/api/about_user_service.dart';
 import 'package:localhub/screens/layout/agenda_screen.dart';
 import 'package:localhub/screens/community/create_community.dart';
-// import 'package:localhub/screens/posts/create_post.dart';
 import 'package:localhub/screens/layout/explore_screen.dart';
 import 'package:localhub/screens/layout/home_screen.dart';
 import 'package:localhub/screens/layout/profile_screen.dart';
 import 'package:localhub/screens/layout/search_screen.dart';
 import 'package:localhub/screens/layout/settings/settings_screen.dart';
 import 'package:localhub/screens/post/create_post.dart';
-import 'package:localhub/themes/theme.dart';
 import 'package:localhub/widgets/custom_bottom_app_bar.dart';
 
 class AppLayout extends StatefulWidget {
