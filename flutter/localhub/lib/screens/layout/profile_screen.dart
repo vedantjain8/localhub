@@ -1,6 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:localhub/api/about_user_service.dart';
+import 'package:localhub/api/post_service.dart';
 import 'package:localhub/screens/authscreens/register_screen.dart';
+import 'package:localhub/widgets/custom_post_card_widget.dart';
+import 'package:localhub/widgets/custom_shimmer.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -11,117 +16,173 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen>
     with SingleTickerProviderStateMixin {
+  bool _hasMoreData = true;
+  int offset = 0;
+
+  List<Map<String, dynamic>> _journals = [];
+  Map<String, dynamic> _meJournal = {};
+
+  final PostApiService pas = PostApiService();
+  final AboutUserApiService auas = AboutUserApiService();
+
+  void _loadData() async {
+    if (!_hasMoreData) {
+      return; // No more data to load
+    }
+
+    final List<Map<String, dynamic>> data = await pas.getUserPublishedPost(
+      offsetN: offset,
+    );
+
+    if (data.isEmpty) {
+      setState(() {
+        _hasMoreData = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _journals = [..._journals, ...data];
+      offset += 20;
+    });
+
+    if (data.length != 20) {
+      setState(() {
+        _hasMoreData = false;
+      });
+      return;
+    }
+  }
+
+  Future<void> _refreshData() async {
+    setState(() {
+      _journals = [];
+      offset = 0;
+      _hasMoreData = true;
+    });
+    _loadData();
+  }
+
+  void _loadMeData() async {
+    Map<String, dynamic> data = await auas.aboutUserData();
+    setState(() {
+      _meJournal = data;
+    });
+  }
+
   late TabController _tabController;
 
   final _tabs = const [
     Tab(text: 'Posts'),
     Tab(text: 'Comments'),
-    Tab(text: 'About'),
   ];
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _loadData();
+    _loadMeData();
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            SliverAppBar(
-              leading: const Icon(Icons.arrow_back),
-              actions: [
-                IconButton(
-                  onPressed: () {},
-                  icon: const FaIcon(
-                    FontAwesomeIcons.sliders,
-                  ),
-                ),
-              ],
-              expandedHeight: 250,
-              floating: false,
-              snap: false,
-              pinned: true,
-              flexibleSpace: FlexibleSpaceBar(
-                titlePadding: const EdgeInsets.only(left: 50, bottom: 15),
-                title: const Text(
-                  'username',
-                ),
-                background: ShaderMask(
-                  shaderCallback: (rect) {
-                    return const RadialGradient(
-                      radius: 1.5,
-                      center: Alignment.center,
-                      colors: [
-                        Colors.black,
-                        Colors.transparent,
-                      ],
-                    ).createShader(rect);
-                    // return const LinearGradient(
-                    //     begin: Alignment.topLeft,
-                    //     end: Alignment.bottomRight,
-                    //     colors: [
-                    //       Colors.black,
-                    //       Colors.transparent,
-                    //     ]).createShader(
-                    //     Rect.fromLTRB(0, 0, rect.width, rect.height));
-                  },
-                  blendMode: BlendMode.dstIn,
-                  child: Image.network(
-                    // 'https://source.unsplash.com/random',
-                    'https://images.unsplash.com/photo-1487700160041-babef9c3cb55?q=80&w=1152&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            ),
-          ];
-        },
-        body: Container(
-          decoration: const BoxDecoration(
-              // color: colorScheme.onInverseSurface,
-              ),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  color: colorScheme.background,
-                  borderRadius: BorderRadius.circular(60.0),
-                ),
-                child: TabBar(
-                  controller: _tabController,
-                  tabs: _tabs,
-                  unselectedLabelColor: colorScheme.primary,
-                  // labelColor: colorScheme.background,
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  // indicatorColor: Colors.transparent,
-                ),
-              ),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
+      body: RefreshIndicator(
+        onRefresh: () => _refreshData(),
+        child: SingleChildScrollView(
+          child: _meJournal.isEmpty
+              ? const CustomShimmer()
+              : Column(
                   children: [
-                    ListView.builder(
-                      itemBuilder: (context, index) => Container(
-                        color: index.isOdd
-                            ? colorScheme.primary
-                            : colorScheme.secondary,
-                        height: 100,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            radius: 45,
+                            backgroundImage: CachedNetworkImageProvider(
+                              _meJournal["avatar_url"],
+                            ),
+                          ),
+                          const SizedBox(width: 20),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _meJournal["username"],
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 30),
+                              ),
+                              Text(
+                                _meJournal["locality_state"] +
+                                    ", " +
+                                    _meJournal["locality_country"],
+                              ),
+                              Text(_meJournal["bio"] ?? "")
+                            ],
+                          ),
+                          const Spacer(),
+                          IconButton(
+                            onPressed: () {},
+                            icon: const Icon(
+                              FontAwesomeIcons.pen,
+                              size: 20,
+                            ),
+                          )
+                        ],
                       ),
-                      itemCount: 15,
                     ),
-                    const RegisterScreen(),
-                    const RegisterScreen(),
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                            color: colorScheme.onInverseSurface,
+                            borderRadius: BorderRadius.circular(30)),
+                        child: TabBar(
+                          overlayColor: const MaterialStatePropertyAll(
+                              Colors.transparent),
+                          tabs: _tabs,
+                          controller: _tabController,
+                          unselectedLabelColor: colorScheme.primary,
+                          labelColor: colorScheme.background,
+                          indicatorSize: TabBarIndicatorSize.tab,
+                          indicatorColor: Colors.transparent,
+                          indicator: BoxDecoration(
+                            borderRadius: BorderRadius.circular(80.0),
+                            color: colorScheme.primary,
+                          ),
+                          dividerColor: Colors.transparent,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height,
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          CustomPostCardWidget(
+                            journals: _journals,
+                            hasMoreData: _hasMoreData,
+                          ),
+                          ListView.builder(
+                            itemBuilder: (context, index) => Container(
+                              color: index.isOdd
+                                  ? colorScheme.primary
+                                  : colorScheme.inversePrimary,
+                              height: 100,
+                            ),
+                            itemCount: 5,
+                          )
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 70),
                   ],
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );

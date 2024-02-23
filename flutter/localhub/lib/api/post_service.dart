@@ -160,4 +160,41 @@ class PostApiService {
     }
     return responseData;
   }
+
+  // get post from user
+  Future<List<Map<String, dynamic>>> getUserPublishedPost(
+      {int offsetN = 0}) async {
+    await getHostAddress();
+    await getUserToken();
+    List<Map<String, dynamic>> responseData = [];
+    try {
+      var url = Uri.https(
+          hostaddress, '/api/v1/posts-by-user', {'offset': '$offsetN'});
+      var response = await http.post(url, body: {'token': '${token}'});
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        jsonResponse = jsonResponse['response'];
+        if (jsonResponse is List) {
+          // Check if jsonResponse is a List
+          responseData = jsonResponse.cast<Map<String, dynamic>>().toList();
+        } else {
+          // Handle the case where jsonResponse is not a List
+          responseData = [
+            {'error': 'Unexpected response format'}
+          ];
+        }
+      } else {
+        responseData = [
+          {'error': 'else Request failed with status: ${response.statusCode}'}
+        ];
+      }
+    } catch (e) {
+      responseData = [
+        {'error': 'catch Request failed with status: $e'}
+      ];
+    }
+    print(responseData);
+    return responseData;
+  }
 }
