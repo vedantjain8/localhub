@@ -22,7 +22,7 @@ async function checkJoinedCommunity(community_id, user_id) {
       [user_id, community_id]
     );
     return responseBool[0].exists;
-  } catch (error) {}
+  } catch (error) {return error}
 }
 
 module.exports = { checkJoinedCommunity };

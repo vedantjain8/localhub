@@ -9,7 +9,7 @@ async function incrementView(postId, userId) {
     try {
 
       const rateLimitCheck = await redisClient.get(
-        `rateLimit:postID-${postId}:userID-${userId}`
+        `viewrateLimit:postID-${postId}:userID-${userId}`
       );
 
       if (rateLimitCheck) {
@@ -17,7 +17,7 @@ async function incrementView(postId, userId) {
       }
       // create new ratelimit for post cache
       await redisClient.setEx(
-        `rateLimit:postID-${postId}:userID-${userId}`,
+        `viewrateLimit:postID-${postId}:userID-${userId}`,
         5400,
         "T"
       );
