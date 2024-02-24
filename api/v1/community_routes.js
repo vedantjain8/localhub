@@ -9,7 +9,7 @@ const { getUserData } = require("./functions/users");
 const { getCommunityData } = require("./functions/community");
 const config = require("../config/config.json");
 var cron = require("node-cron");
-
+const { checkJoinedCommunity } = require("./functions/joinCommunityCheck");
 const cachingBool = Boolean(config.caching);
 
 // regex for alphanumeric and underscore
@@ -142,7 +142,7 @@ const getcommunityDataById = async (request, response) => {
   }
 };
 
-const joinCommunity = async (request, response) => {
+const joinCommunityStatus = async (request, response) => {
   const community_id = parseInt(request.body.community_id);
   const token = request.body.token;
 
@@ -161,40 +161,98 @@ const joinCommunity = async (request, response) => {
   const user_id = JSON.parse(await getUserData(token))["user_id"];
 
   try {
+    const checkBool = await checkJoinedCommunity(community_id, user_id);
+
+    return response
+      .status(200)
+      .json({ status: 200, response: [{ exists: checkBool }] });
+  } catch (error) {
+    return response.status(400).json({ status: 400, response: error });
+  }
+};
+
+const joinCommunity = async (request, response) => {
+  const community_id = parseInt(request.body.community_id);
+  const token = request.body.token;
+
+  if (!community_id) {
+    return response
+      .status(400)
+      .json({ status: 400, response: "community id is required" });
+  }
+
+  if (!token) {
+    return response
+      .status(400)
+      .json({ status: 400, response: "user token is required" });
+  }
+
+  const user_id = JSON.parse(await getUserData(token))["user_id"];
+  try {
     // community_user_link & community_stats
-    if (cachingBool) {
-      redisClient.select(0);
 
-      await redisClient.hSet(
-        "user_community_data",
-        `user:${user_id}:community:${community_id}`,
-        JSON.stringify({
-          userId: user_id,
-          communityId: community_id,
-          joined_at: new Date().toISOString(),
-        })
-      );
+    const checkBool = await checkJoinedCommunity(community_id, user_id);
 
-      var value = await redisClient.get(
-        `community:joinedCount:${community_id}`
-      );
-      if (value) {
-        value = parseInt(`${value}`);
-        await redisClient.set(`community:joinedCount:${community_id}`, ++value);
+    if (checkBool == false) {
+      if (cachingBool) {
+        redisClient.select(0);
+
+        await redisClient.hSet(
+          "user_community_data",
+          `user:${user_id}:community:${community_id}`,
+          JSON.stringify({
+            userId: user_id,
+            communityId: community_id,
+            joined_at: new Date().toISOString(),
+          })
+        );
+
+        var value = JSON.parse(
+          await redisClient.hGet(
+            "community_stats_data",
+            `community:stats:${community_id}`
+          )
+        );
+
+        if (value) {
+          valueCount = parseInt(`${value["subscriber_count"]}`);
+          await redisClient.hSet(
+            "community_stats_data",
+            `community:stats:${community_id}`,
+            JSON.stringify({ subscriber_count: ++valueCount })
+          );
+        } else
+          await redisClient.hSet(
+            "community_stats_data",
+            `community:stats:${community_id}`,
+            JSON.stringify({ subscriber_count: 1 })
+          );
+
+        return response
+          .status(200)
+          .json({ status: 200, response: "Successfully joined the community" });
+      } else {
+        pool.query(
+          "INSERT INTO users_community_link(community_id, user_id) VALUES($1, $2)",
+          [community_id, user_id]
+        );
+
+        pool.query(
+          "UPDATE community_stats SET subscriber_count = subscriber_count + 1 WHERE community_id = $1",
+          [community_id]
+        );
+
+        return response
+          .status(200)
+          .json({ status: 200, response: "Successfully joined the community" });
       }
-    } else {
-      pool.query(
-        "INSERT INTO users_community_link(community_id, user_id) VALUES($1, $2)",
-        [community_id, user_id]
-      );
-
-      pool.query(
-        "UPDATE community_stats SET subscriber_count = subscriber_count + 1 WHERE community_id = $1",
-        [community_id]
-      );
     }
+    return response
+      .status(200)
+      .json({ status: 200, response: "Already joined the community" });
   } catch (error) {
     console.error(error);
+    return response.status(400).json({ status: 400, response: error });
   }
 };
 
@@ -218,41 +276,66 @@ const leaveCommunity = async (request, response) => {
 
   try {
     // community_user_link & community_stats
-    if (cachingBool) {
-      redisClient.select(0);
 
-      await redisClient.hDel(
-        "user_community_data",
-        `user:${user_id}:community:${community_id}`
-      );
+    const checkBool = await checkJoinedCommunity(community_id, user_id);
 
-      var value = await redisClient.get(
-        `community:joinedCount:${community_id}`
-      );
+    if (checkBool == true) {
+      if (cachingBool) {
+        redisClient.select(0);
 
-      if (value) {
-        value = parseInt(`${value}`);
-        await redisClient.set(
-          `community:joinedCount:${community_id}`,
-          value - 1
+        const isUserJoinedInCache = await redisClient.hGet(
+          "user_community_data",
+          `user:${user_id}:community:${community_id}`
+        );
+
+        if (isUserJoinedInCache) {
+          await redisClient.hDel(
+            "user_community_data",
+            `user:${user_id}:community:${community_id}`
+          );
+        } else {
+          pool.query(
+            "DELETE FROM users_community_link WHERE user_id = $1 AND community_id = $2",
+            [user_id, community_id]
+          );
+        }
+
+        var value = JSON.parse(
+          await redisClient.hGet(
+            "community_stats_data",
+            `community:stats:${community_id}`
+          )
+        );
+        if (value) {
+          valueCount = parseInt(`${value["subscriber_count"]}`);
+          await redisClient.hSet(
+            "community_stats_data",
+            `community:stats:${community_id}`,
+            JSON.stringify({ subscriber_count: --valueCount })
+          );
+        }
+      } else {
+        pool.query(
+          "DELETE FROM users_community_link WHERE user_id = $1 AND community_id = $2",
+          [user_id, community_id]
+        );
+
+        pool.query(
+          "UPDATE community_stats SET subscriber_count = subscriber_count - 1 WHERE community_id = $1",
+          [community_id]
         );
       }
-    } else {
-      pool.query(
-        "DELETE FROM users_community_link WHERE user_id = $1 AND community_id = $2",
-        [user_id, community_id]
-      );
-
-      pool.query(
-        "UPDATE community_stats SET subscriber_count = subscriber_count - 1 WHERE community_id = $1",
-        [community_id]
-      );
+      return response
+        .status(200)
+        .json({ status: 200, response: "Successfully left the community" });
     }
-    return response
-      .status(200)
-      .json({ status: 200, response: "Successfully left the community" });
+    return response.status(200).json({
+      status: 400,
+      response: "Community was not joined before leaving!",
+    });
   } catch (error) {
     console.error(error);
+    return response.status(400).json({ status: 400, response: error });
   }
 };
 
@@ -271,7 +354,7 @@ cron.schedule("*/10 * * * *", async () => {
     for (const singleData in userData) {
       data = JSON.parse(userData[singleData]);
       pool.query(
-        "INSERT INTO user_community_link (user_id, community_id, joined_at) VALUES ($1, $2, $3)",
+        "INSERT INTO users_community_link (user_id, community_id, joined_at) VALUES ($1, $2, $3)",
         [data.userId, data.communityId, data.joined_at]
       );
       await redisClient.hDel(
@@ -281,22 +364,22 @@ cron.schedule("*/10 * * * *", async () => {
     }
 
     // community_stats
-    var value = await redisClient.keys(`community:joinedCount:*`);
+    if (cachingBool) {
+      var value = await redisClient.hGetAll("community_stats_data", "*");
 
-    for (i in value) {
-      var community_id = value[i].split(":")[2];
-      var newCount = await redisClient.get(`${value[i]}`);
-      if (newCount) {
-        newCount = parseInt(`${newCount}`);
-        pool.query(
-          "UPDATE community_stats SET subscriber_count = subscriber_count + $2 WHERE community_id = $1",
-          [community_id, newCount]
+      for (singleCommunity in value) {
+        var community_id = singleCommunity.split(":")[2];
+        data = JSON.parse(value[singleCommunity]);
+        await pool.query(
+          "UPDATE community_stats SET subscriber_count = $1 WHERE community_id = $2",
+          [data.subscriber_count, community_id]
         );
       }
     }
   }
 });
 
+// upload image cron job
 cron.schedule("*/20 * * * *", async () => {
   // running task every 20 minutes
   if (cachingBool) {
@@ -326,6 +409,7 @@ cron.schedule("*/20 * * * *", async () => {
 router.get("/community/search", communitySearch);
 router.get("/community/:id", getcommunityDataById);
 router.post("/community", createCommunity);
+router.post("/community/check/join", joinCommunityStatus);
 router.post("/community/join", joinCommunity);
 router.post("/community/leave", leaveCommunity);
 
