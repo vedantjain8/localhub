@@ -49,7 +49,7 @@ class CommunityStatsApiService {
           body: {"token": "$token", "community_id": "$communityID"});
 
       if (response.statusCode == 200) {
-        jsonResponse = jsonDecode(response.body)['response'];
+        jsonResponse = jsonDecode(response.body)['response'][0];
       }
     } catch (e) {
       return {"response": e.toString()};
