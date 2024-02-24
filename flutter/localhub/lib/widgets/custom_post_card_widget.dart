@@ -1,8 +1,10 @@
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:localhub/api/community_stats_service.dart';
 import 'package:localhub/api/posts_stats_service.dart';
 import 'package:localhub/api/report_service.dart';
 import 'package:localhub/functions/datetimeoperations.dart';
@@ -35,6 +37,8 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
 
   final PostStatsApiService pass = PostStatsApiService();
   final ReportApiService ras = ReportApiService();
+  final CommunityStatsApiService csas = CommunityStatsApiService();
+  final storage = const FlutterSecureStorage();
 
   Future<Map<String, dynamic>> _loadStats(int postID) async {
     await pass.getHostAddress();
@@ -96,6 +100,36 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
     });
   }
 
+  Future<bool> checkCommunityJoinStatus({required communityID}) async {
+    String? value = await storage.read(key: "is-$communityID-joined");
+    if (value != null) {
+      return bool.parse(value);
+    } else {
+      final status =
+          await csas.checkCommunityJoinStatus(communityID: communityID);
+      await storage.write(
+          key: "is-$communityID-joined", value: status['exists'].toString());
+      return (status['exists']);
+    }
+  }
+
+  void _joinORleaveCommunity(
+      {required int communityID, required bool isJoined}) async {
+    print(isJoined);
+    if (isJoined == true) {
+      await csas.leaveCommuntiy(communityID: communityID);
+      await storage.write(
+          key: "is-$communityID-joined", value: false.toString());
+      setState(() {});
+    } else if (isJoined == false) {
+      // todo join community function
+      await csas.joinCommuntiy(communityID: communityID);
+      await storage.write(
+          key: "is-$communityID-joined", value: true.toString());
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // return buildPostCardWidget(context, widget.journals, widget.hasMoreData);
@@ -126,6 +160,7 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
 
               final finalPost = journals[index];
               final postID = finalPost['post_id'];
+              final communityID = finalPost['community_id'];
 
               _loadStatsLazily(postID);
 
@@ -227,6 +262,32 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                             ),
                           ),
 
+                          FutureBuilder(
+                              future: checkCommunityJoinStatus(
+                                  communityID: communityID),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  // Return a loading indicator while the future is being fetched
+                                  return const CircularProgressIndicator();
+                                } else if (snapshot.hasError) {
+                                  // Handle any errors that occur during the future execution
+                                  return Text('Error: ${snapshot.error}');
+                                } else {
+                                  // If the future has successfully resolved, show the join button based on the boolean value
+                                  final bool isJoined = snapshot.data!;
+                                  return ElevatedButton(
+                                    onPressed: () {
+                                      _joinORleaveCommunity(
+                                          communityID: communityID,
+                                          isJoined: isJoined);
+                                    },
+                                    child: Text(isJoined
+                                        ? 'Leave Community'
+                                        : 'Join Community'),
+                                  );
+                                }
+                              }),
                           // Title
                           Padding(
                             padding: const EdgeInsets.all(8.0),
