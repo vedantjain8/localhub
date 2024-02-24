@@ -25,12 +25,12 @@ class UserApiService {
     Map<String, dynamic> jsonResponse = {};
     try {
       Map<String, dynamic> sendBody = {
-        "username": "${username}",
-        "email": "${email}",
-        "password": "${password}",
-        "locality_country": "${localityCountry}",
-        "locality_state": "${localityState}",
-        "locality_city": "${localityCity}",
+        "username": "$username",
+        "email": "$email",
+        "password": "$password",
+        "locality_country": "$localityCountry",
+        "locality_state": "$localityState",
+        "locality_city": "$localityCity",
       };
       var url = Uri.https(hostaddress, '/api/v1/users');
       var response = await http.post(url, body: sendBody);
@@ -53,8 +53,8 @@ class UserApiService {
     Map<String, dynamic> jsonResponse = {};
     try {
       Map<String, dynamic> sendBody = {
-        'username': "${username}",
-        'password': "${password}",
+        'username': "$username",
+        'password': "$password",
       };
       var url = Uri.https(hostaddress, '/api/v1/login');
       var response = await http.post(url, body: sendBody);

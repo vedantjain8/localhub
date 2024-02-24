@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:localhub/api/community_service.dart';
 import 'package:localhub/api/community_stats_service.dart';
@@ -23,7 +24,6 @@ class _CommunityPageState extends State<CommunityPage> {
   Map<String, dynamic> _communityData = {};
   Map<String, dynamic> _communityStats = {};
   final ScrollController _scrollController = ScrollController();
-  final _appbar = AppBar();
   final CommunityApiService commas = CommunityApiService();
   final CommunityStatsApiService commsas = CommunityStatsApiService();
 
@@ -105,8 +105,9 @@ class _CommunityPageState extends State<CommunityPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: _appbar,
       body: (_journals.isEmpty)
           ? const Center(
               child: CircularProgressIndicator(),
@@ -120,47 +121,110 @@ class _CommunityPageState extends State<CommunityPage> {
                   children: [
                     (_communityData.isEmpty)
                         ? const Center(child: CircularProgressIndicator())
-                        : Column(
+                        : Stack(
                             children: [
-                              Container(
-                                width: MediaQuery.of(context).size.width,
-                                height: 65,
-                                decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                    fit: BoxFit.fill,
-                                    image: CachedNetworkImageProvider(
-                                        _communityData["banner_url"]),
+                              AspectRatio(
+                                aspectRatio: 4 / 1,
+                                child: Container(
+                                  decoration: _communityData["banner_url"]
+                                          .isEmpty
+                                      ? BoxDecoration(
+                                          image: DecorationImage(
+                                            fit: BoxFit.cover,
+                                            image: CachedNetworkImageProvider(
+                                                _communityData["banner_url"]),
+                                          ),
+                                        )
+                                      : BoxDecoration(
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            stops: const [0.0, 0.45, 0.55, 1.0],
+                                            colors: [
+                                              colorScheme.outlineVariant,
+                                              colorScheme.onInverseSurface,
+                                              colorScheme.onInverseSurface,
+                                              colorScheme.outlineVariant,
+                                            ],
+                                          ),
+                                        ),
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 5, top: 20),
+                                child: IconButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  icon: const Icon(FontAwesomeIcons.arrowLeft),
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 70, left: 20),
+                                child: CircleAvatar(
+                                  backgroundColor: colorScheme.background,
+                                  radius: 50,
+                                  child: SizedBox(
+                                      height: 80,
+                                      width: 80,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(50),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            image: DecorationImage(
+                                              image: CachedNetworkImageProvider(
+                                                  _communityData["logo_url"]),
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                      )),
+                                ),
+                              ),
+                            ],
+                          ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20.0, top: 8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "c/${_communityData['community_name']}",
+                            style: Theme.of(context).textTheme.headlineLarge,
+                          ),
+                          _communityData['community_description'].isEmpty
+                              ? const SizedBox.shrink()
+                              : Text(
+                                  _communityData['community_description'],
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                          Row(
+                            children: [
+                              (_communityStats.isEmpty)
+                                  ? const Text('00')
+                                  : Text(formater.format(
+                                      _communityStats['subscriber_count'])),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Container(
+                                  height: 4,
+                                  width: 4,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: colorScheme.secondary,
                                   ),
                                 ),
                               ),
-                              Row(
-                                children: [
-                                  Container(
-                                    margin: const EdgeInsets.only(
-                                        right: 6.0, bottom: 5.0),
-                                    height: 55,
-                                    width: 55,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: DecorationImage(
-                                        // image: NetworkImage(finalPost["logo_url"]),
-                                        image: CachedNetworkImageProvider(
-                                            _communityData["logo_url"]),
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                  Text("c/${_communityData['community_name']}"),
-                                ],
-                              ),
-                              (_communityStats.isEmpty)
-                                  ? const SizedBox.shrink()
-                                  : Text(formater.format(
-                                      _communityStats['subscriber_count'])),
-                              Text(_communityData['community_description']),
                               Text(timeAgo(_communityData['created_at'])),
                             ],
                           ),
+                        ],
+                      ),
+                    ),
                     CustomPostCardWidget(
                       journals: _journals,
                       isFromSubPage: true,

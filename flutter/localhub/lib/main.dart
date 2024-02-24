@@ -3,12 +3,11 @@ import 'package:localhub/api/version_check.dart';
 import 'package:localhub/auth/auth_service.dart';
 import 'package:localhub/screens/authscreens/auth_screen.dart';
 import 'package:localhub/screens/layout/app_layout.dart';
+import 'package:localhub/screens/layout/settings/settings_screen.dart';
 import 'package:localhub/themes/theme.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,16 +38,35 @@ Future<void> checkAppVersion() async {
   final String? versionFromApi = await vcas.versionCheck();
 
   if (versionFromApi == null) {
-    runApp(
-      const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          body: Center(
-            child: Text("server is down"),
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+    runApp(ValueListenableBuilder(
+      valueListenable: AppTheme.themeNotifier,
+      builder: (context, theme, child) {
+        return MaterialApp(
+          theme: theme,
+          navigatorKey: navigatorKey,
+          debugShowCheckedModeBanner: false,
+          home: Scaffold(
+            body: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Center(child: Text("server is down")),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      navigatorKey.currentState!.push(MaterialPageRoute(
+                          builder: (context) => const SettingsScreen()));
+                    },
+                    child: const Icon(Icons.settings),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
-    );
+        );
+      },
+    ));
   } else {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     // String appName = packageInfo.appName;
@@ -64,27 +82,42 @@ Future<void> checkAppVersion() async {
     // print(buildNumber); //1
 
     if (version != versionFromApi) {
-      runApp(MaterialApp(
-        navigatorKey: navigatorKey,
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          body: AlertDialog(
-            title: const Text('New Update Available'),
-            content: const Text(
-                'New Update is available to download. Click update to download and install manually.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  _launchURL();
-
-                  // Navigator.pop(navigatorKey.currentContext!);
-                },
-                child: const Text('Update'),
+      final GlobalKey<NavigatorState> navigatorKey =
+          GlobalKey<NavigatorState>();
+      runApp(
+        ValueListenableBuilder(
+          valueListenable: AppTheme.themeNotifier,
+          builder: (context, theme, child) {
+            return MaterialApp(
+              theme: theme,
+              navigatorKey: navigatorKey,
+              debugShowCheckedModeBanner: false,
+              home: Scaffold(
+                body: AlertDialog(
+                  title: const Text('New Update Available'),
+                  content: const Text(
+                      'New Update is available to download. Click update to download and install manually.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        _launchURL();
+                      },
+                      child: const Text('Update'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        navigatorKey.currentState!.push(MaterialPageRoute(
+                            builder: (context) => const SettingsScreen()));
+                      },
+                      child: const Text('Settings'),
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
+            );
+          },
         ),
-      ));
+      );
     } else {
       runApp(MainApp());
     }

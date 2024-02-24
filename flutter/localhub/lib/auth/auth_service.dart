@@ -34,11 +34,11 @@ class AuthService {
         localityState: localityState,
       );
 
-      if (httpRegisterResult['token'] == null) {
+      if (httpRegisterResult['response'] == null) {
         return null;
       }
-      
-      String token = httpRegisterResult['token'];
+
+      String token = httpRegisterResult['response'];
 
       // Store the token securely
       await _storage.write(key: 'token', value: token);
@@ -62,17 +62,17 @@ class AuthService {
         password: password,
       );
 
-      if (httpLoginResult['token'] == null) {
+      if (httpLoginResult['response'] == null) {
         return null;
       }
-      String token = httpLoginResult['token'];
+      String token = httpLoginResult['response'];
 
       // Store the token securely
       await _storage.write(key: 'token', value: token);
 
       return token; // Return the token to the caller
     } catch (error) {
-      return null; 
+      return null;
     }
   }
 

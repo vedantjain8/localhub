@@ -1,6 +1,22 @@
-# info
-- indexes could be created for faster data fetching but comes with a cost of more disk storage and slow write speed
-  - indexes can be created by the below command
-  ```SQL 
-  CREATE INDEX <indexNAME> ON <tableNAME>(<tableFieldName>)
-  ```
+# TODO:
+--- screen ---
+- [ ] community page
+- [ ] create post
+- [ ] explore page
+- [ ] profile page
+- [ ] settings
+- [ ] privacy policy
+- [ ] terms and conditions
+
+--- app layout ---
+- [ ] move the home_screen journal data loading to this page
+
+--- register screen ---
+- [ ] endpoint to check for unique username
+
+--- API ---
+- [ ] get community post
+- [ ] get user feed post
+- [ ] get user published posts
+- [ ] create post
+- [ ] update post

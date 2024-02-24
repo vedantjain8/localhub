@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:localhub/api/comments_service.dart';
 import 'package:localhub/api/post_service.dart';
@@ -96,6 +97,8 @@ class _PostPageState extends State<PostPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(),
@@ -115,7 +118,8 @@ class _PostPageState extends State<PostPage> {
                         voteState: voteState),
                     Container(
                       decoration: const BoxDecoration(
-                          color: Color.fromRGBO(81, 81, 81, 0.494)),
+                          // color: Color.fromRGBO(81, 81, 81, 0.494),
+                          ),
                       padding: const EdgeInsets.all(8.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -128,36 +132,79 @@ class _PostPageState extends State<PostPage> {
                               maxLines: 3,
                               scrollPadding: const EdgeInsets.all(4.0),
                               controller: _comment,
-                              decoration:
-                                  const InputDecoration(hintText: "Comment"),
+                              decoration: InputDecoration(
+                                  label: const Text('Comment'),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                    borderSide: BorderSide(
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                    borderSide: BorderSide(
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                  suffixIcon: InkWell(
+                                      onTap: () async {
+                                        showDialog(
+                                          context: context,
+                                          barrierDismissible: false,
+                                          builder: (BuildContext context) {
+                                            return const Center(
+                                                child:
+                                                    CircularProgressIndicator());
+                                          },
+                                        );
+
+                                        await cas.createCommentById(
+                                          postID: postID,
+                                          commentContent:
+                                              _comment.value.text.toString(),
+                                        );
+
+                                        setState(() {
+                                          _comment.clear();
+                                        });
+
+                                        _refreshData();
+
+                                        Navigator.pop(context);
+                                      },
+                                      overlayColor: MaterialStateProperty.all(
+                                          Colors.transparent),
+                                      child: const Icon(
+                                        FontAwesomeIcons.solidPaperPlane,
+                                      ))),
                             ),
                           ),
-                          ElevatedButton(
-                              onPressed: () async {
-                                showDialog(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (BuildContext context) {
-                                    return const Center(
-                                        child: CircularProgressIndicator());
-                                  },
-                                );
+                          // ElevatedButton(
+                          //     onPressed: () async {
+                          //       showDialog(
+                          //         context: context,
+                          //         barrierDismissible: false,
+                          //         builder: (BuildContext context) {
+                          //           return const Center(
+                          //               child: CircularProgressIndicator());
+                          //         },
+                          //       );
 
-                                await cas.createCommentById(
-                                  postID: postID,
-                                  commentContent:
-                                      _comment.value.text.toString(),
-                                );
+                          //       await cas.createCommentById(
+                          //         postID: postID,
+                          //         commentContent:
+                          //             _comment.value.text.toString(),
+                          //       );
 
-                                setState(() {
-                                  _comment.clear();
-                                });
+                          //       setState(() {
+                          //         _comment.clear();
+                          //       });
 
-                                _refreshData();
+                          //       _refreshData();
 
-                                Navigator.pop(context);
-                              },
-                              child: const Icon(Icons.send_rounded)),
+                          //       Navigator.pop(context);
+                          //     },
+                          //     child: const Icon(Icons.send_rounded)),
                         ],
                       ),
                     ),
