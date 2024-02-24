@@ -1,9 +1,9 @@
 const express = require("express");
-const pool = require("../db");
 const multer = require("multer");
-const path = require("path");
 const fs = require("fs");
 const sharp = require("sharp");
+const redisClient = require("../dbredis");
+const { getUserData } = require("./functions/users");
 
 const router = express.Router();
 
@@ -20,6 +20,15 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 router.post("/upload", upload.single("uploaded_file"), async (req, res) => {
   try {
+    const token = req.body.token;
+    const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+    if (!user_id) {
+      return response
+        .status(400)
+        .json({ status: 400, response: "Invalid name provided" });
+    }
+
     // Create directories if they don't exist
     fs.access("./upload", (error) => {
       if (error) {
@@ -32,22 +41,33 @@ router.post("/upload", upload.single("uploaded_file"), async (req, res) => {
     const ref = `${Date.now()}-${originalname}.webp`;
 
     // Convert and save original image
-    await sharp(buffer).toFile("./upload/original/" + ref);
+    // await sharp(buffer).toFile("./upload/original/" + ref);
 
     // Convert and save low-quality image
     await sharp(buffer)
       .webp({ quality: 20 })
       .toFile("./upload/low/" + ref);
     const link = `https://o8oqubodf2.starling-tet.ts.net/files/low/${ref}`;
-    return res.json({ link });
+
+    const out = { user_id: user_id, image_name: ref, image_url: link };
+    console.log(out);
+
+    await redisClient.hSet(
+      "ImageUploadLog",
+      `${ref}`,
+      JSON.stringify(out)
+    );
+
+    return res.json({ status: 200, response: link });
   } catch (error) {
-    console.error("Error uploading file:", error);
-    return res.status(500).json({ error: "Failed to upload file" });
+    console.error(error);
+    return res
+      .status(500)
+      .json({ status: 500, response: "Failed to upload file" });
   }
 });
 
 module.exports = router;
-
 {
   /* <form action="http://localhost:3001/upload" enctype="multipart/form-data" method="post">
     <div class="form-group">

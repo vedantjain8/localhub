@@ -6,7 +6,7 @@ async function hashPassword(password) {
     });
     return bcryptHash;
   } catch (error) {
-    console.error("Error hashing password:", error.message);
+    console.error(error);
     throw error;
   }
 }
@@ -16,7 +16,7 @@ async function checkPassword(password, hash) {
     const isMatch = await Bun.password.verify(password, hash);
     return isMatch;
   } catch (error) {
-    console.error("Error checking password:", error.message);
+    console.error(error);
     throw error;
   }
 }

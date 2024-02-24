@@ -35,7 +35,7 @@ async function getUserData(userToken) {
     }
     return JSON.stringify(userData);
   } catch (error) {
-    console.error("Database error:", error);
+    console.error(error);
     return error;
   }
 }

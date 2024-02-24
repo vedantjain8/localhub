@@ -17,19 +17,25 @@ const createComment = async (request, response) => {
     const { post_id, comment_content, token } = request.body;
 
     if (!token) {
-      return response.status(400).json({ error: "token is required" });
+      return response
+        .status(400)
+        .json({ status: 400, response: "token is required" });
     }
     if (!post_id) {
-      return response.status(400).json({ error: "post_id is required" });
+      return response
+        .status(400)
+        .json({ status: 400, response: "post_id is required" });
     }
     if (!comment_content) {
       return response
         .status(400)
-        .json({ error: "comment_content is required" });
+        .json({ status: 400, response: "comment_content is required" });
     }
 
     if (!allowedCharactersRegex.test(comment_content)) {
-      return response.status(400).json({ error: "enter a valid comment" });
+      return response
+        .status(400)
+        .json({ status: 400, response: "enter a valid comment" });
     }
     // Check if the user exists and get the user_id
     const userDataString = await getUserData(token);
@@ -56,26 +62,25 @@ const createComment = async (request, response) => {
       }
     }
 
-    // TODO: implement caching when cahing bool is true
-    // await pool.query(
-    //   "UPDATE posts_stats SET total_comments = total_comments + 1 WHERE post_id = $1",
-    //   [post_id]
-    // );
-
     await pool.query(
       "INSERT INTO posts_comments_link (post_id, user_id, comment_content) VALUES ($1, $2, $3) RETURNING comment_id",
       [post_id, user_id, comment_content],
       (error, result) => {
         if (error) {
-          return response.status(500).json({ error: error });
+          console.error(error);
+          return response.status(500).json({ status: 500, response: error });
         }
 
-        return response.status(200).json(result.rows[0]);
+        return response
+          .status(200)
+          .json({ status: 200, response: result.rows[0] });
       }
     );
   } catch (error) {
-    console.error("Error creating comment error:", error);
-    response.status(500).json({ error: "Error creating comment" });
+    console.error(error);
+    response
+      .status(500)
+      .json({ status: 500, response: "Error creating comment" });
   }
 };
 
@@ -90,11 +95,13 @@ const getPostComment = async (request, response) => {
   if (offset % 10 !== 0) {
     return response
       .status(400)
-      .json({ error: "offset should be 10 multiple only" });
+      .json({ status: 400, response: "offset should be 10 multiple only" });
   }
 
   if (!post_id) {
-    return response.status(400).json({ error: "post_id is required" });
+    return response
+      .status(400)
+      .json({ status: 400, response: "post_id is required" });
   }
 
   try {
@@ -108,7 +115,9 @@ const getPostComment = async (request, response) => {
 
       if (value) {
         // Data found in Redis, parse and send response
-        return response.status(200).json(JSON.parse(value));
+        return response
+          .status(200)
+          .json({ status: 200, response: JSON.parse(value) });
       }
     }
     pool.query(
@@ -131,7 +140,8 @@ const getPostComment = async (request, response) => {
       [post_id, offset],
       async (error, result) => {
         if (error) {
-          return response.status(500).json({ error: error });
+          console.error(error);
+          return response.status(500).json({ status: 500, response: error });
         }
         const userData = result.rows;
 
@@ -142,12 +152,12 @@ const getPostComment = async (request, response) => {
             JSON.stringify(userData)
           );
         }
-        return response.status(200).json(userData);
+        return response.status(200).json({ status: 200, response: userData });
       }
     );
   } catch (error) {
-    console.error("Database error:", error);
-    response.status(400).json({ error: error.message });
+    console.error(error);
+    return response.status(400).json({ status: 400, response: error.message });
   }
 };
 

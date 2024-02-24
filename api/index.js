@@ -89,7 +89,6 @@ app.use(uploadImageRoutes);
 app.get("/ip", (request, response) => response.send(request.ip));
 
 app.get("/version-apk", async (request, response) => {
-  console.log("version check request");
   if (cachingBool) {
     const apkversion = await redisClient.get(`version-apk`, config.apkversion);
 
@@ -110,10 +109,6 @@ process.on("SIGINT", async () => {
   console.log("Ctrl-C was pressed");
   process.exit();
 });
-
-// app.listen(port, () => {
-//   console.log(`Server is running on http://localhost:${port}`);
-// });
 
 http.createServer(app.handle.bind(app)).listen(3001, () => {
   console.log(`server is listening on port 3001`);

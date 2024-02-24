@@ -27,7 +27,9 @@ const createPost = async (request, response) => {
     } = request.body;
 
     if (!token) {
-      return response.status(400).json({ error: "Token is required" });
+      return response
+        .status(400)
+        .json({ status: 400, response: "Token is required" });
     }
 
     if (post_image == null || post_image == "null") {
@@ -35,7 +37,9 @@ const createPost = async (request, response) => {
     }
 
     if (!community_name) {
-      return response.status(400).json({ error: "Community name is required" });
+      return response
+        .status(400)
+        .json({ status: 400, response: "Community name is required" });
     }
 
     if (!is_adult) {
@@ -47,13 +51,17 @@ const createPost = async (request, response) => {
       !validator.isLength(post_title, { min: 5, max: 200 }) ||
       !allowedCharactersRegex.test(post_title)
     ) {
-      return response.status(400).json({ error: "Enter a valid post title" });
+      return response
+        .status(400)
+        .json({ status: 400, response: "Enter a valid post title" });
     }
 
     const user_id = JSON.parse(await getUserData(token))["user_id"];
 
     if (!user_id) {
-      return response.status(400).json({ error: "Invalid name provided" });
+      return response
+        .status(400)
+        .json({ status: 400, response: "Invalid name provided" });
     }
 
     const community_id = JSON.parse(await getCommunityData(community_name))[
@@ -63,7 +71,7 @@ const createPost = async (request, response) => {
     if (!community_id) {
       return response
         .status(400)
-        .json({ error: "Invalid community name provided" });
+        .json({ status: 400, response: "Invalid community name provided" });
     }
     // Create the post
     const createPostResult = await pool.query(
@@ -92,13 +100,13 @@ const createPost = async (request, response) => {
       await Promise.all(deletePromises);
     }
 
-    response.status(200).json({
+    return response.status(200).json({
       status: 200,
       response: `Post added with ID - ${createPostResult.rows[0].post_id}`,
     });
   } catch (error) {
-    console.error("Error creating post error:", error);
-    response.status(500).json({ status: 500, response: error });
+    console.error(error);
+    return response.status(500).json({ status: 500, response: error });
   }
 };
 
@@ -114,8 +122,9 @@ const getPosts = async (request, response) => {
       redisClient.select(0);
       const value = await redisClient.get(`posts:offset-${offset}`);
       if (value) {
-        response.status(200).json(JSON.parse(value)); // Data found in Redis
-        return;
+        return response
+          .status(200)
+          .json({ status: 200, response: JSON.parse(value) }); // Data found in Redis
       }
     }
 
@@ -148,11 +157,10 @@ const getPosts = async (request, response) => {
       await redisClient.set(`posts:offset-${offset}`, JSON.stringify(userData));
     }
 
-    response.status(200).json(userData);
-    return;
+    return response.status(200).json({ status: 200, response: userData });
   } catch (error) {
-    console.error("Database error:", error);
-    throw new Error(error.message); // Rethrow for proper error handling
+    console.error(error);
+    return response.status(400).json({ status: 400, response: error.message });
   }
 };
 
@@ -167,11 +175,13 @@ const getCommunityPosts = async (request, response) => {
   if (offset % 20 !== 0) {
     return response
       .status(400)
-      .json({ error: "offset should be 20 multiple only" });
+      .json({ status: 400, response: "offset should be 20 multiple only" });
   }
 
   if (!community_id) {
-    return response.status(400).json({ error: "community_id is required" });
+    return response
+      .status(400)
+      .json({ status: 400, response: "community_id is required" });
   }
 
   try {
@@ -181,7 +191,9 @@ const getCommunityPosts = async (request, response) => {
         `community:${community_id}:posts:offset-${offset}`
       );
       if (value) {
-        response.status(200).json(JSON.parse(value)); // Data found in Redis
+        return response
+          .status(200)
+          .json({ status: 200, response: JSON.parse(value) }); // Data found in Redis
         return;
       }
     }
@@ -221,12 +233,10 @@ const getCommunityPosts = async (request, response) => {
       );
     }
 
-    response.status(200).json(userData);
-    return;
+    return response.status(200).json({ status: 200, response: userData });
   } catch (error) {
-    console.error("Database error:", error);
-    response.status(400).json({ error: error.message });
-    throw new Error(error.message); // Rethrow for proper error handling
+    console.error(error);
+    return response.status(400).json({ status: 400, response: error.message });
   }
 };
 
@@ -239,13 +249,17 @@ const getUserFeedSubredditPosts = async (request, response) => {
   }
 
   if (!token) {
-    return response.status(400).json({ error: "Provide a user token" });
+    return response
+      .status(400)
+      .json({ status: 400, response: "Provide a user token" });
   }
 
   const user_id = JSON.parse(await getUserData(token))["user_id"];
 
   if (!user_id) {
-    return response.status(400).json({ error: "Invalid  name provided" });
+    return response
+      .status(400)
+      .json({ status: 400, response: "Invalid  name provided" });
   }
 
   try {
@@ -276,18 +290,17 @@ OFFSET $2
       [user_id, offset],
       (error, result) => {
         if (error) {
-          return response
-            .status(500)
-            .json({ errorfromgetusersubredditpost: error });
+          console.error(error);
+          return response.status(500).json({ status: 500, response: error });
         }
         userData = result.rows;
-        response.status(200).json(userData);
+        return response.status(200).json({ status: 200, response: userData });
       }
     );
     // }
   } catch (error) {
-    console.error("Database error:", error);
-    response.status(400).json({ error: error.message });
+    console.error(error);
+    return response.status(400).json({ status: 400, response: error.message });
   }
 };
 
@@ -296,7 +309,9 @@ const getPostById = async (request, response) => {
   const token = request.body.token || null;
 
   if (!post_id) {
-    return response.status(400).json({ error: "post id is required" });
+    return response
+      .status(400)
+      .json({ status: 400, response: "post id is required" });
   }
 
   try {
@@ -313,7 +328,9 @@ const getPostById = async (request, response) => {
 
       if (value) {
         // Data found in Redis, parse and send response
-        return response.status(200).json(JSON.parse(value));
+        return response
+          .status(200)
+          .json({ status: 200, response: JSON.parse(value) });
       }
     }
 
@@ -345,10 +362,10 @@ const getPostById = async (request, response) => {
       await redisClient.set(`posts:postID-${post_id}`, JSON.stringify(data));
     }
 
-    return response.status(200).json(data);
+    return response.status(200).json({ status: 200, response: data });
   } catch (error) {
-    console.error("Database error:", error);
-    response.status(400).json({ error: error.message });
+    console.error(error);
+    return response.status(400).json({ status: 400, response: error.message });
   }
 };
 
@@ -358,7 +375,9 @@ const updatePost = async (request, response) => {
     request.body;
 
   if (!token) {
-    return response.status(400).json({ error: "Provide a user token" });
+    return response
+      .status(400)
+      .json({ status: 400, response: "Provide a user token" });
   }
 
   const user_id = JSON.parse(await getUserData(token))["user_id"];
@@ -391,7 +410,7 @@ const updatePost = async (request, response) => {
   if (setClause.length === 0) {
     return response
       .status(400)
-      .json({ error: "No valid fields provided for update." });
+      .json({ status: 400, response: "No valid fields provided for update." });
   }
 
   const updateQuery = `UPDATE posts SET ${setClause.join(
@@ -400,18 +419,23 @@ const updatePost = async (request, response) => {
 
   pool.query(updateQuery, values, (error, results) => {
     if (error) {
-      return response.status(500).json({ error: error.message });
+      console.error(error);
+      return response
+        .status(500)
+        .json({ status: 500, response: error.message });
     }
 
     if (results.rowCount === 0) {
-      return response
-        .status(404)
-        .json({ error: `Post with ID ${post_id} not found for the user.` });
+      return response.status(404).json({
+        status: 404,
+        response: `Post with ID ${post_id} not found for the user.`,
+      });
     }
 
-    response
-      .status(200)
-      .json({ 200: `Post modified having Post_ID: ${post_id}` });
+    response.status(200).json({
+      status: 200,
+      response: `Post modified having Post_ID: ${post_id}`,
+    });
   });
 };
 
@@ -424,7 +448,9 @@ const getUserPubPosts = async (request, response) => {
   }
 
   if (!token) {
-    return response.status(400).json({ error: "Provide a user token" });
+    return response
+      .status(400)
+      .json({ status: 400, response: "Provide a user token" });
   }
 
   const user_id = JSON.parse(await getUserData(token))["user_id"];
@@ -437,11 +463,13 @@ const getUserPubPosts = async (request, response) => {
 
       if (value) {
         // Data found in Redis, parse and send response
-        response.status(200).json(JSON.parse(value));
+        return response
+          .status(200)
+          .json({ status: 200, response: JSON.parse(value) });
       }
-    } else {
-      pool.query(
-        `SELECT
+    }
+    pool.query(
+      `SELECT
     posts.post_id,
     posts.post_title,
     LEFT(posts.post_content, 159) as short_content,
@@ -450,11 +478,11 @@ const getUserPubPosts = async (request, response) => {
     posts.is_adult,
     posts.created_at,
     community.community_name,
-    community.logo_url,
+    community.logo_url
   FROM
     posts
-  INNER JOIN
-    subreddit ON posts.subreddit_id = subreddit.subreddit_id
+  JOIN
+    community ON posts.community_id = community.community_id
   WHERE
     posts.user_id = $1
       AND
@@ -463,26 +491,26 @@ const getUserPubPosts = async (request, response) => {
     posts.created_at DESC
   LIMIT 20
   OFFSET $2`,
-        [user_id, offset],
-        (error, result) => {
-          if (error) {
-            return response.status(500).json({ error: error });
-          }
-          userData = result.rows;
-          if (cachingBool) {
-            redisClient.setEx(
-              `postsPubBy:userID-${user_id}:${offset}`,
-              1800,
-              JSON.stringify(userData)
-            );
-          }
-          response.status(200).json(userData);
+      [user_id, offset],
+      (error, result) => {
+        if (error) {
+          console.error(error);
+          return response.status(500).json({ status: 500, response: error });
         }
-      );
-    }
+        userData = result.rows;
+        if (cachingBool) {
+          redisClient.setEx(
+            `postsPubBy:userID-${user_id}:${offset}`,
+            1800,
+            JSON.stringify(userData)
+          );
+        }
+        return response.status(200).json({ status: 200, response: userData });
+      }
+    );
   } catch (error) {
-    console.error("Database error:", error);
-    response.status(400).json({ error: error.message });
+    console.error(error);
+    return response.status(400).json({ status: 400, response: error.message });
   }
 };
 
@@ -490,7 +518,7 @@ router.get("/posts", getPosts);
 router.post("/posts/:id", getPostById);
 
 router.post("/posts", createPost);
-router.post("/users/posts", getUserPubPosts);
+router.post("/posts-by-user/", getUserPubPosts);
 
 router.put("/posts/:id", updatePost);
 

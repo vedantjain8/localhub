@@ -50,6 +50,7 @@ async function getCommunityData(communityName) {
 
     return JSON.stringify(communityData);
   } catch (error) {
+    console.error(error);
     return error;
   }
 }
