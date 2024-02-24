@@ -40,29 +40,33 @@ Future<void> checkAppVersion() async {
   if (versionFromApi == null) {
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-    runApp(
-      MaterialApp(
-        navigatorKey: navigatorKey,
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          body: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Center(child: Text("server is down")),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    navigatorKey.currentState!.push(MaterialPageRoute(
-                        builder: (context) => const SettingsScreen()));
-                  },
-                  child: const Icon(Icons.settings),
+    runApp(ValueListenableBuilder(
+      valueListenable: AppTheme.themeNotifier,
+      builder: (context, theme, child) {
+        return MaterialApp(
+          theme: theme,
+          navigatorKey: navigatorKey,
+          debugShowCheckedModeBanner: false,
+          home: Scaffold(
+            body: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Center(child: Text("server is down")),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      navigatorKey.currentState!.push(MaterialPageRoute(
+                          builder: (context) => const SettingsScreen()));
+                    },
+                    child: const Icon(Icons.settings),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
-    );
+        );
+      },
+    ));
   } else {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     // String appName = packageInfo.appName;
@@ -80,32 +84,40 @@ Future<void> checkAppVersion() async {
     if (version != versionFromApi) {
       final GlobalKey<NavigatorState> navigatorKey =
           GlobalKey<NavigatorState>();
-      runApp(MaterialApp(
-        navigatorKey: navigatorKey,
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          body: AlertDialog(
-            title: const Text('New Update Available'),
-            content: const Text(
-                'New Update is available to download. Click update to download and install manually.'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  _launchURL();
-                },
-                child: const Text('Update'),
+      runApp(
+        ValueListenableBuilder(
+          valueListenable: AppTheme.themeNotifier,
+          builder: (context, theme, child) {
+            return MaterialApp(
+              theme: theme,
+              navigatorKey: navigatorKey,
+              debugShowCheckedModeBanner: false,
+              home: Scaffold(
+                body: AlertDialog(
+                  title: const Text('New Update Available'),
+                  content: const Text(
+                      'New Update is available to download. Click update to download and install manually.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        _launchURL();
+                      },
+                      child: const Text('Update'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        navigatorKey.currentState!.push(MaterialPageRoute(
+                            builder: (context) => const SettingsScreen()));
+                      },
+                      child: const Text('Settings'),
+                    ),
+                  ],
+                ),
               ),
-              TextButton(
-                onPressed: () {
-                  navigatorKey.currentState!.push(MaterialPageRoute(
-                      builder: (context) => const SettingsScreen()));
-                },
-                child: const Text('Settings'),
-              ),
-            ],
-          ),
+            );
+          },
         ),
-      ));
+      );
     } else {
       runApp(MainApp());
     }
