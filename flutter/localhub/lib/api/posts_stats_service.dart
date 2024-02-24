@@ -60,7 +60,7 @@ class PostStatsApiService {
         var response = await http.post(url, body: {'token': '$token'});
 
         if (response.statusCode == 200) {
-          jsonResponse = jsonDecode(response.body)['response'];
+          jsonResponse = jsonDecode(response.body);
         }
       }
     } catch (e) {

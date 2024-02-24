@@ -31,7 +31,7 @@ class PostApiService {
     List<Map<String, dynamic>> responseData = [];
     try {
       var url = Uri.https(hostaddress, '/api/v1/posts/$postId');
-      var response = await http.post(url, body: {'token': '${token}'});
+      var response = await http.post(url, body: {'token': '$token'});
       if (response.statusCode == 200) {
         var jsonResponse = jsonDecode(response.body)['response'];
         if (jsonResponse is List) {
@@ -161,7 +161,7 @@ class PostApiService {
     return responseData;
   }
 
-  // get post from user
+  // get post published by user
   Future<List<Map<String, dynamic>>> getUserPublishedPost(
       {int offsetN = 0}) async {
     await getHostAddress();
@@ -170,7 +170,7 @@ class PostApiService {
     try {
       var url = Uri.https(
           hostaddress, '/api/v1/posts-by-user', {'offset': '$offsetN'});
-      var response = await http.post(url, body: {'token': '${token}'});
+      var response = await http.post(url, body: {'token': '$token'});
 
       if (response.statusCode == 200) {
         var jsonResponse = jsonDecode(response.body);
@@ -194,7 +194,6 @@ class PostApiService {
         {'error': 'catch Request failed with status: $e'}
       ];
     }
-    print(responseData);
     return responseData;
   }
 }
