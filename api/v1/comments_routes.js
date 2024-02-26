@@ -41,6 +41,12 @@ const createComment = async (request, response) => {
     const userDataString = await getUserData(token);
     const user_id = JSON.parse(userDataString)["user_id"];
 
+    if (!user_id) {
+      return response
+        .status(401)
+        .json({ status: 401, response: "Token is not valid" });
+    }
+
     // Create the comment
     if (cachingBool) {
       await redisClient.del(`comments_data:${post_id}`);

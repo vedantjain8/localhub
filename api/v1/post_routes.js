@@ -60,8 +60,8 @@ const createPost = async (request, response) => {
 
     if (!user_id) {
       return response
-        .status(400)
-        .json({ status: 400, response: "Invalid name provided" });
+        .status(401)
+        .json({ status: 401, response: "Token is not valid" });
     }
 
     const community_id = JSON.parse(await getCommunityData(community_name))[
@@ -240,7 +240,7 @@ const getCommunityPosts = async (request, response) => {
   }
 };
 
-const getUserFeedSubredditPosts = async (request, response) => {
+const getUserFeedPosts = async (request, response) => {
   var { offset } = parseInt(request.body.offset);
   var token = request.body.token;
 
@@ -258,37 +258,37 @@ const getUserFeedSubredditPosts = async (request, response) => {
 
   if (!user_id) {
     return response
-      .status(400)
-      .json({ status: 400, response: "Invalid  name provided" });
+      .status(401)
+      .json({ status: 401, response: "Token is not valid" });
   }
 
   try {
     pool.query(
       `SELECT
-    posts.post_id,
-    posts.post_title,
-    LEFT(posts.post_content, 159) as short_content,
-    posts.post_image,
-    posts.community_id,
-    posts.created_at,
-    community.community_name,
-    community.logo_url
-FROM
-    posts
-JOIN
-    subreddit ON posts.community_id = community.community_id
-JOIN
-    users_community_link ON posts.community_id = users_community_link.community_id
-WHERE
-    posts.active = 'T'
-    AND user_community_link.user_id = $1
-ORDER BY
-    posts.created_at DESC
-LIMIT 20
-OFFSET $2
+      posts.post_id,
+      posts.post_title,
+      LEFT(posts.post_content, 159) as short_content,
+      posts.post_image,
+      posts.community_id,
+      posts.created_at,
+      community.community_name,
+      community.logo_url
+  FROM
+      posts
+  JOIN
+      community ON posts.community_id = community.community_id
+  JOIN
+      users_community_link ON posts.community_id = users_community_link.community_id
+  WHERE
+      posts.active = 'T'
+      AND users_community_link.user_id = $1
+  ORDER BY
+      posts.created_at DESC
+  LIMIT 20
+  OFFSET $2  
 `,
       [user_id, offset],
-      (error, result) => {
+      async (error, result) => {
         if (error) {
           console.error(error);
           return response.status(500).json({ status: 500, response: error });
@@ -316,12 +316,6 @@ const getPostById = async (request, response) => {
 
   try {
     if (cachingBool) {
-      if (token) {
-        const user_id = JSON.parse(await getUserData(token))["user_id"];
-        if (user_id) {
-          incrementView(post_id, user_id);
-        }
-      }
       redisClient.select(0);
 
       const value = await redisClient.get(`posts:postID-${post_id}`);
@@ -358,6 +352,13 @@ const getPostById = async (request, response) => {
 
     const data = userData;
 
+    if (token) {
+      const user_id = JSON.parse(await getUserData(token))["user_id"];
+      if (user_id) {
+        incrementView(post_id, user_id);
+      }
+    }
+
     if (cachingBool) {
       await redisClient.set(`posts:postID-${post_id}`, JSON.stringify(data));
     }
@@ -381,6 +382,12 @@ const updatePost = async (request, response) => {
   }
 
   const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+  if (!user_id) {
+    return response
+      .status(401)
+      .json({ status: 401, response: "Token is not valid" });
+  }
 
   // Construct the SET clause dynamically based on provided fields
   const setClause = [];
@@ -455,6 +462,12 @@ const getUserPubPosts = async (request, response) => {
 
   const user_id = JSON.parse(await getUserData(token))["user_id"];
 
+  if (!user_id) {
+    return response
+      .status(401)
+      .json({ status: 401, response: "Token is not valid" });
+  }
+  
   try {
     if (cachingBool) {
       redisClient.select(0);
@@ -523,6 +536,6 @@ router.post("/posts-by-user/", getUserPubPosts);
 router.put("/posts/:id", updatePost);
 
 router.post("/community/posts", getCommunityPosts);
-router.post("/getUserFeedSubredditPosts", getUserFeedSubredditPosts);
+router.post("/getUserFeedPosts", getUserFeedPosts);
 
 module.exports = router;

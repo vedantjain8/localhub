@@ -51,6 +51,12 @@ const history_upvote = async (request, response) => {
 
   const user_id = JSON.parse(await getUserData(token))["user_id"];
 
+  if (!user_id) {
+    return response
+      .status(401)
+      .json({ status: 401, response: "Token is not valid" });
+  }
+
   try {
     if (cachingBool) {
       const value = await redisClient.get(
@@ -96,6 +102,12 @@ const history_downvote = async (request, response) => {
   }
 
   const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+  if (!user_id) {
+    return response
+      .status(401)
+      .json({ status: 401, response: "Token is not valid" });
+  }
 
   try {
     if (cachingBool) {

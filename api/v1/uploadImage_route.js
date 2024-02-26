@@ -25,8 +25,8 @@ router.post("/upload", upload.single("uploaded_file"), async (req, res) => {
 
     if (!user_id) {
       return response
-        .status(400)
-        .json({ status: 400, response: "Invalid name provided" });
+        .status(401)
+        .json({ status: 401, response: "Token is not valid" });
     }
 
     // Create directories if they don't exist
@@ -47,16 +47,13 @@ router.post("/upload", upload.single("uploaded_file"), async (req, res) => {
     await sharp(buffer)
       .webp({ quality: 20 })
       .toFile("./upload/low/" + ref);
-    const link = `https://o8oqubodf2.starling-tet.ts.net/files/low/${ref}`;
+    // const link = `https://o8oqubodf2.starling-tet.ts.net/files/low/${ref}`;
+    const link = `http://192.168.29.16:3001/files/low/${ref}`;
 
     const out = { user_id: user_id, image_name: ref, image_url: link };
     console.log(out);
 
-    await redisClient.hSet(
-      "ImageUploadLog",
-      `${ref}`,
-      JSON.stringify(out)
-    );
+    await redisClient.hSet("ImageUploadLog", `${ref}`, JSON.stringify(out));
 
     return res.json({ status: 200, response: link });
   } catch (error) {
