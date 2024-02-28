@@ -20,6 +20,7 @@ const meRoutes = require("./v1/me");
 const historyRoutes = require("./v1/history");
 const statsRoutes = require("./v1/stats_routes");
 const uploadImageRoutes = require("./v1/uploadImage_route");
+const searchRoutes = require("./v1/search_routes");
 const freshStartRoutes = require("./v1/freshStart");
 const config = require("./config/config.json");
 
@@ -83,6 +84,7 @@ app.use(v1path, votesRoutes);
 app.use(v1path, reportRoutes);
 app.use(v1path, meRoutes);
 app.use(v1path, historyRoutes);
+app.use(v1path, searchRoutes);
 app.use(v1path, freshStartRoutes);
 app.use(uploadImageRoutes);
 
