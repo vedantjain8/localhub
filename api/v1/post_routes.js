@@ -467,7 +467,7 @@ const getUserPubPosts = async (request, response) => {
       .status(401)
       .json({ status: 401, response: "Token is not valid" });
   }
-  
+
   try {
     if (cachingBool) {
       redisClient.select(0);
@@ -527,6 +527,65 @@ const getUserPubPosts = async (request, response) => {
   }
 };
 
+const deletePost = async (request, response) => {
+  const post_id = parseInt(request.params.id);
+  const token = request.body.token;
+
+  if (!post_id) {
+    return response
+      .status(400)
+      .json({ status: 400, response: "post id is required" });
+  }
+
+  if (!token) {
+    return response
+      .status(400)
+      .json({ status: 400, response: "Provide a user token" });
+  }
+
+  const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+  if (!user_id) {
+    return response
+      .status(401)
+      .json({ status: 401, response: "Token is not valid" });
+  }
+
+  try {
+    pool.query(
+      `UPDATE posts SET active = false WHERE user_id = $1 and post_id = $2 RETURNING post_id`,
+      [user_id, post_id],
+      async (error, result) => {
+        if (error) {
+          console.error(error);
+          return response.status(500).json({ status: 500, response: error });
+        }
+        userData = result.rows;
+
+        if (userData.length == 0) {
+          return response
+            .status(400)
+            .json({ status: 400, response: "No post found" });
+        }
+        if (cachingBool) {
+          // Get all keys matching the pattern 'post:offset-*'
+          const keys = await redisClient.keys("posts:offset-*");
+
+          // Delete each key
+          const deletePromises = keys.map((key) => redisClient.del(key));
+
+          // Wait for all keys to be deleted
+          await Promise.all(deletePromises);
+        }
+        return response.status(200).json({ status: 200, response: userData });
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    return response.status(400).json({ status: 400, response: error.message });
+  }
+};
+
 router.get("/posts", getPosts);
 router.post("/posts/:id", getPostById);
 
@@ -534,6 +593,7 @@ router.post("/posts", createPost);
 router.post("/posts-by-user/", getUserPubPosts);
 
 router.put("/posts/:id", updatePost);
+router.delete("/posts/:id", deletePost);
 
 router.post("/community/posts", getCommunityPosts);
 router.post("/getUserFeedPosts", getUserFeedPosts);

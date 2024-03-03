@@ -48,10 +48,7 @@ router.post("/upload", upload.single("uploaded_file"), async (req, res) => {
       .webp({ quality: 20 })
       .toFile("./upload/low/" + ref);
     // const link = `https://o8oqubodf2.starling-tet.ts.net/files/low/${ref}`;
-    const link = `http://192.168.29.16:3001/files/low/${ref}`;
-
-    const out = { user_id: user_id, image_name: ref, image_url: link };
-    console.log(out);
+    const link = `https://localhub-flutter.duckdns.org:3002/files/low/${ref}`;
 
     await redisClient.hSet("ImageUploadLog", `${ref}`, JSON.stringify(out));
 
