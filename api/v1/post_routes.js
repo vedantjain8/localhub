@@ -263,6 +263,30 @@ const getUserFeedPosts = async (request, response) => {
   }
 
   try {
+    mergedList = [];
+
+    if (cachingBool) {
+      const communityJoinedFromCache = await redisClient.hGetAll(
+        "user_community_data",
+        `user:${user_id}:community:*`
+      );
+      for (const singleData in communityJoinedFromCache) {
+        data = JSON.parse(communityJoinedFromCache[singleData]);
+        mergedList.push(data.communityId);
+      }
+    }
+
+    const communityJoinedFromDB = await pool.query(
+      "SELECT community_id FROM users_community_link WHERE user_id = $1",
+      [user_id]
+    );
+
+    // Extract community IDs from the database query result and push them to the mergedList array
+    const communityIdsFromDB = communityJoinedFromDB.rows.map(
+      (row) => row.community_id
+    );
+    mergedList.push(...communityIdsFromDB);
+
     pool.query(
       `SELECT
       posts.post_id,
@@ -282,6 +306,7 @@ const getUserFeedPosts = async (request, response) => {
   WHERE
       posts.active = 'T'
       AND users_community_link.user_id = $1
+      AND posts.community_id IN (${mergedList})
   ORDER BY
       posts.created_at DESC
   LIMIT 20
@@ -297,7 +322,6 @@ const getUserFeedPosts = async (request, response) => {
         return response.status(200).json({ status: 200, response: userData });
       }
     );
-    // }
   } catch (error) {
     console.error(error);
     return response.status(400).json({ status: 400, response: error.message });
