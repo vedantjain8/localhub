@@ -287,6 +287,8 @@ const getUserFeedPosts = async (request, response) => {
     );
     mergedList.push(...communityIdsFromDB);
 
+    console.log(mergedList);
+
     pool.query(
       `SELECT
       posts.post_id,
@@ -301,18 +303,15 @@ const getUserFeedPosts = async (request, response) => {
       posts
   JOIN
       community ON posts.community_id = community.community_id
-  JOIN
-      users_community_link ON posts.community_id = users_community_link.community_id
   WHERE
       posts.active = 'T'
-      AND users_community_link.user_id = $1
       AND posts.community_id IN (${mergedList})
   ORDER BY
       posts.created_at DESC
   LIMIT 20
-  OFFSET $2  
+  OFFSET $1
 `,
-      [user_id, offset],
+      [offset],
       async (error, result) => {
         if (error) {
           console.error(error);
@@ -594,12 +593,19 @@ const deletePost = async (request, response) => {
         if (cachingBool) {
           // Get all keys matching the pattern 'post:offset-*'
           const keys = await redisClient.keys("posts:offset-*");
+          const keysforPubPostByUser = await redisClient.keys(
+            `postsPubBy:userID-${user_id}:*`
+          );
 
           // Delete each key
           const deletePromises = keys.map((key) => redisClient.del(key));
+          const deletePromisesforPubPostByUser = keysforPubPostByUser.map(
+            (key) => redisClient.del(key)
+          );
 
           // Wait for all keys to be deleted
           await Promise.all(deletePromises);
+          await Promise.all(deletePromisesforPubPostByUser);
         }
         return response.status(200).json({ status: 200, response: userData });
       }
