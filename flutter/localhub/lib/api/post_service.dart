@@ -56,6 +56,30 @@ class PostApiService {
     return responseData;
   }
 
+// delete post by postid
+  Future<Map<String, dynamic>> deletePostById({required int postId}) async {
+    await getHostAddress();
+    await getUserToken();
+    Map<String, dynamic> responseData = {};
+    try {
+      var url = Uri.https(hostaddress, '/api/v1/posts/$postId');
+      var response = await http.delete(url, body: {'token': '$token'});
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        responseData = jsonResponse;
+      } else {
+        responseData = {
+          'error': 'else Request failed with status: ${response.statusCode}'
+        };
+      }
+    } catch (e) {
+      print('Error: $e');
+      responseData = {'error': 'catch Request failed with status: $e'};
+    }
+    return responseData;
+  }
+
 // posts for user home screen filtered by none and order by created_at desc
   Future<List<Map<String, dynamic>>> getExplorePost({int offsetN = 0}) async {
     await getHostAddress();

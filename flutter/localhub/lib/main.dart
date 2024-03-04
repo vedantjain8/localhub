@@ -21,7 +21,7 @@ Future<void> initializeHostAddress() async {
   final prefs = await SharedPreferences.getInstance();
   if (!prefs.containsKey('hostaddress')) {
     // await prefs.setString('hostaddress', "192.168.29.16:3002");
-    await prefs.setString('hostaddress', "o8oqubodf2.starling-tet.ts.net");
+    await prefs.setString('hostaddress', "localhub-flutter.duckdns.org:3002");
   }
 }
 

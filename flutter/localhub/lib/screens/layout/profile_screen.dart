@@ -166,6 +166,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                           CustomPostCardWidget(
                             journals: _journals,
                             hasMoreData: _hasMoreData,
+                            isFromProfilePage: true,
                           ),
                           ListView.builder(
                             itemBuilder: (context, index) => Container(
