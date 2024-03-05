@@ -287,8 +287,6 @@ const getUserFeedPosts = async (request, response) => {
     );
     mergedList.push(...communityIdsFromDB);
 
-    console.log(mergedList);
-
     pool.query(
       `SELECT
       posts.post_id,
