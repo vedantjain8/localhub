@@ -2,7 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localhub/api/about_user_service.dart';
+import 'package:localhub/api/comments_service.dart';
 import 'package:localhub/api/post_service.dart';
+import 'package:localhub/widgets/custom_comment_list_view_builder_widget.dart';
 import 'package:localhub/widgets/custom_post_card_widget.dart';
 import 'package:localhub/widgets/custom_shimmer.dart';
 
@@ -15,39 +17,44 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen>
     with SingleTickerProviderStateMixin {
-  bool _hasMoreData = true;
-  int offset = 0;
+  bool hasMoreDataPosts = true;
+  int offsetPosts = 0;
 
-  List<Map<String, dynamic>> _journals = [];
-  Map<String, dynamic> _meJournal = {};
+  bool hasMoreDataComments = true;
+  int offsetComments = 0;
+
+  List<Map<String, dynamic>> postJournals = [];
+  List<Map<String, dynamic>> commentsJournals = [];
+  Map<String, dynamic> meJournal = {};
 
   final PostApiService pas = PostApiService();
   final AboutUserApiService auas = AboutUserApiService();
+  final CommentsApiService cas = CommentsApiService();
 
-  void _loadData() async {
-    if (!_hasMoreData) {
+  void _loadPostData() async {
+    if (!hasMoreDataPosts) {
       return; // No more data to load
     }
 
     final List<Map<String, dynamic>> data = await pas.getUserPublishedPost(
-      offsetN: offset,
+      offsetN: offsetPosts,
     );
 
     if (data.isEmpty) {
       setState(() {
-        _hasMoreData = false;
+        hasMoreDataPosts = false;
       });
       return;
     }
 
     setState(() {
-      _journals = [..._journals, ...data];
-      offset += 20;
+      postJournals = [...postJournals, ...data];
+      offsetPosts += 20;
     });
 
     if (data.length != 20) {
       setState(() {
-        _hasMoreData = false;
+        hasMoreDataPosts = false;
       });
       return;
     }
@@ -55,17 +62,50 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   Future<void> _refreshData() async {
     setState(() {
-      _journals = [];
-      offset = 0;
-      _hasMoreData = true;
+      postJournals = [];
+      commentsJournals = [];
+      offsetPosts = 0;
+      offsetComments = 0;
+      hasMoreDataPosts = true;
+      hasMoreDataComments = true;
     });
-    _loadData();
+    _loadPostData();
+    _loadCommentData();
+  }
+
+  void _loadCommentData() async {
+    if (!hasMoreDataComments) {
+      return; // No more data to load
+    }
+
+    final List<Map<String, dynamic>> data = await cas.getUserPublishedComments(
+      offsetN: offsetComments,
+    );
+
+    if (data.isEmpty) {
+      setState(() {
+        hasMoreDataComments = false;
+      });
+      return;
+    }
+
+    setState(() {
+      commentsJournals = [...commentsJournals, ...data];
+      offsetComments += 20;
+    });
+
+    if (data.length != 20) {
+      setState(() {
+        hasMoreDataComments = false;
+      });
+      return;
+    }
   }
 
   void _loadMeData() async {
     Map<String, dynamic> data = await auas.aboutUserData();
     setState(() {
-      _meJournal = data;
+      meJournal = data;
     });
   }
 
@@ -79,7 +119,8 @@ class _ProfileScreenState extends State<ProfileScreen>
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _loadPostData();
+    _loadCommentData();
     _loadMeData();
     _tabController = TabController(length: 2, vsync: this);
   }
@@ -91,7 +132,7 @@ class _ProfileScreenState extends State<ProfileScreen>
       body: RefreshIndicator(
         onRefresh: () => _refreshData(),
         child: SingleChildScrollView(
-          child: _meJournal.isEmpty
+          child: meJournal.isEmpty
               ? const CustomShimmer()
               : Column(
                   children: [
@@ -103,7 +144,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                           CircleAvatar(
                             radius: 45,
                             backgroundImage: CachedNetworkImageProvider(
-                              _meJournal["avatar_url"],
+                              meJournal["avatar_url"],
                             ),
                           ),
                           const SizedBox(width: 20),
@@ -111,16 +152,16 @@ class _ProfileScreenState extends State<ProfileScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _meJournal["username"],
+                                meJournal["username"],
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 30),
                               ),
                               Text(
-                                _meJournal["locality_state"] +
+                                meJournal["locality_state"] +
                                     ", " +
-                                    _meJournal["locality_country"],
+                                    meJournal["locality_country"],
                               ),
-                              Text(_meJournal["bio"] ?? "")
+                              Text(meJournal["bio"] ?? "")
                             ],
                           ),
                           const Spacer(),
@@ -164,19 +205,14 @@ class _ProfileScreenState extends State<ProfileScreen>
                         controller: _tabController,
                         children: [
                           CustomPostCardWidget(
-                            journals: _journals,
-                            hasMoreData: _hasMoreData,
+                            journals: postJournals,
+                            hasMoreData: hasMoreDataPosts,
                             isFromProfilePage: true,
                           ),
-                          ListView.builder(
-                            itemBuilder: (context, index) => Container(
-                              color: index.isOdd
-                                  ? colorScheme.primary
-                                  : colorScheme.inversePrimary,
-                              height: 100,
-                            ),
-                            itemCount: 5,
-                          )
+                          commentListViewBuilderWidget(
+                              commentJournals: commentsJournals,
+                              hasMoreData: hasMoreDataComments,
+                              isFromProfilePage: true)
                         ],
                       ),
                     ),
