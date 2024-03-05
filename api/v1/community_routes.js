@@ -55,6 +55,12 @@ const createCommunity = async (request, response) => {
     }
     const user_id = JSON.parse(await getUserData(token))["user_id"];
 
+    if (!user_id) {
+      return response
+        .status(401)
+        .json({ status: 401, response: "Token is not valid" });
+    }
+
     const community_id = (await getCommunityData(community_name)) || null;
 
     if (community_id) {
@@ -160,6 +166,12 @@ const joinCommunityStatus = async (request, response) => {
 
   const user_id = JSON.parse(await getUserData(token))["user_id"];
 
+  if (!user_id) {
+    return response
+      .status(401)
+      .json({ status: 401, response: "Token is not valid" });
+  }
+
   try {
     const checkBool = await checkJoinedCommunity(community_id, user_id);
 
@@ -188,6 +200,13 @@ const joinCommunity = async (request, response) => {
   }
 
   const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+  if (!user_id) {
+    return response
+      .status(401)
+      .json({ status: 401, response: "Token is not valid" });
+  }
+
   try {
     // community_user_link & community_stats
 
@@ -273,6 +292,12 @@ const leaveCommunity = async (request, response) => {
   }
 
   const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+  if (!user_id) {
+    return response
+      .status(401)
+      .json({ status: 401, response: "Token is not valid" });
+  }
 
   try {
     // community_user_link & community_stats

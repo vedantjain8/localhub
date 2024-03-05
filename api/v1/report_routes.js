@@ -14,14 +14,24 @@ const reportComment = async (request, response) => {
     const { token, comment_id } = request.body;
 
     if (!token) {
-      return response.status(400).json({ status: 400, response: "token is required" });
+      return response
+        .status(400)
+        .json({ status: 400, response: "token is required" });
     }
     if (!comment_id) {
-      return response.status(400).json({ status: 400, response: "commentID is required" });
+      return response
+        .status(400)
+        .json({ status: 400, response: "commentID is required" });
     }
 
     // Check if the user exists and get the user_id
     const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+    if (!user_id) {
+      return response
+        .status(401)
+        .json({ status: 401, response: "Token is not valid" });
+    }
 
     if (cachingBool) {
       await redisClient.hSet(
@@ -41,13 +51,16 @@ const reportComment = async (request, response) => {
           if (error) {
             if (error.code === "23505") {
               // Unique violation error, the record already exists
-              response
-                .status(409)
-                .json({ status: 409, response: "User already reported this comment" });
+              response.status(409).json({
+                status: 409,
+                response: "User already reported this comment",
+              });
             } else {
               // Other error
               console.error(error);
-              return response.status(400).json({ status: 400, response: "Error in reporting" });
+              return response
+                .status(400)
+                .json({ status: 400, response: "Error in reporting" });
             }
           }
         }
@@ -58,7 +71,9 @@ const reportComment = async (request, response) => {
       .json({ status: 200, response: "Successfully reported comment" });
   } catch (error) {
     console.error(error);
-    return response.status(500).json({ status: 500, response: "Error reporting comment" });
+    return response
+      .status(500)
+      .json({ status: 500, response: "Error reporting comment" });
   }
 };
 
@@ -67,14 +82,24 @@ const reportPost = async (request, response) => {
     const { token, post_id } = request.body;
 
     if (!token) {
-      return response.status(400).json({ status: 400, response: "token is required" });
+      return response
+        .status(400)
+        .json({ status: 400, response: "token is required" });
     }
     if (!post_id) {
-      return response.status(400).json({ status: 400, response: "post_id is required" });
+      return response
+        .status(400)
+        .json({ status: 400, response: "post_id is required" });
     }
 
     // Check if the user exists and get the user_id
     const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+    if (!user_id) {
+      return response
+        .status(401)
+        .json({ status: 401, response: "Token is not valid" });
+    }
 
     if (cachingBool) {
       await redisClient.hSet(
@@ -94,22 +119,29 @@ const reportPost = async (request, response) => {
           if (error) {
             if (error.code === "23505") {
               // Unique violation error, the record already exists
-              response
-                .status(409)
-                .json({ status: 409, response: "User already reported this post" });
+              response.status(409).json({
+                status: 409,
+                response: "User already reported this post",
+              });
             } else {
               // Other error
               console.error(error);
-              return response.status(400).json({ status: 400, response: "Error in reporting" });
+              return response
+                .status(400)
+                .json({ status: 400, response: "Error in reporting" });
             }
           }
         }
       );
     }
-    return response.status(200).json({ status: 200, response: "Successfully reported post" });
+    return response
+      .status(200)
+      .json({ status: 200, response: "Successfully reported post" });
   } catch (error) {
     console.error(error);
-    return response.status(500).json({ status: 500, response: "Error reporting post" });
+    return response
+      .status(500)
+      .json({ status: 500, response: "Error reporting post" });
   }
 };
 

@@ -38,12 +38,10 @@ const createUser = async (request, response) => {
     }
 
     if (reservedKeywordsFile().includes(username.toLowerCase())) {
-      return response
-        .status(400)
-        .json({
-          status: 400,
-          response: "Username is a reserved keyword and cannot be used.",
-        });
+      return response.status(400).json({
+        status: 400,
+        response: "Username is a reserved keyword and cannot be used.",
+      });
     }
 
     // Check if the username is available
@@ -98,7 +96,9 @@ const createUser = async (request, response) => {
       .json({ status: 200, response: insertUserResult.rows[0].token });
   } catch (error) {
     console.error(error);
-    return response.status(500).json({ status: 500, response: "Error creating user" });
+    return response
+      .status(500)
+      .json({ status: 500, response: "Error creating user" });
   }
 };
 
@@ -112,6 +112,12 @@ const deleteUser = async (request, response) => {
       .json({ status: 400, response: "token can not be null" });
   }
   const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+  if (!user_id) {
+    return response
+      .status(401)
+      .json({ status: 401, response: "Token is not valid" });
+  }
 
   pool.query(
     "UPDATE users SET active = 'false' WHERE userid = $1",

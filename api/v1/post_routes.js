@@ -60,8 +60,8 @@ const createPost = async (request, response) => {
 
     if (!user_id) {
       return response
-        .status(400)
-        .json({ status: 400, response: "Invalid name provided" });
+        .status(401)
+        .json({ status: 401, response: "Token is not valid" });
     }
 
     const community_id = JSON.parse(await getCommunityData(community_name))[
@@ -240,7 +240,7 @@ const getCommunityPosts = async (request, response) => {
   }
 };
 
-const getUserFeedSubredditPosts = async (request, response) => {
+const getUserFeedPosts = async (request, response) => {
   var { offset } = parseInt(request.body.offset);
   var token = request.body.token;
 
@@ -258,37 +258,59 @@ const getUserFeedSubredditPosts = async (request, response) => {
 
   if (!user_id) {
     return response
-      .status(400)
-      .json({ status: 400, response: "Invalid  name provided" });
+      .status(401)
+      .json({ status: 401, response: "Token is not valid" });
   }
 
   try {
+    mergedList = [];
+
+    if (cachingBool) {
+      const communityJoinedFromCache = await redisClient.hGetAll(
+        "user_community_data",
+        `user:${user_id}:community:*`
+      );
+      for (const singleData in communityJoinedFromCache) {
+        data = JSON.parse(communityJoinedFromCache[singleData]);
+        mergedList.push(data.communityId);
+      }
+    }
+
+    const communityJoinedFromDB = await pool.query(
+      "SELECT community_id FROM users_community_link WHERE user_id = $1",
+      [user_id]
+    );
+
+    // Extract community IDs from the database query result and push them to the mergedList array
+    const communityIdsFromDB = communityJoinedFromDB.rows.map(
+      (row) => row.community_id
+    );
+    mergedList.push(...communityIdsFromDB);
+
     pool.query(
       `SELECT
-    posts.post_id,
-    posts.post_title,
-    LEFT(posts.post_content, 159) as short_content,
-    posts.post_image,
-    posts.community_id,
-    posts.created_at,
-    community.community_name,
-    community.logo_url
-FROM
-    posts
-JOIN
-    subreddit ON posts.community_id = community.community_id
-JOIN
-    users_community_link ON posts.community_id = users_community_link.community_id
-WHERE
-    posts.active = 'T'
-    AND user_community_link.user_id = $1
-ORDER BY
-    posts.created_at DESC
-LIMIT 20
-OFFSET $2
+      posts.post_id,
+      posts.post_title,
+      LEFT(posts.post_content, 159) as short_content,
+      posts.post_image,
+      posts.community_id,
+      posts.created_at,
+      community.community_name,
+      community.logo_url
+  FROM
+      posts
+  JOIN
+      community ON posts.community_id = community.community_id
+  WHERE
+      posts.active = 'T'
+      AND posts.community_id IN (${mergedList})
+  ORDER BY
+      posts.created_at DESC
+  LIMIT 20
+  OFFSET $1
 `,
-      [user_id, offset],
-      (error, result) => {
+      [offset],
+      async (error, result) => {
         if (error) {
           console.error(error);
           return response.status(500).json({ status: 500, response: error });
@@ -297,7 +319,6 @@ OFFSET $2
         return response.status(200).json({ status: 200, response: userData });
       }
     );
-    // }
   } catch (error) {
     console.error(error);
     return response.status(400).json({ status: 400, response: error.message });
@@ -316,12 +337,6 @@ const getPostById = async (request, response) => {
 
   try {
     if (cachingBool) {
-      if (token) {
-        const user_id = JSON.parse(await getUserData(token))["user_id"];
-        if (user_id) {
-          incrementView(post_id, user_id);
-        }
-      }
       redisClient.select(0);
 
       const value = await redisClient.get(`posts:postID-${post_id}`);
@@ -358,6 +373,13 @@ const getPostById = async (request, response) => {
 
     const data = userData;
 
+    if (token) {
+      const user_id = JSON.parse(await getUserData(token))["user_id"];
+      if (user_id) {
+        incrementView(post_id, user_id);
+      }
+    }
+
     if (cachingBool) {
       await redisClient.set(`posts:postID-${post_id}`, JSON.stringify(data));
     }
@@ -381,6 +403,12 @@ const updatePost = async (request, response) => {
   }
 
   const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+  if (!user_id) {
+    return response
+      .status(401)
+      .json({ status: 401, response: "Token is not valid" });
+  }
 
   // Construct the SET clause dynamically based on provided fields
   const setClause = [];
@@ -455,6 +483,12 @@ const getUserPubPosts = async (request, response) => {
 
   const user_id = JSON.parse(await getUserData(token))["user_id"];
 
+  if (!user_id) {
+    return response
+      .status(401)
+      .json({ status: 401, response: "Token is not valid" });
+  }
+
   try {
     if (cachingBool) {
       redisClient.select(0);
@@ -514,6 +548,72 @@ const getUserPubPosts = async (request, response) => {
   }
 };
 
+const deletePost = async (request, response) => {
+  const post_id = parseInt(request.params.id);
+  const token = request.body.token;
+
+  if (!post_id) {
+    return response
+      .status(400)
+      .json({ status: 400, response: "post id is required" });
+  }
+
+  if (!token) {
+    return response
+      .status(400)
+      .json({ status: 400, response: "Provide a user token" });
+  }
+
+  const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+  if (!user_id) {
+    return response
+      .status(401)
+      .json({ status: 401, response: "Token is not valid" });
+  }
+
+  try {
+    pool.query(
+      `UPDATE posts SET active = false WHERE user_id = $1 and post_id = $2 RETURNING post_id`,
+      [user_id, post_id],
+      async (error, result) => {
+        if (error) {
+          console.error(error);
+          return response.status(500).json({ status: 500, response: error });
+        }
+        userData = result.rows;
+
+        if (userData.length == 0) {
+          return response
+            .status(400)
+            .json({ status: 400, response: "No post found" });
+        }
+        if (cachingBool) {
+          // Get all keys matching the pattern 'post:offset-*'
+          const keys = await redisClient.keys("posts:offset-*");
+          const keysforPubPostByUser = await redisClient.keys(
+            `postsPubBy:userID-${user_id}:*`
+          );
+
+          // Delete each key
+          const deletePromises = keys.map((key) => redisClient.del(key));
+          const deletePromisesforPubPostByUser = keysforPubPostByUser.map(
+            (key) => redisClient.del(key)
+          );
+
+          // Wait for all keys to be deleted
+          await Promise.all(deletePromises);
+          await Promise.all(deletePromisesforPubPostByUser);
+        }
+        return response.status(200).json({ status: 200, response: userData });
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    return response.status(400).json({ status: 400, response: error.message });
+  }
+};
+
 router.get("/posts", getPosts);
 router.post("/posts/:id", getPostById);
 
@@ -521,8 +621,9 @@ router.post("/posts", createPost);
 router.post("/posts-by-user/", getUserPubPosts);
 
 router.put("/posts/:id", updatePost);
+router.delete("/posts/:id", deletePost);
 
 router.post("/community/posts", getCommunityPosts);
-router.post("/getUserFeedSubredditPosts", getUserFeedSubredditPosts);
+router.post("/getUserFeedPosts", getUserFeedPosts);
 
 module.exports = router;
