@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localhub/api/community_stats_service.dart';
+import 'package:localhub/api/post_service.dart';
 import 'package:localhub/api/posts_stats_service.dart';
 import 'package:localhub/api/report_service.dart';
 import 'package:localhub/functions/datetimeoperations.dart';
@@ -18,6 +19,7 @@ class CustomPostCardWidget extends StatefulWidget {
   final bool? hasMoreData;
   final bool isFromPostPage;
   final bool isFromSubPage;
+  final bool isFromProfilePage;
   final bool? voteState;
   const CustomPostCardWidget({
     super.key,
@@ -25,6 +27,7 @@ class CustomPostCardWidget extends StatefulWidget {
     this.hasMoreData,
     this.isFromPostPage = false,
     this.isFromSubPage = false,
+    this.isFromProfilePage = false,
     this.voteState,
   });
 
@@ -36,6 +39,7 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
   Map<int, bool> voteStateMap = {};
 
   final PostStatsApiService pass = PostStatsApiService();
+  final PostApiService pas = PostApiService();
   final ReportApiService ras = ReportApiService();
   final CommunityStatsApiService csas = CommunityStatsApiService();
   final storage = const FlutterSecureStorage();
@@ -71,10 +75,11 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
     }
   }
 
-  void showPopUpMenuAtTap(
-      {required BuildContext context,
-      required TapDownDetails details,
-      int? postID}) {
+  void showPopUpMenuAtTap({
+    required BuildContext context,
+    required TapDownDetails details,
+    required int postID,
+  }) {
     showMenu(
       context: context,
       position: RelativeRect.fromLTRB(
@@ -85,18 +90,42 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
       ),
       items: [
         const PopupMenuItem<String>(value: '1', child: Text('Report')),
-        // const PopupMenuItem<String>(value: '1', child: Text('Report')),
+        if (widget.isFromProfilePage)
+          const PopupMenuItem<String>(value: '2', child: Text('Delete')),
       ],
       elevation: 8.0,
     ).then((value) {
       if (value == null) return;
 
       if (value == "1") {
-        ras.reportPost(postID: postID!);
+        ras.reportPost(postID: postID);
+      } else if (value == "2") {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Delete this post?'),
+              content: const Text(
+                  'This action cannot be undone. Are you sure you want to delete this post?'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    pas.deletePostById(postId: postID);
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                  child: const Text('Delete'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                  child: const Text('Cancel'),
+                ),
+              ],
+            );
+          },
+        );
       }
-      // else if(value == "2"){
-      //   //code here
-      // }
     });
   }
 
@@ -115,7 +144,6 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
 
   void _joinORleaveCommunity(
       {required int communityID, required bool isJoined}) async {
-    print(isJoined);
     if (isJoined == true) {
       await csas.leaveCommuntiy(communityID: communityID);
       await storage.write(
@@ -141,7 +169,9 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
     bool? isFromSubPage = widget.isFromSubPage;
 
     return (journals.isEmpty)
-        ? const CustomShimmer()
+        ? (hasMoreData ?? true)
+            ? const CustomShimmer()
+            : const Center(child: Text("No more data to load"))
         : ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -207,47 +237,55 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                           Padding(
                             padding:
                                 const EdgeInsets.only(top: 10.0, left: 10.0),
-                            child: InkWell(
-                              onTap: () {
-                                if (!isFromSubPage) {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => CommunityPage(
-                                        communityID: finalPost["community_id"],
+                            child: Row(
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    if (!isFromSubPage) {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => CommunityPage(
+                                            communityID:
+                                                finalPost["community_id"],
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  child: Row(
+                                    children: [
+                                      // const SizedBox(width: 10),
+                                      Container(
+                                        height: 33,
+                                        width: 33,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          image: DecorationImage(
+                                            image: CachedNetworkImageProvider(
+                                                finalPost["logo_url"]),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                }
-                              },
-                              child: Row(
-                                children: [
-                                  // const SizedBox(width: 10),
-                                  Container(
-                                    height: 33,
-                                    width: 33,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: DecorationImage(
-                                        image: CachedNetworkImageProvider(
-                                            finalPost["logo_url"]),
-                                        fit: BoxFit.cover,
+                                      const SizedBox(
+                                        width: 10,
                                       ),
-                                    ),
+                                      Text(
+                                        finalPost["community_name"],
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(
+                                        width: 10,
+                                      ),
+                                      Text(timeAgo(finalPost["created_at"])),
+                                    ],
                                   ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text(
-                                    finalPost["community_name"],
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text(timeAgo(finalPost["created_at"])),
-                                  const Spacer(),
-                                  GestureDetector(
+                                ),
+                                const Spacer(),
+                                SizedBox(
+                                  width: 30,
+                                  child: GestureDetector(
                                     onTapDown: (details) {
                                       showPopUpMenuAtTap(
                                           context: context,
@@ -257,8 +295,8 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                                     child: const FaIcon(
                                         FontAwesomeIcons.ellipsisVertical),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
 

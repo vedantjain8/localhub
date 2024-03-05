@@ -9,7 +9,7 @@ class CommentsApiService {
     hostaddress = prefs.getString('hostaddress')!;
   }
 
-  void getUserToken() async {
+  Future<void> getUserToken() async {
     token = await _storage.read(key: 'token');
   }
 
@@ -29,7 +29,7 @@ class CommentsApiService {
     List<Map<String, dynamic>> responseData = [];
     try {
       var url = Uri.https(
-          hostaddress, '/api/v1/getpostcomment', {'offset': '$offsetN'});
+          hostaddress, '/api/v1/comments/posts', {'offset': '$offsetN'});
       var response = await http.post(url, body: {'post_id': '$postId'});
 
       if (response.statusCode == 200) {
@@ -66,7 +66,7 @@ class CommentsApiService {
         'post_id': '$postID',
         'comment_content': '$commentContent',
       };
-      var url = Uri.https(hostaddress, '/api/v1/createComment/');
+      var url = Uri.https(hostaddress, '/api/v1/comments/create');
       var response = await http.post(url, body: sendBody);
 
       if (response.statusCode == 200) {
@@ -76,5 +76,71 @@ class CommentsApiService {
       jsonResponse = {"error creating comment": e};
     }
     return jsonResponse;
+  }
+
+  Future<List<Map<String, dynamic>>> getUserPublishedComments(
+      {int offsetN = 0}) async {
+    await getHostAddress();
+    await getUserToken();
+    List<Map<String, dynamic>> responseData = [];
+    try {
+      var url = Uri.https(
+          hostaddress, '/api/v1/comments/user', {'offset': '$offsetN'});
+      var response = await http.post(url, body: {'token': '$token'});
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        jsonResponse = jsonResponse['response'];
+        if (jsonResponse is List) {
+          // Check if jsonResponse is a List
+          responseData = jsonResponse.cast<Map<String, dynamic>>().toList();
+        } else {
+          // Handle the case where jsonResponse is not a List
+          responseData = [
+            {'error': 'Unexpected response format'}
+          ];
+        }
+      } else {
+        responseData = [
+          {'error': 'else Request failed with status: ${response.statusCode}'}
+        ];
+      }
+    } catch (e) {
+      responseData = [
+        {'error': 'catch Request failed with status: $e'}
+      ];
+    }
+    return responseData;
+  }
+
+  // delete comment by comment id
+  Future<Map<String, dynamic>> deleteCommentById({
+    required int postId,
+    required int commentId,
+  }) async {
+    await getHostAddress();
+    await getUserToken();
+    Map<String, dynamic> responseData = {};
+    try {
+      var url = Uri.https(hostaddress, '/api/v1/comments/delete');
+      var response = await http.delete(url, body: {
+        'token': '$token',
+        'comment_id': '$commentId',
+        'post_id': '$postId'
+      });
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        responseData = jsonResponse;
+      } else {
+        responseData = {
+          'error': 'else Request failed with status: ${response.statusCode}'
+        };
+      }
+    } catch (e) {
+      print('Error: $e');
+      responseData = {'error': 'catch Request failed with status: $e'};
+    }
+    return responseData;
   }
 }

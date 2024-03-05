@@ -23,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return; // No more data to load
     }
 
-    final List<Map<String, dynamic>> data = await pas.getHomePost(
+    final List<Map<String, dynamic>> data = await pas.getUserJoinedPost(
       offsetN: offset,
     );
 
