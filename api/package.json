@@ -10,6 +10,7 @@
   },
   "scripts": {
     "test": "mocha v1/test/user.test.js",
+    "migrate": "node-pg-migrate",
     "start": "bun index.js"
   },
   "dependencies": {
@@ -22,6 +23,7 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "node-cron": "^3.0.3",
+    "node-pg-migrate": "^6.2.2",
     "pg": "^8.11.3",
     "redis": "^4.6.11",
     "sharp": "^0.33.1",
