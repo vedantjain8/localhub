@@ -104,17 +104,6 @@ class _AppLayoutState extends State<AppLayout> {
                       height: 40.0,
                     ),
 
-                    // myprofile
-                    InkWell(
-                      onTap: () {
-                        scaffoldKey.currentState!.closeEndDrawer();
-                        _selectedTab(3);
-                        customBottomAppBarKey.currentState?.updateIndex(3);
-                      },
-                      child: _endDrawerItem(
-                          FontAwesomeIcons.solidUser, 'My Account'),
-                    ),
-
                     // create a subreddit
                     InkWell(
                       onTap: () {
@@ -170,7 +159,7 @@ class _AppLayoutState extends State<AppLayout> {
                     height: 33,
                     width: 33,
                     decoration: BoxDecoration(
-                      color: colorScheme.onInverseSurface,
+                      color: colorScheme.primary,
                       shape: BoxShape.circle,
                       image: DecorationImage(
                         image: CachedNetworkImageProvider(
@@ -204,7 +193,7 @@ class _AppLayoutState extends State<AppLayout> {
         ],
       ),
       bottomNavigationBar: CustomBottomAppBar(
-        key: customBottomAppBarKey,
+        // key: customBottomAppBarKey,
         onTabSelected: (index) {
           _selectedTab(index);
         },

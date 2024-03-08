@@ -77,6 +77,3 @@ class _CustomBottomAppBarState extends State<CustomBottomAppBar> {
   }
 }
 
-// Global key to access CustomBottomAppBarState from other files
-final GlobalKey<_CustomBottomAppBarState> customBottomAppBarKey =
-    GlobalKey<_CustomBottomAppBarState>();
