@@ -154,10 +154,10 @@ class _CreatePostState extends State<CreatePost> {
 
     // Create new post
     Map<String, dynamic> res = await pas.createNewPost(
-      communityName: selectedCommunity,
-      postTitle: _postTitleController.text,
-      postContent: _postDescriptionController.text,
-    );
+        communityName: selectedCommunity,
+        postTitle: _postTitleController.text,
+        postContent: _postDescriptionController.text,
+        imageUrl: imageUrl);
     return res;
   }
 
