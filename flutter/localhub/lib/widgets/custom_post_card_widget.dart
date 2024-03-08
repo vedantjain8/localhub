@@ -11,6 +11,7 @@ import 'package:localhub/api/report_service.dart';
 import 'package:localhub/functions/datetimeoperations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:localhub/screens/community/community_page.dart';
+import 'package:localhub/screens/post/create_post.dart';
 import 'package:localhub/screens/post/post_page.dart';
 import 'package:localhub/widgets/custom_shimmer.dart';
 
@@ -91,7 +92,9 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
       items: [
         const PopupMenuItem<String>(value: '1', child: Text('Report')),
         if (widget.isFromProfilePage)
-          const PopupMenuItem<String>(value: '2', child: Text('Delete')),
+          const PopupMenuItem<String>(value: '2', child: Text('Update')),
+        if (widget.isFromProfilePage)
+          const PopupMenuItem<String>(value: '3', child: Text('Delete')),
       ],
       elevation: 8.0,
     ).then((value) {
@@ -100,6 +103,15 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
       if (value == "1") {
         ras.reportPost(postID: postID);
       } else if (value == "2") {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => CreatePost(
+              isUpdating: true,
+              postID: postID,
+            ),
+          ),
+        );
+      } else if (value == "3") {
         showDialog(
           context: context,
           builder: (BuildContext context) {

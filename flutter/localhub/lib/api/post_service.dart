@@ -185,6 +185,52 @@ class PostApiService {
     return responseData;
   }
 
+  Future<Map<String, dynamic>> updatePost({
+    required int postID,
+    String? postTitle,
+    String? postContent,
+    String? imageUrl,
+    bool? isadult,
+    bool? active,
+  }) async {
+    await getHostAddress();
+    await getUserToken();
+    Map<String, dynamic> responseData = {};
+    try {
+      Map<String, dynamic> sendBody = {
+        'token': "$token",
+      };
+
+      if (postTitle == null && postContent == null && imageUrl == null) {
+        return {'error': 'All fields are empty'};
+      }
+
+      if (postTitle != null || postTitle != "") {
+        sendBody['post_title'] = "$postTitle";
+      }
+      if (postContent != null || postContent != "") {
+        sendBody['post_content'] = "$postContent";
+      }
+      if (imageUrl != null || imageUrl != "") {
+        sendBody['post_image'] = "$imageUrl";
+      }
+
+      var url = Uri.https(hostaddress, '/api/v1/posts/$postID');
+      var response = await http.put(url, body: sendBody);
+
+      if (response.statusCode == 200) {
+        var jsonResponse = jsonDecode(response.body);
+        responseData = jsonResponse;
+      } else {
+        responseData = {'error': 'else: ${response.body}'};
+      }
+    } catch (e) {
+      print('Error: $e');
+      responseData = {'error': 'catch Request failed with status: $e'};
+    }
+    return responseData;
+  }
+
   // get post published by user
   Future<List<Map<String, dynamic>>> getUserPublishedPost(
       {int offsetN = 0}) async {

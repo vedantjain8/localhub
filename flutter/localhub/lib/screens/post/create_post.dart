@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:dropdown_search/dropdown_search.dart';
@@ -11,7 +12,13 @@ import 'package:localhub/screens/layout/app_layout.dart';
 import 'package:localhub/widgets/custom_input_decoration.dart';
 
 class CreatePost extends StatefulWidget {
-  const CreatePost({super.key});
+  final bool isUpdating;
+  final int? postID;
+  const CreatePost({
+    super.key,
+    this.isUpdating = false,
+    this.postID,
+  });
 
   @override
   State<CreatePost> createState() => _CreatePostState();
@@ -24,8 +31,6 @@ class _CreatePostState extends State<CreatePost> {
 
   List<String> community = [];
   String selectedCommunity = "";
-
-  late String imageUrl;
 
   final ImageUploadService ius = ImageUploadService();
   final PostApiService pas = PostApiService();
@@ -102,9 +107,29 @@ class _CreatePostState extends State<CreatePost> {
     return community;
   }
 
+  Map<String, dynamic> _journals = {};
+
+  void _loadData(int postID) async {
+    final List<Map<String, dynamic>> data =
+        await pas.getPostById(postId: postID);
+
+    setState(() {
+      _journals = data[0];
+    });
+
+    _postDescriptionController.text = _journals['post_content'] as String;
+    _postTitleController.text = _journals['post_title'] as String;
+    pickedImage = _journals['post_image'] != null
+        ? XFile(_journals['post_image'] as String)
+        : null;
+  }
+
   @override
   void initState() {
     super.initState();
+    if (widget.isUpdating == true) {
+      _loadData(widget.postID!);
+    }
     _loadCommunityList("");
   }
 
@@ -132,6 +157,28 @@ class _CreatePostState extends State<CreatePost> {
       communityName: selectedCommunity,
       postTitle: _postTitleController.text,
       postContent: _postDescriptionController.text,
+    );
+    return res;
+  }
+
+  Future<Map<String, dynamic>> _updatePost() async {
+    String? imageUrl;
+    if (pickedImage!.path == _journals['post_image']) {
+      imageUrl = _journals['post_image'];
+    } else if (pickedImage != null) {
+      Map<String, dynamic>? uploadResult =
+          await ius.uploadImageHTTP(File(pickedImage!.path));
+      if (uploadResult['status'] != 200) {
+        return {"status": 400};
+      }
+      imageUrl = uploadResult["response"];
+    }
+
+    // Create new post
+    Map<String, dynamic> res = await pas.updatePost(
+      postID: widget.postID!,
+      postTitle: _postTitleController.text,
+      postContent: _postDescriptionController.text,
       imageUrl: imageUrl,
     );
     return res;
@@ -140,6 +187,7 @@ class _CreatePostState extends State<CreatePost> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    bool isUpdating = widget.isUpdating;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Post'),
@@ -154,43 +202,84 @@ class _CreatePostState extends State<CreatePost> {
                   },
                 );
 
-                await _createPost().then(
-                  (Map<String, dynamic> status) => {
-                    if (status['status'] != null)
-                      {
-                        if (status['status'] == 200)
-                          {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(status['response']),
+                if (widget.isUpdating == false) {
+                  await _createPost().then(
+                    (Map<String, dynamic> status) => {
+                      if (status['status'] != null)
+                        {
+                          if (status['status'] == 200)
+                            {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(status['response']),
+                                ),
                               ),
-                            ),
-                            Navigator.of(context).pop(),
-                            Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const AppLayout()),
-                                (route) => false),
-                          }
-                        else
-                          (
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(status['response']),
+                              Navigator.of(context).pop(),
+                              Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const AppLayout()),
+                                  (route) => false),
+                            }
+                          else
+                            (
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(status['response']),
+                                ),
                               ),
+                            )
+                        }
+                      else
+                        (
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(status['error']),
                             ),
-                          )
-                      }
-                    else
-                      (
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("some error"),
                           ),
-                        ),
-                      )
-                  },
-                );
+                        )
+                    },
+                  );
+                }
+                if (widget.isUpdating == true) {
+                  await _updatePost().then(
+                    (Map<String, dynamic> status) => {
+                      if (status['status'] != null)
+                        {
+                          if (status['status'] == 200)
+                            {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(status['response']),
+                                ),
+                              ),
+                              Navigator.of(context).pop(),
+                              Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const AppLayout()),
+                                  (route) => false),
+                            }
+                          else
+                            (
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(status['response']),
+                                ),
+                              ),
+                            )
+                        }
+                      else
+                        (
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(status['error']),
+                            ),
+                          ),
+                        )
+                    },
+                  );
+                }
               },
               child: const Text('Post')),
           const SizedBox(width: 15)
@@ -292,74 +381,94 @@ class _CreatePostState extends State<CreatePost> {
               const SizedBox(
                 height: 20,
               ),
-              DropdownSearch<String>(
-                popupProps: PopupProps.menu(
-                  searchFieldProps: TextFieldProps(
-                    decoration: CustomInputDecoration.inputDecoration(
-                      context: context,
-                      label: 'Search',
-                      prefixIcon: const Icon(FontAwesomeIcons.magnifyingGlass),
+              (isUpdating == true)
+                  ? Container()
+                  : DropdownSearch<String>(
+                      popupProps: PopupProps.menu(
+                        searchFieldProps: TextFieldProps(
+                          decoration: CustomInputDecoration.inputDecoration(
+                            context: context,
+                            label: 'Search',
+                            prefixIcon:
+                                const Icon(FontAwesomeIcons.magnifyingGlass),
+                          ),
+                        ),
+                        menuProps: MenuProps(
+                            backgroundColor: colorScheme.onInverseSurface,
+                            borderRadius: BorderRadius.circular(30)),
+                        showSearchBox: true,
+                        searchDelay: const Duration(seconds: 1),
+                        isFilterOnline: true,
+                        showSelectedItems: true,
+                      ),
+                      asyncItems: (value) {
+                        return _loadCommunityList(value);
+                      },
+                      clearButtonProps: const ClearButtonProps(
+                        isVisible: true,
+                      ),
+                      dropdownButtonProps: const DropdownButtonProps(
+                          icon: Icon(FontAwesomeIcons.caretDown)),
+                      dropdownDecoratorProps: DropDownDecoratorProps(
+                        dropdownSearchDecoration: InputDecoration(
+                            labelText: "Select Community",
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20))),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          if (value != null) {
+                            selectedCommunity = value;
+                          }
+                        });
+                      },
                     ),
-                  ),
-                  menuProps: MenuProps(
-                      backgroundColor: colorScheme.onInverseSurface,
-                      borderRadius: BorderRadius.circular(30)),
-                  showSearchBox: true,
-                  searchDelay: const Duration(seconds: 1),
-                  isFilterOnline: true,
-                  showSelectedItems: true,
-                ),
-                asyncItems: (value) {
-                  return _loadCommunityList(value);
-                },
-                clearButtonProps: const ClearButtonProps(
-                  isVisible: true,
-                ),
-                dropdownButtonProps: const DropdownButtonProps(
-                    icon: Icon(FontAwesomeIcons.caretDown)),
-                dropdownDecoratorProps: DropDownDecoratorProps(
-                  dropdownSearchDecoration: InputDecoration(
-                      labelText: "Select Community",
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20))),
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    if (value != null) {
-                      selectedCommunity = value;
-                    }
-                  });
-                },
-              ),
               const SizedBox(
                 height: 20,
               ),
               pickedImage == null
                   ? Container()
-                  : ClipRRect(
-                      borderRadius: BorderRadius.circular(30),
-                      child: Stack(
-                        children: [
-                          Image.file(
-                            File(pickedImage!.path),
-                          ),
-                          Positioned(
-                            top: 10,
-                            right: 10,
-                            child: IconButton.filledTonal(
-                              onPressed: () {
-                                setState(() {
-                                  pickedImage = null;
-                                });
-                              },
-                              icon: const Icon(
-                                FontAwesomeIcons.minus,
+                  : (isUpdating)
+                      ? (_journals["post_image"].isEmpty)
+                          ? Container()
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: CachedNetworkImage(
+                                fit: BoxFit.fitWidth,
+                                imageUrl: _journals["post_image"]!,
+                                progressIndicatorBuilder:
+                                    (context, url, downloadProgress) => Center(
+                                  child: CircularProgressIndicator(
+                                      value: downloadProgress.progress),
+                                ),
+                                errorWidget: (context, url, error) =>
+                                    const Icon(Icons.error),
                               ),
-                            ),
+                            )
+                      : ClipRRect(
+                          borderRadius: BorderRadius.circular(30),
+                          child: Stack(
+                            children: [
+                              Image.file(
+                                File(pickedImage!.path),
+                              ),
+                              Positioned(
+                                top: 10,
+                                right: 10,
+                                child: IconButton.filledTonal(
+                                  onPressed: () {
+                                    setState(() {
+                                      pickedImage = null;
+                                    });
+                                  },
+                                  icon: const Icon(
+                                    FontAwesomeIcons.minus,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    )
+                        )
             ],
           ),
         ),
