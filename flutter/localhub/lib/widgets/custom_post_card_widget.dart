@@ -295,49 +295,56 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                                   ),
                                 ),
                                 const Spacer(),
-                                SizedBox(
-                                  width: 30,
-                                  child: GestureDetector(
-                                    onTapDown: (details) {
-                                      showPopUpMenuAtTap(
-                                          context: context,
-                                          details: details,
-                                          postID: journals[index]['post_id']);
-                                    },
-                                    child: const FaIcon(
-                                        FontAwesomeIcons.ellipsisVertical),
-                                  ),
+                                Row(
+                                  children: [
+                                    FutureBuilder(
+                                        future: checkCommunityJoinStatus(
+                                            communityID: communityID),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.waiting) {
+                                            // Return a loading indicator while the future is being fetched
+                                            return const CircularProgressIndicator();
+                                          } else if (snapshot.hasError) {
+                                            // Handle any errors that occur during the future execution
+                                            return Text(
+                                                'Error: ${snapshot.error}');
+                                          } else {
+                                            // If the future has successfully resolved, show the join button based on the boolean value
+                                            final bool isJoined =
+                                                snapshot.data!;
+                                            return ElevatedButton(
+                                              onPressed: () {
+                                                _joinORleaveCommunity(
+                                                    communityID: communityID,
+                                                    isJoined: isJoined);
+                                              },
+                                              child: Text(
+                                                  isJoined ? 'Leave' : 'Join'),
+                                            );
+                                          }
+                                        }),
+                                    const SizedBox(width: 10),
+                                    SizedBox(
+                                      width: 30,
+                                      child: GestureDetector(
+                                        onTapDown: (details) {
+                                          showPopUpMenuAtTap(
+                                              context: context,
+                                              details: details,
+                                              postID: journals[index]
+                                                  ['post_id']);
+                                        },
+                                        child: const FaIcon(
+                                            FontAwesomeIcons.ellipsisVertical),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
                           ),
 
-                          FutureBuilder(
-                              future: checkCommunityJoinStatus(
-                                  communityID: communityID),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  // Return a loading indicator while the future is being fetched
-                                  return const CircularProgressIndicator();
-                                } else if (snapshot.hasError) {
-                                  // Handle any errors that occur during the future execution
-                                  return Text('Error: ${snapshot.error}');
-                                } else {
-                                  // If the future has successfully resolved, show the join button based on the boolean value
-                                  final bool isJoined = snapshot.data!;
-                                  return ElevatedButton(
-                                    onPressed: () {
-                                      _joinORleaveCommunity(
-                                          communityID: communityID,
-                                          isJoined: isJoined);
-                                    },
-                                    child: Text(isJoined
-                                        ? 'Leave Community'
-                                        : 'Join Community'),
-                                  );
-                                }
-                              }),
                           // Title
                           Padding(
                             padding: const EdgeInsets.all(8.0),
