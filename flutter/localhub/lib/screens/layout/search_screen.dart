@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localhub/api/search_service.dart';
 import 'package:localhub/screens/community/community_page.dart';
 import 'package:localhub/screens/post/post_page.dart';
+import 'package:localhub/widgets/custom_input_decoration.dart';
+import 'package:localhub/widgets/custom_post_card_widget.dart';
 
 class Debouncer {
   Debouncer({required this.milliseconds});
@@ -55,17 +58,36 @@ class _SearchScreenState extends State<SearchScreen> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.only(top: 50.0, left: 10, right: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextField(
-                controller: _searchController,
-                onChanged: _loadSearchData,
-                decoration: const InputDecoration(
-                  hintText: 'Search',
-                  prefixIcon: Icon(Icons.search),
-                ),
+              Row(
+                children: [
+                  InkWell(
+                    overlayColor: MaterialStateProperty.all(Colors.transparent),
+                    child: const Icon(FontAwesomeIcons.arrowLeft),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                        controller: _searchController,
+                        onChanged: (String value) {
+                          _loadSearchData(value);
+                        },
+                        decoration: CustomInputDecoration.inputDecoration(
+                          hintText: '',
+                          label: 'Search',
+                          prefixIcon: const Icon(
+                            FontAwesomeIcons.magnifyingGlass,
+                          ),
+                          context: context,
+                        )),
+                  ),
+                ],
               ),
               const SizedBox(height: 40),
               buildCommunitySearchResult(
@@ -89,7 +111,10 @@ class _SearchScreenState extends State<SearchScreen> {
       children: [
         Text(
           title,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 10),
         SingleChildScrollView(
@@ -112,8 +137,8 @@ class _SearchScreenState extends State<SearchScreen> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Container(
-                        height: 80,
-                        width: 80,
+                        height: 50,
+                        width: 50,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           image: DecorationImage(
@@ -123,7 +148,8 @@ class _SearchScreenState extends State<SearchScreen> {
                           ),
                         ),
                       ),
-                      Text(data[index]["community_name"]),
+                      const SizedBox(height: 5),
+                      Text("c/" + data[index]["community_name"]),
                     ],
                   ),
                 ),
@@ -136,6 +162,8 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget buildPostSearchResult(String title, List<dynamic>? data) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     if (data == null || data.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -147,20 +175,25 @@ class _SearchScreenState extends State<SearchScreen> {
           title,
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: data.length,
-          itemBuilder: (BuildContext context, int index) {
-            return ListTile(
-              title: Text(data[index]['post_title']),
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) =>
-                        PostPage(postID: data[index]['post_id'])));
-              },
-            );
-          },
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: List.generate(
+              data.length,
+              (index) => ListTile(
+                    title: Text(
+                      data[index]['post_title'],
+                      style: const TextStyle(
+                        fontSize: 17,
+                      ),
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) =>
+                              PostPage(postID: data[index]['post_id'])));
+                    },
+                  )),
         ),
       ],
     );
