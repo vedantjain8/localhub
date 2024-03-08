@@ -396,6 +396,12 @@ const updatePost = async (request, response) => {
   const { post_title, post_content, post_image, is_adult, active, token } =
     request.body;
 
+  if (!post_id) {
+    return response
+      .status(400)
+      .json({ status: 400, response: "Provide a valid post_id" });
+  }
+
   if (!token) {
     return response
       .status(400)
@@ -410,6 +416,16 @@ const updatePost = async (request, response) => {
       .json({ status: 401, response: "Token is not valid" });
   }
 
+  if (
+    !post_title ||
+    !validator.isLength(post_title, { min: 5, max: 200 }) ||
+    !allowedCharactersRegex.test(post_title)
+  ) {
+    return response
+      .status(400)
+      .json({ status: 400, response: "Enter a valid post title" });
+  }
+
   // Construct the SET clause dynamically based on provided fields
   const setClause = [];
   const values = [post_id];
@@ -422,7 +438,11 @@ const updatePost = async (request, response) => {
     setClause.push(`post_content = $${values.push(post_content)}`);
   }
 
-  if (post_image !== undefined) {
+  if (post_image == null || post_image == "null") {
+    post_image = "";
+  }
+
+  if (post_image !== undefined && post_image !== "") {
     setClause.push(`post_image = $${values.push(post_image)}`);
   }
 
@@ -445,7 +465,7 @@ const updatePost = async (request, response) => {
     ", "
   )} WHERE user_id = ${user_id} AND post_id = $1 RETURNING post_id`;
 
-  pool.query(updateQuery, values, (error, results) => {
+  pool.query(updateQuery, values, async (error, results) => {
     if (error) {
       console.error(error);
       return response
@@ -458,6 +478,19 @@ const updatePost = async (request, response) => {
         status: 404,
         response: `Post with ID ${post_id} not found for the user.`,
       });
+    }
+
+    if (cachingBool) {
+      // Get all keys matching the pattern 'post:offset-*'
+      const keys = await redisClient.keys("posts:offset-*");
+
+      // Delete each key
+      const deletePromises = keys.map((key) => redisClient.del(key));
+
+      // Wait for all keys to be deleted
+      await Promise.all(deletePromises);
+
+      await redisClient.del(`posts:postID-${post_id}`);
     }
 
     response.status(200).json({
@@ -604,6 +637,7 @@ const deletePost = async (request, response) => {
           // Wait for all keys to be deleted
           await Promise.all(deletePromises);
           await Promise.all(deletePromisesforPubPostByUser);
+          await redisClient.del(`posts:postID-${post_id}`);
         }
         return response.status(200).json({ status: 200, response: userData });
       }
