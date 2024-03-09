@@ -145,6 +145,7 @@ const getPosts = async (request, response) => {
           community ON posts.community_id = community.community_id
         WHERE
           posts.active = 'T'
+          AND community.active = 'T'
         ORDER BY
           posts.created_at DESC
         LIMIT 20
@@ -218,6 +219,7 @@ const getCommunityPosts = async (request, response) => {
         posts.active = 'T'
         AND posts.community_id = $1 
         AND community.community_id = $1
+        AND community.active = 'T'
     ORDER BY
         posts.created_at DESC
     LIMIT 20
@@ -303,6 +305,7 @@ const getUserFeedPosts = async (request, response) => {
       community ON posts.community_id = community.community_id
   WHERE
       posts.active = 'T'
+      AND community.active = 'T'
       AND posts.community_id IN (${mergedList})
   ORDER BY
       posts.created_at DESC
@@ -367,7 +370,7 @@ const getPostById = async (request, response) => {
     JOIN
         users ON posts.user_id = users.user_id
    WHERE
-        posts.active = 'T' AND posts.post_id = $1`,
+        posts.active = 'T' AND community.active = 'T' AND  posts.post_id = $1`,
       [post_id]
     );
 
@@ -436,10 +439,6 @@ const updatePost = async (request, response) => {
 
   if (post_content !== undefined) {
     setClause.push(`post_content = $${values.push(post_content)}`);
-  }
-
-  if (post_image == null || post_image == "null") {
-    post_image = "";
   }
 
   if (post_image !== undefined && post_image !== "") {
@@ -554,6 +553,7 @@ const getUserPubPosts = async (request, response) => {
     posts.user_id = $1
       AND
     posts.active = 'T'
+    AND community.active = 'T'
   ORDER BY
     posts.created_at DESC
   LIMIT 20
