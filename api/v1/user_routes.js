@@ -98,7 +98,7 @@ const createUser = async (request, response) => {
     console.error(error);
     return response
       .status(500)
-      .json({ status: 500, response: "Error creating user" });
+      .json({ status: 500, response: error });
   }
 };
 
@@ -194,7 +194,7 @@ const loginUser = async (request, response) => {
     console.error(error);
     return response
       .status(500)
-      .json({ status: 500, response: "Error creating post" });
+      .json({ status: 500, response: error });
   }
 };
 

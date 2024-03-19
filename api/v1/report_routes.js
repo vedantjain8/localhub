@@ -141,7 +141,7 @@ const reportPost = async (request, response) => {
     console.error(error);
     return response
       .status(500)
-      .json({ status: 500, response: "Error reporting post" });
+      .json({ status: 500, response: error });
   }
 };
 
@@ -184,6 +184,7 @@ cron.schedule("*/30 * * * *", async () => {
     }
 
     // posts
+    
     const postReport = await redisClient.hGetAll("report_post_data", "post:*");
 
     for (const ReportData in postReport) {
