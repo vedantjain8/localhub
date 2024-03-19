@@ -171,7 +171,7 @@ exports.up = async (pgm) => {
     user_id: { type: "int", notNull: true, references: "users(user_id)" },
     comment_content: { type: "varchar", notNull: true },
     active: { type: "boolean", notNull: true, default: true },
-    create_at: { type: "timestamp", notNull: true, default: pgm.func("NOW()") },
+    created_at: { type: "timestamp", notNull: true, default: pgm.func("NOW()") },
   });
 
   await pgm.createTable("report_comment", {

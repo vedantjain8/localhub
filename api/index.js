@@ -24,6 +24,12 @@ const searchRoutes = require("./v1/search_routes");
 const freshStartRoutes = require("./v1/freshStart");
 const config = require("./config/config.json");
 
+const adminUserRoutes = require("./v1/admin/admin_user_routes");
+const adminStatsRoutes = require("./v1/admin/admin_stats");
+const adminPowerRoutes = require("./v1/admin/admin_power");
+
+const agendaRoutes = require("./v1/agenda");
+
 const redisClient = require("./dbredis");
 
 const cachingBool = Boolean(config.caching);
@@ -48,6 +54,7 @@ const subdirectory = "/api";
 const latestVersion = "/v1";
 
 const v1path = subdirectory + latestVersion;
+const adminv1path = subdirectory + "/admin" + latestVersion;
 
 createDirectories();
 
@@ -87,6 +94,12 @@ app.use(v1path, historyRoutes);
 app.use(v1path, searchRoutes);
 app.use(v1path, freshStartRoutes);
 app.use(uploadImageRoutes);
+
+app.use(adminv1path, adminUserRoutes);
+app.use(adminv1path, adminStatsRoutes);
+app.use(adminv1path, adminPowerRoutes);
+
+app.use(v1path, agendaRoutes);
 
 app.get("/ip", (request, response) => response.send(request.ip));
 

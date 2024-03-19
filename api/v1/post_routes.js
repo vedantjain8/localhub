@@ -250,7 +250,7 @@ const getUserFeedPosts = async (request, response) => {
     offset = 0;
   }
 
-  if (!token) {
+  if (!token || token == null || token == "" || token == undefined) {
     return response
       .status(400)
       .json({ status: 400, response: "Provide a user token" });

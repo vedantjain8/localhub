@@ -104,7 +104,7 @@ const createUser = async (request, response) => {
 
 // delete user function
 const deleteUser = async (request, response) => {
-  const token = request.params.token;
+  const token = request.body.token;
 
   if (!token) {
     return response
@@ -156,7 +156,7 @@ const loginUser = async (request, response) => {
 
     // Check if the user exists and get the user_id
     const userResult = await pool.query(
-      "SELECT user_id, password_hash, token FROM users WHERE username = $1",
+      "SELECT user_id, password_hash, token FROM users WHERE username = $1 AND active = 'true'",
       [username]
     );
 
@@ -201,6 +201,6 @@ const loginUser = async (request, response) => {
 router.post("/users", createUser);
 router.post("/login", loginUser);
 
-router.delete("/users/:token", deleteUser);
+router.delete("/users/delete", deleteUser);
 
 module.exports = router;
