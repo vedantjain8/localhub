@@ -57,7 +57,7 @@ router.post("/upload", upload.single("uploaded_file"), async (req, res) => {
     console.error(error);
     return res
       .status(500)
-      .json({ status: 500, response: "Failed to upload file" });
+      .json({ status: 500, response: error });
   }
 });
 
