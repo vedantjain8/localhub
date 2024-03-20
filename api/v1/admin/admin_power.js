@@ -12,6 +12,7 @@ const config = require("../../config/config.json");
 var cron = require("node-cron");
 const { hashPassword, checkPassword } = require("../functions/hash_password");
 const { checkJoinedCommunity } = require("../functions/joinCommunityCheck");
+const { adminLogger } = require("./functions/adminLogger");
 const cachingBool = Boolean(config.caching);
 
 const allowedCharactersRegex = /^[a-zA-Z0-9_]*$/;
@@ -56,7 +57,7 @@ const deleteCommunityAdmin = async (request, response) => {
         return response.status(500).json({ status: 500, response: error });
       }
 
-      adminLog(
+      adminLogger(
         "admin-community-active-toggle",
         `Community with communityID: ${community_id} is now active=${result.rows[0].active}`,
         admin_data["user_id"]
@@ -112,7 +113,7 @@ const deletePostAdmin = async (request, response) => {
         return response.status(500).json({ status: 500, response: error });
       }
 
-      // adminLog(
+      // adminLogger(
       //   "admin-post-active-toggle",
       //   `Post with postID: ${post_id} is now active=${result.rows[0].active}`,
       //   admin_data["user_id"]
@@ -168,7 +169,7 @@ const deleteCommentAdmin = async (request, response) => {
         return response.status(500).json({ status: 500, response: error });
       }
 
-      // adminLog(
+      // adminLogger(
       //   "admin-comment-active-toggle",
       //   `Comment with comment_id: ${comment_id} is now active=${result.rows[0].active}`,
       //   admin_data["user_id"]

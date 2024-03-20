@@ -298,11 +298,14 @@ const getUserFeedPosts = async (request, response) => {
       posts.community_id,
       posts.created_at,
       community.community_name,
-      community.logo_url
+      community.logo_url,
+      users.username AS post_username
   FROM
       posts
   JOIN
       community ON posts.community_id = community.community_id
+  JOIN
+      users on posts.user_id = users.user_id
   WHERE
       posts.active = 'T'
       AND community.active = 'T'

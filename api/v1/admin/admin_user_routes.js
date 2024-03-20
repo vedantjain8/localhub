@@ -6,7 +6,7 @@ const pool = require("../../db");
 const redisClient = require("../../dbredis");
 var validator = require("validator");
 const { getAdminData } = require("../functions/users");
-const { adminLog } = require("./functions/adminLog");
+// const { adminLogger } = require("./functions/adminLogger");
 const checkPassword = require("../functions/hash_password");
 
 const allowedCharactersRegex = /^[a-zA-Z0-9_]*$/;

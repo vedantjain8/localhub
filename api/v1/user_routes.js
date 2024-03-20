@@ -96,9 +96,7 @@ const createUser = async (request, response) => {
       .json({ status: 200, response: insertUserResult.rows[0].token });
   } catch (error) {
     console.error(error);
-    return response
-      .status(500)
-      .json({ status: 500, response: error });
+    return response.status(500).json({ status: 500, response: error });
   }
 };
 
@@ -192,15 +190,144 @@ const loginUser = async (request, response) => {
     }
   } catch (error) {
     console.error(error);
-    return response
-      .status(500)
-      .json({ status: 500, response: error });
+    return response.status(500).json({ status: 500, response: error });
   }
 };
 
+const updateUser = async (request, response) => {
+  try {
+    const {
+      username,
+      bio,
+      email,
+      password,
+      avatar_url,
+      locality_city,
+      locality_state,
+      locality_country,
+      token,
+    } = request.body;
+
+    const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+    if (!user_id) {
+      return response
+        .status(401)
+        .json({ status: 401, response: "Token is not valid" });
+    }
+
+    if (
+      !username ||
+      !validator.isLength(username, { min: 4, max: 15 }) ||
+      !allowedCharactersRegex.test(username)
+    ) {
+      return response
+        .status(400)
+        .json({ status: 400, response: "Enter a valid username" });
+    }
+
+    if (reservedKeywordsFile().includes(username.toLowerCase())) {
+      return response.status(400).json({
+        status: 400,
+        response: "Username is a reserved keyword and cannot be used.",
+      });
+    }
+
+    // Check if the username is available
+    const usernameCheckResult = await pool.query(
+      "SELECT * FROM users WHERE LOWER(username) = LOWER($1)",
+      [username]
+    );
+
+    if (usernameCheckResult.rows.length > 0) {
+      return response
+        .status(400)
+        .json({ status: 400, response: "Username not available" });
+    }
+
+    // email validation
+    if (!email || !validator.isEmail(email)) {
+      return response
+        .status(400)
+        .json({ status: 400, response: "Enter a valid email" });
+    }
+
+    //TODO: password validation
+    // TODO: password check
+
+    // set clause
+    const setClause = [];
+    const values = [user_id];
+
+    if (username !== undefined) {
+      setClause.push(`username = $${values.push(username)}`);
+    }
+    
+    if (bio !== undefined) {
+      setClause.push(`bio = $${values.push(bio)}`);
+    }
+
+    if (email !== undefined) {
+      setClause.push(`email = $${values.push(email)}`);
+    }
+
+    if (avatar_url !== undefined) {
+      setClause.push(`avatar_url = $${values.push(avatar_url)}`);
+    }
+
+    if (locality_city !== undefined) {
+      setClause.push(`locality_city = $${values.push(locality_city)}`);
+    }
+    if (locality_state !== undefined) {
+      setClause.push(`locality_state = $${values.push(locality_state)}`);
+    }
+    if (locality_country !== undefined) {
+      setClause.push(`locality_country = $${values.push(locality_country)}`);
+    }
+
+    if (setClause.length === 0) {
+      return response.status(400).json({
+        status: 400,
+        response: "No valid fields provided for update.",
+      });
+    }
+
+    const updateQuery = `UPDATE users SET ${setClause.join(
+      ", "
+    )} WHERE token = ${token} RETURNING post_id`;
+
+    pool.query(updateQuery, values, async (error, results) => {
+      if (error) {
+        console.error(error);
+        return response
+          .status(500)
+          .json({ status: 500, response: error.message });
+      }
+
+      if (results.rowCount === 0) {
+        return response.status(404).json({
+          status: 404,
+          response: `No user found`,
+        });
+      }
+
+      if (cachingBool) {
+        await redisClient.flushall();
+      }
+
+      response.status(200).json({
+        status: 200,
+        response: `Post modified having Post_ID: ${post_id}`,
+      });
+    });
+  } catch (error) {
+    console.error(error);
+    return response.status(500).json({ status: 500, response: error });
+  }
+};
 router.post("/users", createUser);
 router.post("/login", loginUser);
-
+router.put("/users", updateUser);
 router.delete("/users/delete", deleteUser);
 
 module.exports = router;

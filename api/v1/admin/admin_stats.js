@@ -6,7 +6,7 @@ const pool = require("../../db");
 const redisClient = require("../../dbredis");
 var validator = require("validator");
 const { getAdminData } = require("../functions/users");
-const { adminLog } = require("./functions/adminLog");
+// const { adminLogger } = require("./functions/adminLogger");
 const checkPassword = require("../functions/hash_password");
 
 const localhubStatsAdmin = async (request, response) => {
@@ -34,7 +34,7 @@ const localhubStatsAdmin = async (request, response) => {
       popularCommuntiy,
       post,
       popularPost,
-      adminLog,
+      adminLogs,
       reportPost,
       reportComment,
     ] = await Promise.all([
@@ -109,12 +109,12 @@ const localhubStatsAdmin = async (request, response) => {
       // admin logs
       pool.query(
         `SELECT
-        logEvent,
-        logDescription,
+        log_event,
+        log_description,
         created_at,
         log_id
       FROM
-        adminLog
+        adminlog
       ORDER BY
         created_at desc
       LIMIT
@@ -154,7 +154,7 @@ const localhubStatsAdmin = async (request, response) => {
     responseData["popularCommuntiy"] = popularCommuntiy.rows;
     responseData["post"] = post.rows[0];
     responseData["popularPost"] = popularPost.rows;
-    responseData["adminLog"] = adminLog.rows;
+    responseData["adminLogs"] = adminLogs.rows;
     responseData["reportPost"] = reportPost.rows;
     responseData["reportComment"] = reportComment.rows;
 
