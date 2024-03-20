@@ -17,7 +17,7 @@ exports.up = (pgm) => {
         WHERE user_role IS NULL
     `);
 
-  pgm.createTable("adminLog", {
+  pgm.createTable("adminlog", {
     log_id: {
       type: "serial",
       primaryKey: true,
@@ -27,59 +27,12 @@ exports.up = (pgm) => {
       notNull: true,
       references: "users(user_id)",
     },
-    logEvent: {
+    log_event: {
       type: "varchar(50)",
       notNull: true,
     },
-    logDescription: {
+    log_description: {
       type: "text",
-    },
-    created_at: {
-      type: "timestamp",
-      notNull: true,
-      default: pgm.func("NOW()"),
-    },
-  });
-
-  pgm.createTable("agenda", {
-    event_id: {
-      type: "serial",
-      primaryKey: true,
-    },
-    event_title: {
-      type: "varchar(100)",
-      notNull: true,
-    },
-    event_description: {
-      type: "text",
-    },
-    user_id: {
-      type: "INT",
-      notNull: true,
-      references: "users(user_id)",
-    },
-    image_url: {
-      type: "text",
-    },
-    locality_city: {
-      type: "varchar(100)",
-      notNull: true,
-    },
-    locality_state: {
-      type: "varchar(100)",
-      notNull: true,
-    },
-    locality_country: {
-      type: "varchar(100)",
-      notNull: true,
-    },
-    event_start_date: {
-      type: "timestamp",
-      notNull: true,
-    },
-    event_end_date: {
-      type: "timestamp",
-      notNull: true,
     },
     created_at: {
       type: "timestamp",
