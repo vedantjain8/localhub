@@ -71,7 +71,6 @@ const createAgenda = async (request, response) => {
       token,
       agenda_title,
       agenda_description,
-      image_url,
       locality_city,
       locality_state,
       locality_country,
@@ -79,7 +78,47 @@ const createAgenda = async (request, response) => {
       agenda_end_date,
     } = request.body || "";
 
-    // todo add validation
+    if (!token) {
+      return response
+        .status(400)
+        .json({ status: 400, response: "Token is required" });
+    }
+
+    if (
+      !post_title ||
+      post_title != "" ||
+      !validator.isLength(post_title, { min: 5, max: 200 }) ||
+      !allowedCharactersRegex.test(post_title)
+    ) {
+      return response
+        .status(400)
+        .json({ status: 400, response: "Enter a valid agenda title" });
+    }
+
+    if (
+      locality_city == null ||
+      locality_city == "" ||
+      locality_state == null ||
+      locality_state == "" ||
+      locality_country == null ||
+      locality_country == ""
+    ) {
+      return response
+        .status(400)
+        .json({ status: 400, response: "Locality fields are required" });
+    }
+
+    if (
+      !agenda_start_date ||
+      !agenda_end_date ||
+      !validator.isISO8601(agenda_start_date) ||
+      !validator.isISO8601(agenda_end_date) ||
+      agenda_start_date > agenda_end_date
+    ) {
+      return response
+        .status(400)
+        .json({ status: 400, response: "Enter a valid start and end date" });
+    }
 
     const admin_data = JSON.parse((await getAdminData(token)) ?? null);
 
