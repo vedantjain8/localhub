@@ -6,7 +6,6 @@ import 'package:localhub/api/search_service.dart';
 import 'package:localhub/screens/community/community_page.dart';
 import 'package:localhub/screens/post/post_page.dart';
 import 'package:localhub/widgets/custom_input_decoration.dart';
-import 'package:localhub/widgets/custom_post_card_widget.dart';
 
 class Debouncer {
   Debouncer({required this.milliseconds});
@@ -48,7 +47,6 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     _loadSearchData('');
     super.initState();
   }
@@ -162,7 +160,6 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget buildPostSearchResult(String title, List<dynamic>? data) {
-    final colorScheme = Theme.of(context).colorScheme;
 
     if (data == null || data.isEmpty) {
       return const SizedBox.shrink();

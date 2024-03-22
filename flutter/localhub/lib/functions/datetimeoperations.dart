@@ -5,22 +5,22 @@ String timeAgo(String fatchedDateString) {
   var different = currentDate.difference(fatchedDate);
 
   if (different.inDays > 365) {
-    return "${(different.inDays / 365).floor()}y ago";
+    return "${(different.inDays / 365).floor()}y ";
   }
   if (different.inDays > 30) {
-    return "${(different.inDays / 30).floor()}m ago";
+    return "${(different.inDays / 30).floor()}m ";
   }
   if (different.inDays > 7) {
-    return "${(different.inDays / 7).floor()}w ago";
+    return "${(different.inDays / 7).floor()}w ";
   }
   if (different.inDays > 0) {
-    return "${different.inDays}d ago";
+    return "${different.inDays}d ";
   }
   if (different.inHours > 0) {
-    return "${different.inHours}hr ago";
+    return "${different.inHours}hr ";
   }
   if (different.inMinutes > 0) {
-    return "${different.inMinutes}min ago";
+    return "${different.inMinutes}min ";
   }
   if (different.inMinutes == 0) return 'Just Now';
 
