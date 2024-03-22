@@ -51,7 +51,7 @@ const deleteCommunityAdmin = async (request, response) => {
   await pool.query(
     "UPDATE community SET active = CASE WHEN active = true THEN false ELSE true END WHERE community_id = $1 returning active",
     [community_id],
-    (error, result) => {
+    async (error, result) => {
       if (error) {
         console.error(error);
         return response.status(500).json({ status: 500, response: error });
@@ -59,12 +59,15 @@ const deleteCommunityAdmin = async (request, response) => {
 
       adminLogger(
         "admin-community-active-toggle",
-        `Community with communityID: ${community_id} is now active=${result.rows[0].active}`,
+        `Community with communityID: ${community_id} is now active=${result.rows[0].active}. Log description: ${log_description}`,
         admin_data["user_id"]
       );
 
       // TODO: implement redis delete community
       // redisClient.del(`:${new_admin_token}`);
+      if (cachingBool) {
+        await redisClient.flushall();
+      }
 
       return response.status(200).json({
         status: 200,

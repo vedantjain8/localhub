@@ -31,7 +31,7 @@ const localhubStatsAdmin = async (request, response) => {
     const [
       user,
       community,
-      popularCommuntiy,
+      popularCommunity,
       post,
       popularPost,
       adminLogs,
@@ -150,8 +150,8 @@ const localhubStatsAdmin = async (request, response) => {
     ]);
 
     responseData["user"] = user.rows[0];
-    responseData["community"] = community.rows;
-    responseData["popularCommuntiy"] = popularCommuntiy.rows;
+    responseData["community"] = community.rows[0];
+    responseData["popularCommunity"] = popularCommunity.rows;
     responseData["post"] = post.rows[0];
     responseData["popularPost"] = popularPost.rows;
     responseData["adminLogs"] = adminLogs.rows;
