@@ -75,6 +75,31 @@ class AuthService {
       return null;
     }
   }
+  
+  Future<String?> Adminlogin({
+    required String username,
+    required String password,
+  }) async {
+    try {
+      // Perform authentication and get the token
+      Map<String, dynamic> httpLoginResult = await apiService.httpLoginFun(
+        username: username,
+        password: password,
+      );
+
+      if (httpLoginResult['response'] == null) {
+        return null;
+      }
+      String token = httpLoginResult['response'];
+
+      // Store the token securely
+      // await _storage.write(key: 'token', value: token);
+
+      return token; // Return the token to the caller
+    } catch (error) {
+      return null;
+    }
+  }
 
   // Method to perform logout and remove the token
   Future<void> logout() async {

@@ -11,6 +11,7 @@ import 'package:localhub/api/report_service.dart';
 import 'package:localhub/functions/datetimeoperations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:localhub/screens/community/community_page.dart';
+import 'package:localhub/screens/post/create_post.dart';
 import 'package:localhub/screens/post/post_page.dart';
 import 'package:localhub/widgets/custom_shimmer.dart';
 
@@ -91,7 +92,9 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
       items: [
         const PopupMenuItem<String>(value: '1', child: Text('Report')),
         if (widget.isFromProfilePage)
-          const PopupMenuItem<String>(value: '2', child: Text('Delete')),
+          const PopupMenuItem<String>(value: '2', child: Text('Update')),
+        if (widget.isFromProfilePage)
+          const PopupMenuItem<String>(value: '3', child: Text('Delete')),
       ],
       elevation: 8.0,
     ).then((value) {
@@ -100,6 +103,15 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
       if (value == "1") {
         ras.reportPost(postID: postID);
       } else if (value == "2") {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => CreatePost(
+              isUpdating: true,
+              postID: postID,
+            ),
+          ),
+        );
+      } else if (value == "3") {
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -283,49 +295,56 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                                   ),
                                 ),
                                 const Spacer(),
-                                SizedBox(
-                                  width: 30,
-                                  child: GestureDetector(
-                                    onTapDown: (details) {
-                                      showPopUpMenuAtTap(
-                                          context: context,
-                                          details: details,
-                                          postID: journals[index]['post_id']);
-                                    },
-                                    child: const FaIcon(
-                                        FontAwesomeIcons.ellipsisVertical),
-                                  ),
+                                Row(
+                                  children: [
+                                    FutureBuilder(
+                                        future: checkCommunityJoinStatus(
+                                            communityID: communityID),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.waiting) {
+                                            // Return a loading indicator while the future is being fetched
+                                            return const CircularProgressIndicator();
+                                          } else if (snapshot.hasError) {
+                                            // Handle any errors that occur during the future execution
+                                            return Text(
+                                                'Error: ${snapshot.error}');
+                                          } else {
+                                            // If the future has successfully resolved, show the join button based on the boolean value
+                                            final bool isJoined =
+                                                snapshot.data!;
+                                            return ElevatedButton(
+                                              onPressed: () {
+                                                _joinORleaveCommunity(
+                                                    communityID: communityID,
+                                                    isJoined: isJoined);
+                                              },
+                                              child: Text(
+                                                  isJoined ? 'Leave' : 'Join'),
+                                            );
+                                          }
+                                        }),
+                                    const SizedBox(width: 10),
+                                    SizedBox(
+                                      width: 30,
+                                      child: GestureDetector(
+                                        onTapDown: (details) {
+                                          showPopUpMenuAtTap(
+                                              context: context,
+                                              details: details,
+                                              postID: journals[index]
+                                                  ['post_id']);
+                                        },
+                                        child: const FaIcon(
+                                            FontAwesomeIcons.ellipsisVertical),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
                           ),
 
-                          FutureBuilder(
-                              future: checkCommunityJoinStatus(
-                                  communityID: communityID),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  // Return a loading indicator while the future is being fetched
-                                  return const CircularProgressIndicator();
-                                } else if (snapshot.hasError) {
-                                  // Handle any errors that occur during the future execution
-                                  return Text('Error: ${snapshot.error}');
-                                } else {
-                                  // If the future has successfully resolved, show the join button based on the boolean value
-                                  final bool isJoined = snapshot.data!;
-                                  return ElevatedButton(
-                                    onPressed: () {
-                                      _joinORleaveCommunity(
-                                          communityID: communityID,
-                                          isJoined: isJoined);
-                                    },
-                                    child: Text(isJoined
-                                        ? 'Leave Community'
-                                        : 'Join Community'),
-                                  );
-                                }
-                              }),
                           // Title
                           Padding(
                             padding: const EdgeInsets.all(8.0),
