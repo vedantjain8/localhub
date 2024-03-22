@@ -1,0 +1,1647 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<title>Local Hub</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<!-- VENDOR CSS -->
+	<link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="assets/vendor/font-awesome/css/font-awesome.min.css">
+	<link rel="stylesheet" href="assets/vendor/linearicons/style.css">
+	<!-- MAIN CSS -->
+	<link rel="stylesheet" href="assets/css/main.css">
+	<!-- FOR DEMO PURPOSES ONLY. You should remove this in your project -->
+	<link rel="stylesheet" href="assets/css/demo.css">
+
+	<!-- GOOGLE FONTS -->
+	<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700" rel="stylesheet">
+	<!-- ICONS -->
+	<link rel="apple-touch-icon" sizes="76x76" href="assets/img/apple-icon.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="assets/img/favicon.png">
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+</head>
+
+<body>
+	<!-- WRAPPER -->
+	<div id="wrapper">
+		<!-- NAVBAR -->
+		<nav class="navbar navbar-default navbar-fixed-top">
+			<div class="brand">	
+				<a href="index.html"><img src="assets/img/logog.png" alt="local hub logo"
+						class="img-responsive logo"></a>
+			</div>
+			<div class="container-fluid">
+				<div class="navbar-btn">
+					<button type="button" class="btn-toggle-fullwidth"><i
+							class="lnr lnr-arrow-left-circle"></i></button>
+				</div>
+			</div>
+		</nav>
+		<!-- END NAVBAR -->
+		<!-- LEFT SIDEBAR -->
+		<div id="sidebar-nav" class="sidebar">
+			<div class="sidebar-scroll">
+				<nav>
+					<ul class="nav">
+						<li><a href="#home" class=""><i class="lnr lnr-home"></i> <span>Dashboard</span></a></li>
+					
+						
+						<li>
+							<a href="#subPages2" data-toggle="collapse" class="collapsed"><i
+									class="lnr lnr-file-empty"></i> <span>Community</span> <i
+									class="icon-submenu lnr lnr-chevron-left"></i></a>
+							<div id="subPages2" class="collapse ">
+								<ul class="nav">
+									<li><a href="#GetComm" class="">get data &nbsp; <span
+												class="label label-success">GET</span></a></li>
+									<li><a href="#createCommunity" class="">create community &nbsp; <span
+												class="label label-primary">POST</span></a></li>
+									<li><a href="#leaveCommunity" class="">leave community &nbsp; <span
+												class="label label-warning">POST</span></a></li>
+									<li><a href="#joinCommunity" class="">join Community&nbsp; <span
+												class="label label-danger">POST</span></a></li>
+								</ul>
+							</div>
+						</li>
+						<li>
+							<a href="#subPages3" data-toggle="collapse" class="collapsed"><i
+									class="lnr lnr-file-empty"></i> <span>User</span> <i
+									class="icon-submenu lnr lnr-chevron-left"></i></a>
+							<div id="subPages3" class="collapse ">
+								<ul class="nav">
+									<li><a href="#Login" class="">Login &nbsp; <span
+												class="label label-success">POST</span></a></li>
+									<li><a href="#userRegistration" class="">Register &nbsp; <span
+												class="label label-primary">POST</span></a></li>
+									<li><a href="#userFeed" class="">User Feed &nbsp; <span
+												class="label label-warning">GET</span></a></li>
+									<li><a href="#me" class="">Me &nbsp; <span
+												class="label label-danger">GET</span></a></li>
+								</ul>
+							</div>
+						</li>
+						<li>
+							<a href="#subPages4" data-toggle="collapse" class="collapsed"><i
+									class="lnr lnr-file-empty"></i> <span>Vote</span> <i
+									class="icon-submenu lnr lnr-chevron-left"></i></a>
+							<div id="subPages4" class="collapse ">
+								<ul class="nav">
+									<li><a href="#submitDownvoteResponse" class="">Down Vote &nbsp; <span
+												class="label label-success">POST</span></a></li>
+									<li><a href="#submitVoteResponse" class="">Vote &nbsp; <span
+												class="label label-primary">POST</span></a></li>
+									<li><a href="#" class="">Refresh Token &nbsp; <span
+												class="label label-warning">PUT</span></a></li>
+									<li><a href="#" class="">Delete Token &nbsp; <span
+												class="label label-danger">DELETE</span></a></li>
+								</ul>
+							</div>
+						</li>
+						<li>
+							<a href="#subPages5" data-toggle="collapse" class="collapsed"><i
+									class="lnr lnr-file-empty"></i> <span>Comment</span> <i
+									class="icon-submenu lnr lnr-chevron-left"></i></a>
+							<div id="subPages5" class="collapse ">
+								<ul class="nav">
+									<li><a href="#GetComment" class="">Get Comment &nbsp; <span
+												class="label label-success">GET</span></a></li>
+									<li><a href="#createComment" class="">Create Comment &nbsp; <span
+												class="label label-primary">POST</span></a></li>
+									<li><a href="#deleteCommentResponse" class="">Delete Comments &nbsp; <span
+												class="label label-warning">DELETE</span></a></li>
+									<li><a href="#reportComment" class="">Report Comment &nbsp; <span
+												class="label label-danger">POST</span></a></li>
+								</ul>
+							</div>
+						</li>
+						
+					
+						
+						
+					</ul>
+				</nav>
+			</div>
+		</div>
+		<!-- END LEFT SIDEBAR -->
+		<!-- MAIN -->
+		<div class="main">
+			<!-- MAIN CONTENT -->
+			<div class="main-content">	
+
+
+
+
+
+				<div class="container-fluid" id="GetComment">
+					<h1 class="page-title" id="home">Local Hub</h1>	
+					<h3 class="page-title">Get Comment
+					</h3>
+					<h4> End point = <code>http://localhub-flutter.duckdns.org/api/v1/comments/posts</code></h4>
+					<h4>This API endpoint allows users to add comments to specific posts by sending a POST request to the appropriate URL with the post ID in the path parameter and the comment content in the request body.</h4>
+					<div class="col-md-7">
+						<!-- TABLE HOVER -->
+						<div class="panel">
+							<div class="panel-heading">
+								<h3 class="panel-title">Get</h3>
+							</div>
+							<div class="panel-body">
+								<table class="table table-hover">
+									<thead>
+										<tr>
+											<th>Parameter</th>
+											<th>Type</th>
+											<th>Position</th>
+											<th>#</th>
+											<th>Description</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>offset</td>
+											<td><code>string</code></td>
+											<td><code>Body</code></td>
+											<td><code>Required</code></td>
+											<td>The offset parameter indicates the index of the first item to retrieve from the collection. For example, if you have a collection of 100 items and you set the offset to 20, the API will start fetching items from the 21st item onwards. </td>
+										</tr>
+										
+										<tr>
+											<td>post_id</td>
+											<td><code>integer</code></td>
+											<td><code>Body</code></td>
+											<td><code>Required</code></td>
+											<td>The unique identifier of the  comments of post will be retrived. </td>
+										</tr>
+
+
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<!-- END TABLE HOVER -->
+					</div>
+					<div class="col-md-5">
+						<!-- TABLE HOVER -->
+						<div class="panel">
+							<div class="panel-heading">
+								<h3 class="panel-title">Response</h3>
+							</div>
+							<div class="panel-body">
+								<pre>{
+	"status": 200,
+	"response": [
+			{
+	"comment_id": 21,
+	"post_id": 2,
+	"username": "mayankcham",
+	"comment_content": "api check",
+	"created_at": "2024-03-11T11:36:19.415Z",
+	"avatar_url": "https://api.dicebear.com/7.x/notionists/png?seed=mayankcham"
+										}
+									]
+								}</pre>
+							</div>
+						</div>
+						<!-- END TABLE HOVER -->
+
+	
+					</div>
+						
+					</div>
+
+
+
+
+
+
+
+					<div class="container-fluid" id="SearchCommunityViaID">
+						<h3 class="page-title">Search Community Via ID</h3>
+						<h4>End point = <code>http://localhub-flutter.duckdns.orgapi/v1/community/search?communityId=</code></h4>
+						<h4>This API endpoint allows users to search for a community via its ID.</h4>
+						<div class="col-md-7">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Get</h3>
+								</div>
+								<div class="panel-body">
+									<table class="table table-hover">
+										<thead>
+											<tr>
+												<th>Parameter</th>
+												<th>Type</th>
+												<th>Position</th>
+												<th>#</th>
+												<th>Description</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>communityId</td>
+												<td><code>integer</code></td>
+												<td><code>Params</code></td>
+												<td><code>Required</code></td>
+												<td>ID of the community to search for</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+						<div class="col-md-5">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Response</h3>
+								</div>
+								<div class="panel-body">
+									<pre>{
+	"response": [
+		{
+			"status": 200,
+			"community_id": 1,
+			"community_description": "Inferno post only",
+			"community_name": "Inferno",
+			"creator_user_id": 1,
+			"created_at": "2024-02-28T07:31:40.306Z",
+			"banner_url": "https://localhub-flutter.duckdns.org:3002/files/low/1709105500161-image_cropper_1709105487184.jpg.webp",
+			"logo_url": "https://localhub-flutter.duckdns.org:3002/files/low/1709105500009-image_cropper_1709105431868.jpg.webp",
+			"active": true
+		},
+		{
+			"status": 200,
+			"community_id": 2,
+			"community_name": "mayankIsPro",
+			"community_description": "😉",
+			"creator_user_id": 3,
+			"created_at": "2024-02-28T10:25:40.778Z",
+			"banner_url": "https://localhub-flutter.duckdns.org:3002/files/low/1709115939930-image_cropper_1709115898921.jpg.webp",
+			"logo_url": "https://localhub-flutter.duckdns.org:3002/files/low/1709115939503-image_cropper_1709115921792.jpg.webp",
+			"active": true
+		},
+		...
+	]
+}</pre>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+					</div>
+					
+
+
+
+
+
+
+
+					<div class="container-fluid" id="submitVoteResponse">
+
+						<h3 class="page-title">Submit Vote Response</h3>
+						<h4> End point = <code>http://localhub-flutter.duckdns.orgapi/api/v1/posts/vote/upvote/</code></h4>
+						<div class="col-md-7">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Post</h3>
+								</div>
+								<div class="panel-body">
+									<table class="table table-hover">
+										<thead>
+											<tr>
+												<th>Parameter</th>
+												<th>Type</th>
+												<th>Position</th>
+												<th>#</th>
+												<th>Description</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>token</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>User authentication token.</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+						<div class="col-md-5">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Response</h3>
+								</div>
+								<div class="panel-body">
+									<pre>{
+	"status": 200,
+	"response": "Vote submitted for post_id: 9"
+					}</pre>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+					</div>
+					
+
+
+
+
+
+
+					<div class="container-fluid" id="userFeed">
+
+						<h3 class="page-title">User Feed</h3>
+						<h4>End Point = <code>http://localhub-flutter.duckdns.org/api/v1/getUserFeedPosts?offset=0</code></h4>
+						<div class="col-md-7">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Get</h3>
+								</div>
+								<div class="panel-body">
+									<table class="table table-hover">
+										<thead>
+											<tr>
+												<th>Parameter</th>
+												<th>Type</th>
+												<th>Position</th>
+												<th>#</th>
+												<th>Description</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>token</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>User authentication token.</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+						<div class="col-md-5">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Response</h3>
+								</div>
+								<div class="panel-body">
+									<pre>{
+"status": 200,
+"response": [
+	{
+		"post_id": 20,
+		"post_title": "project presentation",
+		"short_content": "",
+		"post_image": "https://localhub-flutter.duckdns.org:3002/files/low/1710176009032-image_cropper_1710175985116.jpg.webp",
+		"community_id": 1,
+		"created_at": "2024-03-11T16:53:30.618Z",
+		"community_name": "Inferno",
+		"logo_url": "https://localhub-flutter.duckdns.org:3002/files/low/1709105500009-image_cropper_1709105431868.jpg.webp"
+	}
+						]
+					}</pre>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+					</div>
+					
+
+
+
+
+
+
+
+					<div class="container-fluid" id="submitDownvoteResponse">
+
+						<h3 class="page-title">Submit Downvote Response</h3>
+						<h4> End point = <code>http://localhub-flutter.duckdns.orgapi/api/v1/posts/vote/upvote/</code></h4>
+						<div class="col-md-7">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Post</h3>
+								</div>
+								<div class="panel-body">
+									<table class="table table-hover">
+										<thead>
+											<tr>
+												<th>Parameter</th>
+												<th>Type</th>
+												<th>Position</th>
+												<th>#</th>
+												<th>Description</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>token</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>User authentication token.</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+						<div class="col-md-5">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Response</h3>
+								</div>
+								<div class="panel-body">
+									<pre>{
+	"status": 200,
+	"response": "Downvote submitted for post_id: 20"
+					}</pre>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+					</div>
+					
+
+
+
+
+
+
+
+
+
+
+					<div class="container-fluid" id="createCommunity">
+
+						<h3 class="page-title">Create Community</h3>
+						<h4> End point = <code>http://localhub-flutter.duckdns.orgapi/v1/community/</code></h4>
+						<div class="col-md-7">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Post</h3>
+								</div>
+								<div class="panel-body">
+									<table class="table table-hover">
+										<thead>
+											<tr>
+												<th>Parameter</th>
+												<th>Type</th>
+												<th>Position</th>
+												<th>#</th>
+												<th>Description</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>community_name</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>Name of the community.</td>
+											</tr>
+											<tr>
+												<td>community_description</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>Description of the community.</td>
+											</tr>
+											<tr>
+												<td>logo_url</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>URL of the community logo.</td>
+											</tr>
+											<tr>
+												<td>banner_url</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>URL of the community banner.</td>
+											</tr>
+											<tr>
+												<td>token</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>User authentication token.</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+						<div class="col-md-5">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Response</h3>
+								</div>
+								<div class="panel-body">
+									<pre>{
+		"status": 200,
+		"response": "community created with ID: 6"
+					}</pre>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+					</div>
+					
+
+
+
+
+					<div class="container-fluid" id="getUserPublishedPosts">
+
+						<h3 class="page-title">Get User Published Posts</h3>
+						<div class="col-md-7">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Get</h3>
+								</div>
+								<div class="panel-body">
+									<table class="table table-hover">
+										<thead>
+											<tr>
+												<th>Parameter</th>
+												<th>Type</th>
+												<th>Position</th>
+												<th>#</th>
+												<th>Description</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>token</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>User authentication token.</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+						<div class="col-md-5">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Response</h3>
+								</div>
+								<div class="panel-body">
+									<pre>{
+						"status": 200,
+						"response": [
+							{
+								"post_id": 1,
+								"post_username": "bosshu",
+								"post_title": "updated third time",
+								"post_content": "updated from api, this is working all good.... yoooo boi i got it working :cool:",
+								"post_image": "https://localhub-flutter.duckdns.org:3002/files/low/1709105522519-image_cropper_1709105512880.jpg.webp",
+								"community_id": 1,
+								"created_at": "2024-02-28T07:32:02.863Z",
+								"community_name": "Inferno",
+								"logo_url": "https://localhub-flutter.duckdns.org:3002/files/low/1709105500009-image_cropper_1709105431868.jpg.webp"
+							}
+						]
+					}</pre>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+					</div>
+					
+
+
+
+
+
+					<div class="container-fluid" id="SearchCommunity">
+					
+						<h3 class="page-title">Search Community
+						</h3>
+						<h4> End point = <code>http://localhub-flutter.duckdns.orgapi/v1/community/search?communityName=</code></h4>
+						<h4>This API endpoint allows users to search community via its name and if its left blank then all the communities will be responded.</h4>
+						<div class="col-md-7">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Get</h3>
+								</div>
+								<div class="panel-body">
+									<table class="table table-hover">
+										<thead>
+											<tr>
+												<th>Parameter</th>
+												<th>Type</th>
+												<th>Position</th>
+												<th>#</th>
+												<th>Description</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>communityName</td>
+												<td><code>string</code></td>
+												<td><code>Params</code></td>
+												<td><code>Optional</code></td>
+												<td>Name of the community that has to be found </td>
+											</tr>
+											
+	
+	
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+						<div class="col-md-5">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Response</h3>
+								</div>
+								<div class="panel-body">
+									<pre>{
+	"response": [
+	"status": 200,
+		{
+			"community_id": 1,
+			"community_description": "Inferno post only",
+			"community_name": "Inferno",
+			"creator_user_id": 1,
+			"created_at": "2024-02-28T07:31:40.306Z",
+			"banner_url": "https://localhub-flutter.duckdns.org:3002/files/low/1709105500161-image_cropper_1709105487184.jpg.webp",
+			"logo_url": "https://localhub-flutter.duckdns.org:3002/files/low/1709105500009-image_cropper_1709105431868.jpg.webp",
+			"active": true
+		},
+		{
+			"community_id": 2,
+			"community_name": "mayankIsPro",
+			"community_description": "😉",
+			"creator_user_id": 3,
+			"created_at": "2024-02-28T10:25:40.778Z",
+			"banner_url": "https://localhub-flutter.duckdns.org:3002/files/low/1709115939930-image_cropper_1709115898921.jpg.webp",
+			"logo_url": "https://localhub-flutter.duckdns.org:3002/files/low/1709115939503-image_cropper_1709115921792.jpg.webp",
+			"active": true
+		}, ...........
+										]
+									}</pre>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+	
+		
+						</div>
+							
+						</div>
+
+
+
+
+					<div class="container-fluid" id="joinCommunity">
+
+						<h3 class="page-title">Join Community</h3>
+						<h4>End point = <code>http://localhub-flutter.duckdns.org/api/v1/community/join</code></h4>
+						<h4>This API allows users to join communities by providing the community ID and a valid authentication token.</h4>
+						<div class="col-md-7">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Post</h3>
+								</div>
+								<div class="panel-body">
+									<table class="table table-hover">
+										<thead>
+											<tr>
+												<th>Parameter</th>
+												<th>Type</th>
+												<th>Position</th>
+												<th>#</th>
+												<th>Description</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>token</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>Tokens are typically issued after a user successfully authenticates and authorizes the application to access specific resources.</td>
+											</tr>
+											<tr>
+												<td>community_id</td>
+												<td><code>integer</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>The unique identifier of the community to which the user will join.</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+						<div class="col-md-5">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Response</h3>
+								</div>
+								<div class="panel-body">
+									<pre>{
+						"status": 200,
+						"response": "Successfully joined the community"
+					}</pre>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+					</div>
+					
+
+
+
+
+
+
+					<div class="container-fluid" id="leaveCommunity">
+
+						<h3 class="page-title">Leave Community</h3>
+						<h4>End point = <code>http://localhub-flutter.duckdns.org/api/v1/community/leave</code></h4>
+						<h4>This API allows users to leave communities by providing the community ID and a valid authentication token.</h4>
+						<div class="col-md-7">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Post</h3>
+								</div>
+								<div class="panel-body">
+									<table class="table table-hover">
+										<thead>
+											<tr>
+												<th>Parameter</th>
+												<th>Type</th>
+												<th>Position</th>
+												<th>#</th>
+												<th>Description</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>token</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>Tokens are typically issued after a user successfully authenticates and authorizes the application to access specific resources.</td>
+											</tr>
+											<tr>
+												<td>community_id</td>
+												<td><code>integer</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>The unique identifier of the community from which the user will leave.</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+						<div class="col-md-5">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Response</h3>
+								</div>
+								<div class="panel-body">
+									<pre>{
+						"status": 200,
+						"response": "Successfully left the community"
+					}</pre>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+					</div>
+					
+
+
+
+
+
+
+
+
+
+					<div class="container-fluid" id="reportPost">
+
+						<h3 class="page-title">Report Post</h3>
+						<h4>End point = <code>http://localhub-flutter.duckdns.org/api/v1/posts/report</code></h4>
+						<h4>This API allows users to report posts by providing the post ID and a valid authentication token.</h4>
+						<div class="col-md-7">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Post</h3>
+								</div>
+								<div class="panel-body">
+									<table class="table table-hover">
+										<thead>
+											<tr>
+												<th>Parameter</th>
+												<th>Type</th>
+												<th>Position</th>
+												<th>#</th>
+												<th>Description</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>token</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>Tokens are typically issued after a user successfully authenticates and authorizes the application to access specific resources.</td>
+											</tr>
+											<tr>
+												<td>post_id</td>
+												<td><code>integer</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>The unique identifier of the post which will be reported.</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+						<div class="col-md-5">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Response</h3>
+								</div>
+								<div class="panel-body">
+									<pre>{
+						"status": 200,
+						"response": "Successfully reported post"
+					}</pre>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+					</div>
+					
+
+
+
+
+
+					<div class="container-fluid" id="deleteCommentResponse">
+						
+						<h3 class="page-title">Delete Comment Response</h3>
+						<h4>end point =<code> http://localhub-flutter.duckdns.org/api/v1/comments/delete</code></h4>
+						<div class="col-md-7">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Post</h3>
+								</div>
+								<div class="panel-body">
+									<table class="table table-hover">
+										<thead>
+											<tr>
+												<th>Parameter</th>
+												<th>Type</th>
+												<th>Position</th>
+												<th>#</th>
+												<th>Description</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>comment_id</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>ID of the comment to delete.</td>
+											</tr>
+											<tr>
+												<td>post_id</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>ID of the post containing the comment.</td>
+											</tr>
+											<tr>
+												<td>token</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>User authentication token.</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+						<div class="col-md-5">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Response</h3>
+								</div>
+								<div class="panel-body">
+									<pre>{
+						"status": 200,
+						"response": [
+							{
+								"comment_id": 21
+							}
+						]
+					}</pre>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+					</div>
+					
+					
+
+
+
+
+					
+				<div class="container-fluid" id="reportComment">
+				
+					<h3 class="page-title">Report Comment
+					</h3>
+					<h4> End point = <code>http://localhub-flutter.duckdns.org/api/v1/comments/create</code></h4>
+					<h4>This API allows users to report comments by providing the comment ID and a valid authentication token.</h4>
+					<div class="col-md-7">
+						<!-- TABLE HOVER -->
+						<div class="panel">
+							<div class="panel-heading">
+								<h3 class="panel-title">Post</h3>
+							</div>
+							<div class="panel-body">
+								<table class="table table-hover">
+									<thead>
+										<tr>
+											<th>Parameter</th>
+											<th>Type</th>
+											<th>Position</th>
+											<th>#</th>
+											<th>Description</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>token</td>
+											<td><code>string</code></td>
+											<td><code>Body</code></td>
+											<td><code>Required</code></td>
+											<td>tokens are typically issued after a user successfully authenticates and authorizes the application to access specific resources </td>
+										</tr>
+										
+										<tr>
+											<td>comment_id</td>
+											<td><code>integer</code></td>
+											<td><code>Body</code></td>
+											<td><code>Required</code></td>
+											<td>The unique identifier of the  comment which will be reported. </td>
+										</tr>
+
+
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<!-- END TABLE HOVER -->
+					</div>
+					<div class="col-md-5">
+						<!-- TABLE HOVER -->
+						<div class="panel">
+							<div class="panel-heading">
+								<h3 class="panel-title">Response</h3>
+							</div>
+							<div class="panel-body">
+								<pre>{
+	"status": 200,
+	"response": "Successfully reported comment"
+								}</pre>
+							</div>
+						</div>
+						<!-- END TABLE HOVER -->
+
+	
+					</div>
+						
+					</div>
+
+
+
+
+
+
+
+				<div class="container-fluid" id="createComment">
+					
+					<h3 class="page-title">Create Comment
+					</h3>
+					<h4> End point = <code>http://localhub-flutter.duckdns.org/api/v1/comments/create</code></h4>
+					<h4>This API endpoint allows users to add comments to specific posts by sending a POST request to the appropriate URL with the post ID in the path parameter and the comment content in the request body.</h4>
+					<div class="col-md-7">
+						<!-- TABLE HOVER -->
+						<div class="panel">
+							<div class="panel-heading">
+								<h3 class="panel-title">Post</h3>
+							</div>
+							<div class="panel-body">
+								<table class="table table-hover">
+									<thead>
+										<tr>
+											<th>Parameter</th>
+											<th>Type</th>
+											<th>Position</th>
+											<th>#</th>
+											<th>Description</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>Token</td>
+											<td><code>string</code></td>
+											<td><code>Body</code></td>
+											<td><code>Required</code></td>
+											<td>tokens are typically issued after a user successfully authenticates and authorizes the application to access specific resources </td>
+										</tr>
+										
+										<tr>
+											<td>post id</td>
+											<td><code>integer</code></td>
+											<td><code>Body</code></td>
+											<td><code>Required</code></td>
+											<td>The unique identifier of the post to which the comment will be added. </td>
+										</tr>
+
+										<tr>
+											<td>commentContent</td>
+											<td><code>string</code></td>
+											<td><code>Body</code></td>
+											<td><code>Required</code></td>
+											<td>The comment content serves as the primary expression of the user's thoughts, opinions, feedback, or engagement with the post. </td>
+										</tr>
+
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<!-- END TABLE HOVER -->
+					</div>
+					<div class="col-md-5">
+						<!-- TABLE HOVER -->
+						<div class="panel">
+							<div class="panel-heading">
+								<h3 class="panel-title">Response</h3>
+							</div>
+							<div class="panel-body">
+								<pre>{
+	"status": 200,
+	"response": {
+		"comment_id": 21
+	}
+								}</pre>
+							</div>
+						</div>
+						<!-- END TABLE HOVER -->
+
+	
+					</div>
+						
+					</div>
+
+
+
+
+
+
+
+
+					<div class="container-fluid" id="userRegistration">
+
+						<h3 class="page-title">User Registration</h3>
+						<h4>Endpoint = <code>http://localhub-flutter.duckdns.org/api/v1/users</code></h4>
+						<h4>this is used to create new account for the application</h4>
+						<div class="col-md-7">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Post</h3>
+								</div>
+								<div class="panel-body">
+									<table class="table table-hover">
+										<thead>
+											<tr>
+												<th>Parameter</th>
+												<th>Type</th>
+												<th>Position</th>
+												<th>#</th>
+												<th>Description</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>username</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>User's username.</td>
+											</tr>
+											<tr>
+												<td>email</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>User's email address.</td>
+											</tr>
+											<tr>
+												<td>password</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Required</code></td>
+												<td>User's password.</td>
+											</tr>
+											<tr>
+												<td>avatar_url</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Optional</code></td>
+												<td>URL of the user's avatar.</td>
+											</tr>
+											<tr>
+												<td>locality_country</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Optional</code></td>
+												<td>Country of the user's locality.</td>
+											</tr>
+											<tr>
+												<td>locality_state</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Optional</code></td>
+												<td>State of the user's locality.</td>
+											</tr>
+											<tr>
+												<td>locality_city</td>
+												<td><code>string</code></td>
+												<td><code>Body</code></td>
+												<td><code>Optional</code></td>
+												<td>City of the user's locality.</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+						<div class="col-md-5">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Response</h3>
+								</div>
+								<div class="panel-body">
+									<pre>{
+						"status": 200,
+						"response": "df3b38112df41648f401d4dd3"
+					}</pre>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+					</div>
+					
+
+
+
+
+
+				<div class="container-fluid" id="Login">
+					
+					<h3 class="page-title">Login 
+					</h3>
+					<h4> End point = <code>http://localhub-flutter.duckdns.org/api/v1/login</code></h4>
+					<h4>this is used to retrive all the posts or any of the posts stored in the database of the server</h4>
+					<div class="col-md-7">
+						<!-- TABLE HOVER -->
+						<div class="panel">
+							<div class="panel-heading">
+								<h3 class="panel-title">Post</h3>
+							</div>
+							<div class="panel-body">
+								<table class="table table-hover">
+									<thead>
+										<tr>
+											<th>Parameter</th>
+											<th>Type</th>
+											<th>Position</th>
+											<th>#</th>
+											<th>Description</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>Username Password</td>
+											<td><code>string</code></td>
+											<td><code>Body</code></td>
+											<td><code>Required</code></td>
+											<td>The username and password is your API key which you can obtain from the developer portal after signing up </td>
+										</tr>
+										
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<!-- END TABLE HOVER -->
+					</div>
+					<div class="col-md-5">
+						<!-- TABLE HOVER -->
+						<div class="panel">
+							<div class="panel-heading">
+								<h3 class="panel-title">Response</h3>
+							</div>
+							<div class="panel-body">
+								<pre>{
+	"status": 200,
+	"response": "699e24e093b579e49e6b20492"
+								
+}</pre>
+							</div>
+						</div>
+						<!-- END TABLE HOVER -->
+
+
+						
+					</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+				<div class="container-fluid" id="me">
+				
+					<h3 class="page-title">Me 
+					</h3>
+					<h4> End point = <code>http://localhub-flutter.duckdns.org/api/v1/me</code></h4>
+					<h4>this is used to retrive all the posts or any of the posts stored in the database of the server</h4>
+					<div class="col-md-7">
+						<!-- TABLE HOVER -->
+						<div class="panel">
+							<div class="panel-heading">
+								<h3 class="panel-title">Get</h3>
+							</div>
+							<div class="panel-body">
+								<table class="table table-hover">
+									<thead>
+										<tr>
+											<th>Parameter</th>
+											<th>Type</th>
+											<th>Position</th>
+											<th>#</th>
+											<th>Description</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>Offset</td>
+											<td><code>string</code></td>
+											<td><code>Params</code></td>
+											<td><code>Optional</code></td>
+											<td>The offset parameter indicates the index of the first item to retrieve from the collection. For example, if you have a collection of 100 items and you set the offset to 20, the API will start fetching items from the 21st item onwards. </td>
+										</tr>
+										
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<!-- END TABLE HOVER -->
+					</div>
+					<div class="col-md-5">
+						<!-- TABLE HOVER -->
+						<div class="panel">
+							<div class="panel-heading">
+								<h3 class="panel-title">Response</h3>
+							</div>
+							<div class="panel-body">
+								<pre>{
+		"status": 200,
+		"response": {
+		"user_id": 3,
+		"username": "mayankcham",
+		"email": "gg@gg.com",
+		"bio": null,
+		"avatar_url": "https://api.dicebear.com/7.x/notionists/png?seed=mayankcham",
+		"created_at": "2024-02-28T10:14:28.812Z",
+		"locality_country": "India",
+		"locality_state": "Gujarat",
+		"locality_city": "Surat"
+		}
+			}</pre>
+							</div>
+						</div>
+						<!-- END TABLE HOVER -->
+
+
+						
+					</div>
+
+
+
+
+
+
+
+					<div class="container-fluid" id="Get PostsStats">
+				
+						<h3 class="page-title">Get Posts Stats
+						</h3>
+						<h4> End point = <code>http://localhub-flutter.duckdns.org/api/v1/post/stats/2</code></h4>
+						<h4>this is used to retrive all the posts stats or any of the posts stats stored in the database of the server</h4>
+						<div class="col-md-7">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Get</h3>
+								</div>
+								<div class="panel-body">
+									<table class="table table-hover">
+										<thead>
+											<tr>
+												<th>Parameter</th>
+												<th>Type</th>
+												<th>Position</th>
+												<th>#</th>
+												<th>Description</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>id</td>
+												<td><code>integer</code></td>
+												<td><code>Endpointpath</code></td>
+												<td><code>Optional</code></td>
+												<td>A unique identifier assigned to individual posts within a system, used to retrieve specific post-related information via API requests.</td>
+											</tr>
+											
+										</tbody>
+									</table>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+						<div class="col-md-5">
+							<!-- TABLE HOVER -->
+							<div class="panel">
+								<div class="panel-heading">
+									<h3 class="panel-title">Response</h3>
+								</div>
+								<div class="panel-body">
+									<pre>{
+	"status": 200,
+	"response": {
+	"total_votes": 1,
+	"total_views": 0,
+	"total_comments": 0
+			}
+		}</pre>
+								</div>
+							</div>
+							<!-- END TABLE HOVER -->
+						</div>
+
+
+
+
+
+
+				<div class="container-fluid" id="Get Posts">
+				
+					<h3 class="page-title">Get Posts 
+					</h3>
+					<h4> End point = <code>http://localhub-flutter.duckdns.org/api/v1/posts?offset=</code></h4>
+					<h4>this is used to retrive all the posts or any of the posts stored in the database of the server</h4>
+					<div class="col-md-7">
+						<!-- TABLE HOVER -->
+						<div class="panel">
+							<div class="panel-heading">
+								<h3 class="panel-title">Get</h3>
+							</div>
+							<div class="panel-body">
+								<table class="table table-hover">
+									<thead>
+										<tr>
+											<th>Parameter</th>
+											<th>Type</th>
+											<th>Position</th>
+											<th>#</th>
+											<th>Description</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>Offset</td>
+											<td><code>string</code></td>
+											<td><code>Params</code></td>
+											<td><code>Optional</code></td>
+											<td>The offset parameter indicates the index of the first item to retrieve from the collection. For example, if you have a collection of 100 items and you set the offset to 20, the API will start fetching items from the 21st item onwards. </td>
+										</tr>
+										
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<!-- END TABLE HOVER -->
+					</div>
+					<div class="col-md-5">
+						<!-- TABLE HOVER -->
+						<div class="panel">
+							<div class="panel-heading">
+								<h3 class="panel-title">Response</h3>
+							</div>
+							<div class="panel-body">
+								<pre>{
+    "status": true,
+    "result_code": 200,
+    "message": "Success!",
+    {
+		"post_id": 2,
+		"post_title": "Hack overflow",
+		"short_content": "",
+		"post_image": "https://localhub-flutter.duckdns.org:3002/files/low/1709109086745-image_cropper_1709109075939.jpg.webp",
+		"community_id": 1,
+		"created_at": "2024-02-28T08:31:27.069Z",
+		"community_name": "Inferno",
+		"logo_url": "https://localhub-flutter.duckdns.org:3002/files/low/1709105500009-image_cropper_1709105431868.jpg.webp"
+	},
+	{
+		"post_id": 1,
+		"post_title": "Stunt mania",
+		"short_content": "",
+		"post_image": "https://localhub-flutter.duckdns.org:3002/files/low/1709105522519-image_cropper_1709105512880.jpg.webp",
+		"community_id": 1,
+		"created_at": "2024-02-28T07:32:02.863Z",
+		"community_name": "Inferno",
+		"logo_url": "https://localhub-flutter.duckdns.org:3002/files/low/1709105500009-image_cropper_1709105431868.jpg.webp"
+	}
+]
+}</pre>
+							</div>
+						</div>
+						<!-- END TABLE HOVER -->
+
+
+						
+					</div>
+			
+					</div>
+				</div>
+
+				
+			</div>
+
+			<div class="container-fluid" id="GetComm">
+				
+				<h3 class="page-title">Get Community Data
+				</h3>
+				<h4> End point = <code>http://localhub-flutter.duckdns.org/api/v1/community/1</code></h4>
+				<h4>this is used to retrive specific community with the id</h4>
+				<div class="col-md-7">
+					<!-- TABLE HOVER -->
+					<div class="panel">
+						<div class="panel-heading">
+							<h3 class="panel-title">Get</h3>
+						</div>
+						<div class="panel-body">
+							<table class="table table-hover">
+								<thead>
+									<tr>
+										<th>Parameter</th>
+										<th>Type</th>
+										<th>Position</th>
+										<th>#</th>
+										<th>Description</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>id</td>
+										<td><code>integer</code></td>
+										<td><code>Endpointpath</code></td>
+										<td><code>Optional</code></td>
+										<td>A unique identifier assigned to individual posts within a system, used to retrieve specific post-related information via API requests.</td>
+									</tr>
+									
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<!-- END TABLE HOVER -->
+				</div>
+				<div class="col-md-5">
+					<!-- TABLE HOVER -->
+					<div class="panel">
+						<div class="panel-heading">
+							<h3 class="panel-title">Response</h3>
+						</div>
+						<div class="panel-body">
+							<pre>{
+		"status": 200,
+		"response": {
+		"community_id": 1,
+		"community_name": "Inferno",
+		"community_description": "Inferno post only",
+		"creator_user_id": 1,
+		"created_at": "2024-02-28T07:31:40.306Z",
+		"banner_url": "https://localhub-flutter.duckdns.org:3002/files/low/1709105500161-image_cropper_1709105487184.jpg.webp",
+		"logo_url": "https://localhub-flutter.duckdns.org:3002/files/low/1709105500009-image_cropper_1709105431868.jpg.webp",
+		"active": true
+							}
+						}
+</pre>
+						</div>
+					</div>
+					<!-- END TABLE HOVER -->
+				</div>
+			</div>
+		</div>
+
+		
+	</div>
+
+	
+</div>
+
+
+
+
+
+
+		</div>
+		<!-- END MAIN CONTENT -->
+		
+
+
+		
+	</div>
+	<!-- END MAIN -->
+
+	<!-- END WRAPPER -->
+	<!-- Javascript -->
+	
+	<script src="assets/vendor/jquery/jquery.min.js"></script>
+	<script src="assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+	<script src="assets/vendor/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+	<script src="assets/scripts/klorofil-common.js"></script>
+</body>
+
+</html>
