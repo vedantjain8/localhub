@@ -102,7 +102,7 @@ const createVote = async (request, response, vote_type) => {
     console.error(error);
     response
       .status(500)
-      .json({ status: 500, response: "Error voting for post" });
+      .json({ status: 500, response: error });
   }
 };
 

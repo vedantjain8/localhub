@@ -50,14 +50,18 @@ router.post("/upload", upload.single("uploaded_file"), async (req, res) => {
     // const link = `https://o8oqubodf2.starling-tet.ts.net/files/low/${ref}`;
     const link = `https://localhub-flutter.duckdns.org:3002/files/low/${ref}`;
 
-    await redisClient.hSet("ImageUploadLog", `${ref}`, JSON.stringify(out));
+    await redisClient.hSet(
+      "ImageUploadLog",
+      `${ref}`,
+      JSON.stringify({ user_id: user_id, image_name: ref, image_url: link })
+    );
 
     return res.json({ status: 200, response: link });
   } catch (error) {
     console.error(error);
     return res
       .status(500)
-      .json({ status: 500, response: "Failed to upload file" });
+      .json({ status: 500, response: error });
   }
 });
 

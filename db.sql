@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS
     locality_state VARCHAR NOT NULL,
     locality_city VARCHAR NOT NULL,
     active BOOLEAN NOT NULL DEFAULT TRUE,
-    token VARCHAR(25) NOT NULL
+    token VARCHAR(25) NOT NULL,
+    user_role INT NOT NULL DEFAULT 0
   );
 
 CREATE TABLE IF NOT EXISTS
@@ -152,3 +153,30 @@ CREATE TABLE IF NOT EXISTS
     image_url TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
   );
+
+CREATE TABLE IF NOT EXISTS
+  adminlog(
+    log_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    log_event VARCHAR(50) NOT NULL,
+    log_description TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+  );
+
+
+CREATE TABLE IF NOT EXISTS
+  agenda(
+    agenda_id SERIAL PRIMARY KEY,
+    agenda_title VARCHAR(100) NOT NULL,
+    agenda_description TEXT NOT NULL,
+    user_id INT NOT NULL,
+    image_url TEXT,
+    locality_city VARCHAR NOT NULL,
+    locality_state VARCHAR NOT NULL,
+    locality_country VARCHAR NOT NULL,
+    agenda_start_date TIMESTAMP NOT NULL,
+    agenda_end_date TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+  )

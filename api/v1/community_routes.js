@@ -87,21 +87,7 @@ const createCommunity = async (request, response) => {
   }
 };
 
-const communitySearch = (request, response) => {
-  var communityName = request.query.communityName;
 
-  pool.query(
-    "SELECT * FROM community WHERE LOWER(community_name) LIKE LOWER($1 || '%') AND active = 'T' ORDER BY community_id ASC LIMIT 8",
-    [communityName],
-    (error, result) => {
-      if (error) {
-        console.error(error);
-        return response.status(500).json({ status: 500, response: error });
-      }
-      return response.status(200).json({ status: 200, response: result.rows });
-    }
-  );
-};
 
 const getcommunityDataById = async (request, response) => {
   const community_id = parseInt(request.params.id);
@@ -431,7 +417,6 @@ cron.schedule("*/20 * * * *", async () => {
   }
 });
 
-router.get("/community/search", communitySearch);
 router.get("/community/:id", getcommunityDataById);
 router.post("/community", createCommunity);
 router.post("/community/check/join", joinCommunityStatus);

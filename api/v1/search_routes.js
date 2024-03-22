@@ -44,6 +44,23 @@ const search = async (request, response) => {
   }
 };
 
+const communitySearch = (request, response) => {
+  var communityName = request.query.communityName;
+
+  pool.query(
+    "SELECT * FROM community WHERE LOWER(community_name) LIKE LOWER($1 || '%') AND active = 'T' ORDER BY community_id ASC LIMIT 8",
+    [communityName],
+    (error, result) => {
+      if (error) {
+        console.error(error);
+        return response.status(500).json({ status: 500, response: error });
+      }
+      return response.status(200).json({ status: 200, response: result.rows });
+    }
+  );
+};
+
 router.get("/search", search);
+router.get("/community/search", communitySearch);
 
 module.exports = router;

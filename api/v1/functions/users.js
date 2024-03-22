@@ -20,7 +20,7 @@ async function getUserData(userToken) {
     // Data not found in Redis, fetch from PostgreSQL
     const userResult = await pool.query(
       // "SELECT user_id FROM users WHERE token = $1",
-      "SELECT user_id, username, email, bio, avatar_url, created_at, locality_country, locality_state, locality_city from users where users.token = $1",
+      "SELECT user_id, username, email, bio, avatar_url, created_at, locality_country, locality_state, locality_city, active from users where users.token = $1",
       [userToken]
     );
 
@@ -40,4 +40,43 @@ async function getUserData(userToken) {
   }
 }
 
-module.exports = { getUserData };
+async function getAdminData(adminToken) {
+  // Return list of users data based on users token
+  try {
+    if (cachingBool) {
+      redisClient.select(0);
+
+      var value = await redisClient.get(`adminData:${adminToken}`);
+
+      if (value) {
+        // Data found in Redis, parse and send response
+        return value;
+      }
+    }
+    // Data not found in Redis, fetch from PostgreSQL
+    const adminResult = await pool.query(
+      // "SELECT user_id FROM users WHERE token = $1",
+      "SELECT user_id, username, email, avatar_url, created_at, user_role, active from users where users.token = $1",
+      [adminToken]
+    );
+
+    if (!adminResult.rows.length) {
+      return;
+    }
+
+    var adminData = adminResult.rows[0];
+
+    if (cachingBool) {
+      await redisClient.set(
+        `adminData:${adminToken}`,
+        JSON.stringify(adminData)
+      );
+    }
+    return JSON.stringify(adminData);
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
+
+module.exports = { getUserData, getAdminData };

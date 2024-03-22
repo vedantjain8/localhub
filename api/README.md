@@ -72,15 +72,16 @@ Containers are configured using parameters passed at runtime (such as those abov
 - [dotenv](https://www.npmjs.com/package/dotenv)
 - [express](https://www.npmjs.com/package/express)
 - [express-rate-limit](https://www.npmjs.com/package/express-rate-limit)
-- [Helmet](https://www.npmjs.com/package/helmet) : Helmet helps secure Express apps by setting HTTP response headers.
+- [helmet](https://www.npmjs.com/package/helmet) : Helmet helps secure Express apps by setting HTTP response headers.
 - [moment-timezone](https://www.npmjs.com/package/moment-timezone)
 - [morgan](https://www.npmjs.com/package/morgan) : Logging
-- [redis](https://www.npmjs.com/package/redis)
-- [pg](https://www.npmjs.com/package/pg)
-- [validator](https://www.npmjs.com/package/validator)
-- [node-cron](https://www.npmjs.com/package/node-cron)
 - [multer](https://www.npmjs.com/package/multer)
+- [node-cron](https://www.npmjs.com/package/node-cron)
+- [node-pg-migrate](https://www.npmjs.com/package/node-pg-migrate)
+- [pg](https://www.npmjs.com/package/pg)
+- [redis](https://www.npmjs.com/package/redis)
 - [sharp](https://www.npmjs.com/package/sharp)
+- [validator](https://www.npmjs.com/package/validator)
 
 # Understand the code
 - token is generated from the tools.js using crypto package to generate truely random token key
