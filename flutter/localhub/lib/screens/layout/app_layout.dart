@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localhub/api/about_user_service.dart';
+import 'package:localhub/auth/auth_service.dart';
+import 'package:localhub/screens/admin/admin_login.dart';
 import 'package:localhub/screens/layout/agenda_screen.dart';
 import 'package:localhub/screens/community/create_community.dart';
 import 'package:localhub/screens/layout/explore_screen.dart';
@@ -33,6 +35,8 @@ class _AppLayoutState extends State<AppLayout> {
     setState(() {
       _meJournal = data;
     });
+
+    // if (_meJournal['active']==false){TODO: implement this}
   }
 
   @override
@@ -115,16 +119,16 @@ class _AppLayoutState extends State<AppLayout> {
                     ),
 
                     // history
-                    InkWell(
-                      onTap: () {
-                        // Navigator.of(context).push(MaterialPageRoute(
-                        //     builder: (context) => const HistoryPage()));
-                      },
-                      child: _endDrawerItem(
-                        FontAwesomeIcons.clockRotateLeft,
-                        'History',
-                      ),
-                    ),
+                    // InkWell(
+                    //   onTap: () {
+                    //     // Navigator.of(context).push(MaterialPageRoute(
+                    //     //     builder: (context) => const HistoryPage()));
+                    //   },
+                    //   child: _endDrawerItem(
+                    //     FontAwesomeIcons.clockRotateLeft,
+                    //     'History',
+                    //   ),
+                    // ),
 
                     // settings
                     InkWell(
@@ -133,6 +137,21 @@ class _AppLayoutState extends State<AppLayout> {
                             builder: (context) => const SettingsScreen()));
                       },
                       child: _endDrawerItem(FontAwesomeIcons.gear, 'Settings'),
+                    ),
+
+                    // logout
+                    InkWell(
+                      onLongPress: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const AdminLoginPage()));
+                      },
+                      onTap: () {
+                        AuthService().logout();
+                      },
+                      child: _endDrawerItem(
+                        FontAwesomeIcons.doorOpen,
+                        'logout',
+                      ),
                     ),
                   ],
                 ),

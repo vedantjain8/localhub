@@ -67,4 +67,26 @@ class UserApiService {
     }
     return jsonResponse;
   }
+  
+  Future<Map<String, dynamic>> httpAdminLoginFun({
+    required String username,
+    required String password,
+  }) async {
+    Map<String, dynamic> jsonResponse = {};
+    try {
+      Map<String, dynamic> sendBody = {
+        'username': "$username",
+        'password': "$password",
+      };
+      var url = Uri.https(hostaddress, '/api/admin/v1/login');
+      var response = await http.post(url, body: sendBody);
+
+      if (response.statusCode == 200) {
+        jsonResponse = jsonDecode(response.body);
+      }
+    } catch (e) {
+      rethrow;
+    }
+    return jsonResponse;
+  }
 }
