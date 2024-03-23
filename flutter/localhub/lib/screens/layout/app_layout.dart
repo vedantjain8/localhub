@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localhub/api/about_user_service.dart';
+import 'package:localhub/api/agenda_service.dart';
 import 'package:localhub/auth/auth_service.dart';
 import 'package:localhub/screens/admin/admin_login.dart';
 import 'package:localhub/screens/layout/agenda_screen.dart';
@@ -28,6 +29,9 @@ class _AppLayoutState extends State<AppLayout> {
   }
 
   final AboutUserApiService auas = AboutUserApiService();
+  final AgendaApiService aas = AgendaApiService();
+
+  List<Map<String, dynamic>> agendaList = [];
   Map<String, dynamic> _meJournal = {};
 
   void _loadMeData() async {
@@ -39,10 +43,18 @@ class _AppLayoutState extends State<AppLayout> {
     // if (_meJournal['active']==false){TODO: implement this}
   }
 
+  void _loadAgendaList() async {
+    List<Map<String, dynamic>> data = await aas.getAgendaList();
+    setState(() {
+      agendaList = data;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     _loadMeData();
+    _loadAgendaList();
   }
 
   Widget _endDrawerItem(icon, text) {
@@ -204,11 +216,11 @@ class _AppLayoutState extends State<AppLayout> {
       body: PageView(
         physics: const NeverScrollableScrollPhysics(),
         controller: _pageController,
-        children: const [
-          HomeScreen(),
-          ExploreScreen(),
-          AgendaScreen(),
-          ProfileScreen(),
+        children: [
+          const HomeScreen(),
+          const ExploreScreen(),
+          AgendaScreen(agendaList: agendaList),
+          const ProfileScreen(),
         ],
       ),
       bottomNavigationBar: CustomBottomAppBar(
