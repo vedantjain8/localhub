@@ -52,9 +52,9 @@ class _AppLayoutState extends State<AppLayout> {
 
   @override
   void initState() {
-    super.initState();
     _loadMeData();
     _loadAgendaList();
+    super.initState();
   }
 
   Widget _endDrawerItem(icon, text) {
