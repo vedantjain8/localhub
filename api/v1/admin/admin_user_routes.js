@@ -47,7 +47,7 @@ const loginAdmin = async (request, response) => {
 
     const checkPasswordBool = await checkPassword(password, user.password_hash);
 
-    if (checkPasswordBool == true && user.role == 2) {
+    if (checkPasswordBool == true && user.role == 1) {
       const { token, user_id } = user;
       const now = moment().tz("UTC").format();
 
@@ -101,14 +101,14 @@ const makeAdmin = async (request, response) => {
       .json({ status: 401, response: "Token is not valid" });
   }
 
-  if (admin_data["user_role"] != 2) {
+  if (admin_data["user_role"] != 1) {
     return response
       .status(401)
       .json({ status: 401, response: "User is not an admin" });
   }
 
   await pool.query(
-    "UPDATE users SET user_role = CASE WHEN user_role = 2 THEN 0 ELSE 2 END WHERE user_id = $1 returning user_role",
+    "UPDATE users SET user_role = CASE WHEN user_role = 1 THEN 0 ELSE 1 END WHERE user_id = $1 returning user_role",
     [new_admin_user_id],
     (error, result) => {
       if (error) {

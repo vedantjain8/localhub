@@ -22,7 +22,7 @@ const localhubStatsAdmin = async (request, response) => {
   try {
     const admin_data = JSON.parse(await getAdminData(token));
 
-    if (admin_data.user_role !== 2) {
+    if (admin_data.user_role !== 1) {
       return response
         .status(401)
         .json({ status: 401, response: "User is not an admin" });
@@ -42,8 +42,7 @@ const localhubStatsAdmin = async (request, response) => {
       pool.query(`
           SELECT
             COUNT(user_id) FILTER (WHERE user_role = 0) AS total_public_users,
-            COUNT(user_id) FILTER (WHERE user_role = 1) AS total_moderators,
-            COUNT(user_id) FILTER (WHERE user_role = 2) AS total_admins,
+            COUNT(user_id) FILTER (WHERE user_role = 1) AS total_admins,
             COUNT(user_id) FILTER (WHERE active = 'T') AS active_users,
             COUNT(user_id) AS total_users
           FROM

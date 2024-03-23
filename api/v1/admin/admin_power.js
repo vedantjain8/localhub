@@ -42,7 +42,7 @@ const deleteCommunityAdmin = async (request, response) => {
       .json({ status: 401, response: "Token is not valid" });
   }
 
-  if (admin_data["user_role"] != 2) {
+  if (admin_data["user_role"] != 1) {
     return response
       .status(401)
       .json({ status: 401, response: "User is not an admin" });
@@ -101,7 +101,7 @@ const deletePostAdmin = async (request, response) => {
       .json({ status: 401, response: "Token is not valid" });
   }
 
-  if (admin_data["user_role"] != 2) {
+  if (admin_data["user_role"] != 1) {
     return response
       .status(401)
       .json({ status: 401, response: "User is not an admin" });
@@ -157,7 +157,7 @@ const deleteCommentAdmin = async (request, response) => {
       .json({ status: 401, response: "Token is not valid" });
   }
 
-  if (admin_data["user_role"] != 2) {
+  if (admin_data["user_role"] != 1) {
     return response
       .status(401)
       .json({ status: 401, response: "User is not an admin" });
