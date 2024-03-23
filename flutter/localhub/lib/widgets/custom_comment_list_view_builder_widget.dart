@@ -34,7 +34,13 @@ void showPopUpMenuAtTap({
     if (value == null) return;
 
     if (value == "1") {
-      ras.reportComment(commentID: commentID);
+      ras.reportComment(commentID: commentID).then(
+              (value) => ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(value['response'].toString()),
+                ),
+              ),
+            );
     } else if (value == "2") {
       showDialog(
         context: context,

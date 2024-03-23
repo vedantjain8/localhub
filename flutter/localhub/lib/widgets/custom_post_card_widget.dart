@@ -101,7 +101,13 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
       if (value == null) return;
 
       if (value == "1") {
-        ras.reportPost(postID: postID);
+        ras.reportPost(postID: postID).then(
+              (value) => ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(value['response'].toString()),
+                ),
+              ),
+            );
       } else if (value == "2") {
         Navigator.of(context).push(
           MaterialPageRoute(

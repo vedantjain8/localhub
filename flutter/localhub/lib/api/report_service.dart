@@ -9,7 +9,7 @@ class ReportApiService {
     hostaddress = prefs.getString('hostaddress')!;
   }
 
-  void getUserToken() async {
+  Future<void> getUserToken() async {
     token = await _storage.read(key: 'token');
   }
 
@@ -27,6 +27,7 @@ class ReportApiService {
     required int commentID,
   }) async {
     await getHostAddress();
+    await getUserToken();
     Map<String, dynamic> responseData = {};
     try {
       Map<String, dynamic> sendBody = {
@@ -37,7 +38,7 @@ class ReportApiService {
       var response = await http.post(url, body: sendBody);
 
       if (response.statusCode == 200) {
-        var jsonResponse = jsonDecode(response.body)['response'];
+        var jsonResponse = jsonDecode(response.body);
         responseData = jsonResponse;
       } else {
         print('Request failed with status: ${response.statusCode}.');
@@ -67,7 +68,7 @@ class ReportApiService {
       var response = await http.post(url, body: sendBody);
 
       if (response.statusCode == 200) {
-        var jsonResponse = jsonDecode(response.body)['response'];
+        var jsonResponse = jsonDecode(response.body);
         responseData = jsonResponse;
       } else {
         print('Request failed with status: ${response.statusCode}.');
