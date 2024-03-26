@@ -105,7 +105,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   void _loadMeData() async {
     Map<String, dynamic> data = await auas.aboutUserData();
     setState(() {
-      meJournal = data;
+      meJournal = data['response'];
     });
   }
 

@@ -1,19 +1,6 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:localhub/api/base_api_service.dart';
 
-class UserApiService {
-  void getHostAddress() async {
-    final prefs = await SharedPreferences.getInstance();
-    hostaddress = prefs.getString('hostaddress')!; // Never null
-  }
-
-  late String hostaddress;
-
-  UserApiService() {
-    getHostAddress(); // Fetch hostaddress once per instance
-  }
-
+class UserApiService extends BaseApiService {
   Future<Map<String, dynamic>> httpRegisterFun({
     required String username,
     required String password,
@@ -22,74 +9,40 @@ class UserApiService {
     required String localityState,
     required String localityCity,
   }) async {
-    Map<String, dynamic> jsonResponse = {};
-    try {
-      Map<String, dynamic> sendBody = {
-        "username": "$username",
-        "email": "$email",
-        "password": "$password",
-        "locality_country": "$localityCountry",
-        "locality_state": "$localityState",
-        "locality_city": "$localityCity",
-      };
-      var url = Uri.https(hostaddress, '/api/v1/users');
-      var response = await http.post(url, body: sendBody);
+    Map<String, dynamic> sendBody = {
+      "username": "$username",
+      "email": "$email",
+      "password": "$password",
+      "locality_country": "$localityCountry",
+      "locality_state": "$localityState",
+      "locality_city": "$localityCity",
+    };
 
-      if (response.statusCode == 200) {
-        jsonResponse = jsonDecode(response.body);
-      } else {
-        throw "response code: ${response.statusCode}";
-      }
-    } catch (e) {
-      jsonResponse = {"error on login": e};
-    }
-    return jsonResponse;
+    return await makeMapPOSTRequest(endpoint: "/api/v1/users", body: sendBody);
   }
 
   Future<Map<String, dynamic>> httpLoginFun({
     required String username,
     required String password,
   }) async {
-    Map<String, dynamic> jsonResponse = {};
-    try {
-      Map<String, dynamic> sendBody = {
-        'username': "$username",
-        'password': "$password",
-      };
-      var url = Uri.https(hostaddress, '/api/v1/login');
-      var response = await http.post(url, body: sendBody);
+    Map<String, dynamic> sendBody = {
+      'username': "$username",
+      'password': "$password",
+    };
 
-      if (response.statusCode == 200) {
-        jsonResponse = jsonDecode(response.body);
-      }
-    } catch (e) {
-      rethrow;
-    }
-    return jsonResponse;
+    return await makeMapPOSTRequest(endpoint: "/api/v1/login", body: sendBody);
   }
 
   Future<Map<String, dynamic>> httpAdminLoginFun({
     required String username,
     required String password,
   }) async {
-    Map<String, dynamic> jsonResponse = {};
-    try {
-      Map<String, dynamic> sendBody = {
-        'username': "$username",
-        'password': "$password",
-      };
-      var url = Uri.https(hostaddress, '/api/admin/v1/login');
-      var response = await http.post(url, body: sendBody);
+    Map<String, dynamic> sendBody = {
+      'username': "$username",
+      'password': "$password",
+    };
 
-      if (response.statusCode == 200) {
-        jsonResponse = jsonDecode(response.body);
-      } else {
-        jsonResponse = {"error": jsonDecode(response.body)['response']};
-      }
-    } catch (e) {
-      print('Error: $e');
-      jsonResponse = {"error": e};
-    }
-    return jsonResponse;
+    return await makeMapPOSTRequest(
+        endpoint: "/api/admin/v1/login", body: sendBody);
   }
 }

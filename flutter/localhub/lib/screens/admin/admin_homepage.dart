@@ -19,7 +19,7 @@ class _AdminHomepageState extends State<AdminHomepage> {
     Map<String, dynamic> data = await admin.adminStatsData(token: widget.token);
 
     setState(() {
-      _adminStatsJournal = data;
+      _adminStatsJournal = data['response'];
     });
   }
 

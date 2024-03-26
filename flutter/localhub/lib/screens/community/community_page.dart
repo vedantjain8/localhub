@@ -65,7 +65,7 @@ class _CommunityPageState extends State<CommunityPage> {
     final Map<String, dynamic> data =
         await commas.getCommunityData(communityID: communityID);
     setState(() {
-      _communityData = data;
+      _communityData = data['response'];
     });
   }
 
@@ -73,7 +73,7 @@ class _CommunityPageState extends State<CommunityPage> {
     final Map<String, dynamic> data =
         await commsas.getCommunityStats(communityID: communityID);
     setState(() {
-      _communityStats = data;
+      _communityStats = data['response'];
     });
   }
 

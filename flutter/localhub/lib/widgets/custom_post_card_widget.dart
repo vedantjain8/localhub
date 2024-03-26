@@ -46,10 +46,8 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
   final storage = const FlutterSecureStorage();
 
   Future<Map<String, dynamic>> _loadStats(int postID) async {
-    await pass.getHostAddress();
-
     final Map<String, dynamic> data = await pass.getPostStats(postID: postID);
-    return data;
+    return data['response'];
   }
 
   @override

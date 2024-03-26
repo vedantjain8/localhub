@@ -37,7 +37,7 @@ class _AppLayoutState extends State<AppLayout> {
   void _loadMeData() async {
     Map<String, dynamic> data = await auas.aboutUserData();
     setState(() {
-      _meJournal = data;
+      _meJournal = data['response'];
     });
 
     // if (_meJournal['active']==false){TODO: implement this}
