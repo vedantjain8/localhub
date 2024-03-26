@@ -1,8 +1,11 @@
 import "package:flutter/material.dart";
 import "package:localhub/api/admin_service.dart";
+import "package:localhub/screens/admin/admin_report_page.dart";
+import "package:localhub/screens/admin/admin_users.dart";
 
 class AdminHomepage extends StatefulWidget {
-  const AdminHomepage({super.key});
+  final String token;
+  const AdminHomepage({super.key, required this.token});
 
   @override
   State<AdminHomepage> createState() => _AdminHomepageState();
@@ -13,7 +16,7 @@ class _AdminHomepageState extends State<AdminHomepage> {
   final AdminService admin = AdminService();
 
   void _loadAdminStatsData() async {
-    Map<String, dynamic> data = await admin.adminStatsData();
+    Map<String, dynamic> data = await admin.adminStatsData(token: widget.token);
 
     setState(() {
       _adminStatsJournal = data;
@@ -29,6 +32,9 @@ class _AdminHomepageState extends State<AdminHomepage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Admin Homepage"),
+      ),
       body: SingleChildScrollView(
         child: (_adminStatsJournal.isEmpty)
             ? const Center(
@@ -36,6 +42,31 @@ class _AdminHomepageState extends State<AdminHomepage> {
               )
             : Column(
                 children: [
+                  ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => AdminUsersPage(
+                              token: widget.token,
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Text("users page")),
+                  const SizedBox(
+                    height: 40,
+                  ),
+                  ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => AdminReportPage(
+                              token: widget.token,
+                            ),
+                          ),
+                        );
+                      },
+                      child: const Text("report page")),
                   const SizedBox(
                     height: 40,
                   ),
@@ -58,7 +89,7 @@ class _AdminHomepageState extends State<AdminHomepage> {
                   const SizedBox(
                     height: 40,
                   ),
-                  Text("popular communties:"),
+                  const Text("popular communties:"),
                   ListView.builder(
                     itemCount: _adminStatsJournal['popularCommunity'].length,
                     shrinkWrap: true,
@@ -70,7 +101,7 @@ class _AdminHomepageState extends State<AdminHomepage> {
                               .toString());
                     },
                   ),
-                  Text("Active Posts:"),
+                  const Text("Active Posts:"),
                   Text(
                       "${_adminStatsJournal['post']['total_active_posts']}/${_adminStatsJournal['post']['total_posts']}"),
                   const SizedBox(
@@ -80,10 +111,8 @@ class _AdminHomepageState extends State<AdminHomepage> {
                     itemCount: _adminStatsJournal['popularPost'].length,
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
-                      return Container(
-                        child: Text(
-                            "${_adminStatsJournal['popularPost'][index]["post_title"]} Post title ${_adminStatsJournal['popularPost'][index]["total_views"]}views ${_adminStatsJournal['popularPost'][index]["total_comments"]}comments ${_adminStatsJournal['popularPost'][index]["total_votes"]}votes"),
-                      );
+                      return Text(
+                          "${_adminStatsJournal['popularPost'][index]["post_title"]} Post title ${_adminStatsJournal['popularPost'][index]["total_views"]}views ${_adminStatsJournal['popularPost'][index]["total_comments"]}comments ${_adminStatsJournal['popularPost'][index]["total_votes"]}votes");
                     },
                   ),
                   const SizedBox(
@@ -93,10 +122,8 @@ class _AdminHomepageState extends State<AdminHomepage> {
                     itemCount: _adminStatsJournal['adminLogs'].length,
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
-                      return Container(
-                        child: Text(
-                            "${_adminStatsJournal['adminLogs'][index]["log_event"]} \n ${_adminStatsJournal['adminLogs'][index]["log_description"]} \n ${_adminStatsJournal['adminLogs'][index]["created_at"]}"),
-                      );
+                      return Text(
+                          "${_adminStatsJournal['adminLogs'][index]["log_event"]} \n ${_adminStatsJournal['adminLogs'][index]["log_description"]} \n ${_adminStatsJournal['adminLogs'][index]["created_at"]}");
                     },
                   ),
                   const SizedBox(

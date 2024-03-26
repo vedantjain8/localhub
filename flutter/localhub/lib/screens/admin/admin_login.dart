@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:font_awesome_flutter/font_awesome_flutter.dart";
-import "package:localhub/auth/auth_service.dart";
+import "package:localhub/api/user_service.dart";
 import "package:localhub/screens/admin/admin_homepage.dart";
 import "package:localhub/widgets/custom_input_decoration.dart";
 
@@ -16,7 +16,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   late bool showPass = false;
-  final AuthService authService = AuthService();
+  final UserApiService uas = UserApiService();
 
   @override
   void dispose() {
@@ -104,7 +104,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                     height: 30,
                   ),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         showDialog(
                           context: context,
@@ -115,48 +115,59 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                           },
                         );
 
-                        authService.Adminlogin(
-                          username: _usernameController.text,
-                          password: _passwordController.text,
-                        ).then(
-                          (String? token) => {
-                            Navigator.of(context).pop(),
-                            if (token != null)
-                              {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text("Login successfull"),
-                                  ),
-                                ),
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const AdminHomepage()),
-                                )
-                              }
-                            else
-                              {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text('Login Failed'),
-                                      content: const Text(
-                                          'Invalid username or password.'),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context),
-                                          child: const Text('OK'),
+                        await uas
+                            .httpAdminLoginFun(
+                                username: _usernameController.text,
+                                password: _passwordController.text)
+                            .then(
+                              (Map<String, dynamic> data) => {
+                                Navigator.pop(context),
+                                if (data['response'] != null)
+                                  {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text("Login successfull"),
+                                      ),
+                                    ),
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => AdminHomepage(
+                                          token: data['response'],
                                         ),
-                                      ],
-                                    );
-                                  },
-                                )
-                              }
-                          },
-                        );
+                                      ),
+                                    )
+                                  }
+                                else if (data['error'] != null)
+                                  {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(data['error']),
+                                      ),
+                                    ),
+                                  }
+                                // else
+                                //   {
+                                //     showDialog(
+                                //       context: context,
+                                //       builder: (BuildContext context) {
+                                //         return AlertDialog(
+                                //           title: const Text('Login Failed'),
+                                //           content: const Text(
+                                //               'Invalid username or password.'),
+                                //           actions: [
+                                //             TextButton(
+                                //               onPressed: () =>
+                                //                   Navigator.pop(context),
+                                //               child: const Text('OK'),
+                                //             ),
+                                //           ],
+                                //         );
+                                //       },
+                                //     )
+                                //   }
+                              },
+                            );
                       }
                     },
                     style: ButtonStyle(

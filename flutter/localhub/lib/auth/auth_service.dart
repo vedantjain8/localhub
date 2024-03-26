@@ -76,13 +76,13 @@ class AuthService {
     }
   }
   
-  Future<String?> Adminlogin({
+  Future<String?> adminLogin({
     required String username,
     required String password,
   }) async {
     try {
       // Perform authentication and get the token
-      Map<String, dynamic> httpLoginResult = await apiService.httpLoginFun(
+      Map<String, dynamic> httpLoginResult = await apiService.httpAdminLoginFun(
         username: username,
         password: password,
       );
