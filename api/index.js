@@ -26,7 +26,7 @@ const config = require("./config/config.json");
 
 const adminUserRoutes = require("./v1/admin/admin_user_routes");
 const adminStatsRoutes = require("./v1/admin/admin_stats");
-const adminPowerRoutes = require("./v1/admin/admin_power");
+const adminPowerRoutes = require("./v1/admin/admin_report");
 
 const agendaRoutes = require("./v1/agenda");
 

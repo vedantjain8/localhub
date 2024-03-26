@@ -189,8 +189,86 @@ const deleteCommentAdmin = async (request, response) => {
   );
 };
 
+const listReportedPosts = async (request, response) => {
+  try {
+    const { token } = request.body ?? null;
+    var offset = parseInt(request.query.offset);
+
+    if (!offset) {
+      offset = 0;
+    }
+
+    if (!token || token == null || token == "" || token == undefined) {
+      return response
+        .status(400)
+        .json({ status: 400, response: "token can not be null" });
+    }
+
+    await pool.query(
+      `SELECT report_posts.report_id, report_posts.post_id, report_posts.report_time, posts.post_title, posts.active
+      FROM report_posts
+      JOIN posts ON report_posts.post_id = posts.post_id
+      LIMIT 10 OFFSET $1`,
+      [offset],
+      (error, result) => {
+      if (error) {
+        console.error(error);
+        return response.status(500).json({ status: 500, response: error });
+      }
+      return response.status(200).json({
+        status: 200,
+        response: result.rows,
+      });
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    return response.status(500).json({ status: 500, response: error });
+  }
+};
+const listReportedComments = async (request, response) => {
+  try {
+    const { token } = request.body ?? null;
+    var offset = parseInt(request.query.offset);
+
+    if (!offset) {
+      offset = 0;
+    }
+
+    if (!token || token == null || token == "" || token == undefined) {
+      return response
+        .status(400)
+        .json({ status: 400, response: "token can not be null" });
+    }
+
+    await pool.query(
+      `SELECT report_comment.report_id, report_comment.comment_id, report_comment.report_time, posts_comments_link.comment_content, posts_comments_link.active, posts_comments_link.post_id
+      FROM report_comment
+      JOIN posts_comments_link ON report_comment.comment_id = posts_comments_link.comment_id
+      LIMIT 10 OFFSET $1`,
+      [offset],
+      (error, result) => {
+        if (error) {
+          console.error(error);
+          return response.status(500).json({ status: 500, response: error });
+        }
+        return response.status(200).json({
+          status: 200,
+          response: result.rows,
+        });
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    return response.status(500).json({ status: 500, response: error });
+  }
+};
+
 router.delete("/community/:id", deleteCommunityAdmin);
 router.delete("/posts/:id", deletePostAdmin);
 router.delete("/comments/:id", deleteCommentAdmin);
+
+router.post("/comments/list", listReportedComments);
+router.post("/posts/list", listReportedPosts);
 
 module.exports = router;
