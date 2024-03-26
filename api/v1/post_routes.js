@@ -133,6 +133,7 @@ const getPosts = async (request, response) => {
       `SELECT
           posts.post_id,
           posts.post_title,
+          users.username AS post_username,
           LEFT(posts.post_content, 159) as short_content,
           posts.post_image,
           posts.community_id,
@@ -143,6 +144,8 @@ const getPosts = async (request, response) => {
           posts
         JOIN
           community ON posts.community_id = community.community_id
+        JOIN
+          users ON posts.user_id = users.user_id
         WHERE
           posts.active = 'T'
           AND community.active = 'T'
