@@ -67,7 +67,7 @@ class UserApiService {
     }
     return jsonResponse;
   }
-  
+
   Future<Map<String, dynamic>> httpAdminLoginFun({
     required String username,
     required String password,
@@ -83,9 +83,12 @@ class UserApiService {
 
       if (response.statusCode == 200) {
         jsonResponse = jsonDecode(response.body);
+      } else {
+        jsonResponse = {"error": jsonDecode(response.body)['response']};
       }
     } catch (e) {
-      rethrow;
+      print('Error: $e');
+      jsonResponse = {"error": e};
     }
     return jsonResponse;
   }

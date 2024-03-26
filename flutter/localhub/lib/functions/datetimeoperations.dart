@@ -1,8 +1,8 @@
-String timeAgo(String fatchedDateString) {
-  DateTime fatchedDate = DateTime.parse(fatchedDateString);
+String timeAgo(String fetchedDateString) {
+  DateTime fetchedDate = DateTime.parse(fetchedDateString);
   DateTime currentDate = DateTime.now();
 
-  var different = currentDate.difference(fatchedDate);
+  var different = currentDate.difference(fetchedDate);
 
   if (different.inDays > 365) {
     return "${(different.inDays / 365).floor()}y ";
@@ -24,5 +24,5 @@ String timeAgo(String fatchedDateString) {
   }
   if (different.inMinutes == 0) return 'Just Now';
 
-  return fatchedDate.toString();
+  return fetchedDate.toString();
 }
