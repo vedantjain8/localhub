@@ -41,9 +41,8 @@ class CommunityApiService extends BaseApiService {
     List<Map<String, dynamic>> responseData = [];
     try {
       var response = await makeMapGETRequest(
-          endpoint: '/api/v1/community/search',
+          endpoint: '/api/v1/search/community',
           parameter: {'communityName': '$communityName'});
-
       var jsonResponse = response["response"];
       if (jsonResponse is List) {
         // Check if jsonResponse is a List

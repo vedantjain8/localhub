@@ -205,6 +205,7 @@ class _CreatePostState extends State<CreatePost> {
                 if (widget.isUpdating == false) {
                   await _createPost().then(
                     (Map<String, dynamic> status) => {
+                      Navigator.of(context).pop(),
                       if (status['status'] != null)
                         {
                           if (status['status'] == 200)
