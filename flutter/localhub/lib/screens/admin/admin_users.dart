@@ -15,8 +15,9 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
 
   List<Map<String, dynamic>> _journals = [];
   final ScrollController _scrollController = ScrollController();
-
   final AdminService aas = AdminService();
+  String sortBy = "";
+  bool order = true;
 
   void _loadData() async {
     if (!_hasMoreData) {
@@ -26,6 +27,8 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
     final List<Map<String, dynamic>> data = await aas.getAllUsersList(
       token: widget.token,
       offsetN: offset,
+      sortby: sortBy,
+      order: order ? "asc" : "desc",
     );
 
     if (data.isEmpty) {
@@ -81,71 +84,92 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
             ? const Center(
                 child: CircularProgressIndicator(),
               )
-            : ListView.builder(
-                itemCount: _journals.length,
-                shrinkWrap: true,
-                physics: const AlwaysScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  return Column(
-                    children: [
-                      Text(_journals[index]["user_id"].toString()),
-                      Text(_journals[index]["username"]),
-                      Text(_journals[index]["email"]),
-                      Text(_journals[index]["avatar_url"]),
-                      Text(_journals[index]["created_at"]),
-                      Text(_journals[index]["last_login"]),
-                      Text(_journals[index]["locality_country"]),
-                      Text(_journals[index]["locality_state"]),
-                      Text(_journals[index]["locality_city"]),
-                      Text(_journals[index]["active"].toString()),
-                      Text(_journals[index]["user_role"].toString()),
-                      ElevatedButton(
+            : SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: DataTable(
+                  columns: const [
+                    DataColumn(label: Text('User ID')),
+                    DataColumn(label: Text('Username')),
+                    DataColumn(label: Text('Email')),
+                    DataColumn(label: Text('Avatar')),
+                    DataColumn(label: Text('Created At')),
+                    DataColumn(label: Text('Last Login')),
+                    DataColumn(label: Text('Country')),
+                    DataColumn(label: Text('State')),
+                    DataColumn(label: Text('City')),
+                    DataColumn(label: Text('Active')),
+                    DataColumn(label: Text('Role')),
+                    DataColumn(label: Text('Actions1')),
+                    DataColumn(label: Text('Actions2')),
+                  ],
+                  rows: _journals.map<DataRow>((journal) {
+                    return DataRow(cells: [
+                      DataCell(Text(journal['user_id'].toString())),
+                      DataCell(Text(journal['username'])),
+                      DataCell(Text(journal['email'])),
+                      DataCell(Text(journal['avatar_url'])),
+                      DataCell(Text(journal['created_at'])),
+                      DataCell(Text(journal['last_login'])),
+                      DataCell(Text(journal['locality_country'])),
+                      DataCell(Text(journal['locality_state'])),
+                      DataCell(Text(journal['locality_city'])),
+                      DataCell(Text(journal['active'].toString())),
+                      DataCell(Text(journal['user_role'].toString())),
+                      DataCell(ElevatedButton(
                         onPressed: () async {
                           await aas
                               .makeAdmin(
-                                  targetUserID: _journals[index]["user_id"],
-                                  token: widget.token)
+                            targetUserID: journal['user_id'],
+                            token: widget.token,
+                          )
                               .then((value) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(value['response'] ??
-                                    value['error'] ??
-                                    "error"),
+                                content: Text(
+                                  value['response'] ??
+                                      value['error'] ??
+                                      "Error",
+                                ),
                               ),
                             );
                             _refreshData();
                           });
                         },
-                        child: Text(_journals[index]["user_role"] == 0
-                            ? "make admin"
-                            : "make user"),
-                      ),
-                      ElevatedButton(
+                        child: Text(
+                          journal["user_role"] == 0
+                              ? "Make Admin"
+                              : "Make User",
+                        ),
+                      )),
+                      DataCell(
+                        ElevatedButton(
                           onPressed: () async {
                             await aas
                                 .disableAccount(
-                                    targetUserID: _journals[index]["user_id"],
-                                    token: widget.token)
+                              targetUserID: journal['user_id'],
+                              token: widget.token,
+                            )
                                 .then((value) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text(value['response'] ??
-                                      value['error'] ??
-                                      "error"),
+                                  content: Text(
+                                    value['response'] ??
+                                        value['error'] ??
+                                        "Error",
+                                  ),
                                 ),
                               );
                               _refreshData();
                             });
                           },
-                          child: Text(_journals[index]["active"] == true
-                              ? "disable"
-                              : "activate")),
-                      const SizedBox(
-                        height: 80,
-                      )
-                    ],
-                  );
-                },
+                          child: Text(
+                            journal["active"] == true ? "Disable" : "Activate",
+                          ),
+                        ),
+                      ),
+                    ]);
+                  }).toList(),
+                ),
               ),
       ),
     );

@@ -46,12 +46,12 @@ class AdminService extends BaseApiService {
       var response = await makeMapPOSTRequest(
           endpoint: '/api/admin/v1/users/list',
           parameter: {
-            'offset': '$offsetN'
+            'offset': '$offsetN',
+            if (sortby != null) "sort": "${sortby}",
+            if (order != null) "order": "${order}"
           },
           body: {
             "token": "${token}",
-            if (sortby != null) "sort": "${sortby}",
-            if (order != null) "order": "${order}"
           });
 
       var jsonResponse = response['response'];
