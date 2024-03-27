@@ -65,6 +65,7 @@ const localhubStatsAdmin = async (request, response) => {
         community.community_id,
         community.community_name,
         community.creator_user_id,
+        community.logo_url,
         community.active,
         community_stats.subscriber_count
       FROM
@@ -119,33 +120,6 @@ const localhubStatsAdmin = async (request, response) => {
       LIMIT
         10;`
       ),
-
-      // report logs
-      pool.query(
-        `SELECT
-        post_id,
-        report_time,
-        user_id
-      FROM
-        report_posts
-      ORDER BY
-        report_time desc
-      LIMIT
-        10`
-      ),
-
-      pool.query(
-        `SELECT
-        comment_id,
-        user_id,
-        report_time
-      FROM
-        report_comment
-      ORDER BY
-        report_time desc
-      LIMIT
-        10`
-      ),
     ]);
 
     responseData["user"] = user.rows[0];
@@ -154,8 +128,6 @@ const localhubStatsAdmin = async (request, response) => {
     responseData["post"] = post.rows[0];
     responseData["popularPost"] = popularPost.rows;
     responseData["adminLogs"] = adminLogs.rows;
-    responseData["reportPost"] = reportPost.rows;
-    responseData["reportComment"] = reportComment.rows;
 
     return response.status(200).json({ status: 200, response: responseData });
   } catch (error) {
