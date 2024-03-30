@@ -150,11 +150,13 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
     if (value != null) {
       return bool.parse(value);
     } else {
-      final status =
-          await csas.checkCommunityJoinStatus(communityID: communityID);
-      await storage.write(
-          key: "is-$communityID-joined", value: status['exists'].toString());
-      return (status['exists']);
+    final status =
+        await csas.checkCommunityJoinStatus(communityID: communityID);
+
+    await storage.write(
+        key: "is-$communityID-joined",
+        value: status['response']['exists'].toString());
+    return (status['response']['exists']);
     }
   }
 
