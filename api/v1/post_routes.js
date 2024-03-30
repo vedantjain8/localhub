@@ -246,28 +246,28 @@ const getCommunityPosts = async (request, response) => {
 };
 
 const getUserFeedPosts = async (request, response) => {
-  var { offset } = parseInt(request.body.offset);
-  var token = request.body.token;
-
-  if (!offset) {
-    offset = 0;
-  }
-
-  if (!token || token == null || token == "" || token == undefined) {
-    return response
-      .status(400)
-      .json({ status: 400, response: "Provide a user token" });
-  }
-
-  const user_id = JSON.parse(await getUserData(token))["user_id"];
-
-  if (!user_id) {
-    return response
-      .status(401)
-      .json({ status: 401, response: "Token is not valid" });
-  }
-
   try {
+    var { offset } = parseInt(request.body.offset);
+    var token = request.body.token;
+
+    if (!offset) {
+      offset = 0;
+    }
+
+    if (!token || token == null || token == "" || token == undefined) {
+      return response
+        .status(400)
+        .json({ status: 400, response: "Provide a user token" });
+    }
+
+    const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+    if (!user_id) {
+      return response
+        .status(401)
+        .json({ status: 401, response: "Token is not valid" });
+    }
+
     mergedList = [];
 
     if (cachingBool) {
@@ -312,7 +312,7 @@ const getUserFeedPosts = async (request, response) => {
   WHERE
       posts.active = 'T'
       AND community.active = 'T'
-      AND posts.community_id IN (${mergedList})
+      AND posts.community_id IN (${mergedList.join(",")})
   ORDER BY
       posts.created_at DESC
   LIMIT 20
