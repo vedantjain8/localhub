@@ -2,8 +2,10 @@ const express = require("express");
 const router = express.Router();
 
 const pool = require("../db");
+const { getUserData } = require("./functions/users");
 const redisClient = require("../dbredis");
 const { getAdminData } = require("./functions/users");
+var validator = require("validator");
 const config = require("../config/config.json");
 
 const cachingBool = Boolean(config.caching);
@@ -76,6 +78,7 @@ const createAgenda = async (request, response) => {
       locality_country,
       agenda_start_date,
       agenda_end_date,
+      image_url,
     } = request.body || "";
 
     if (!token) {
@@ -85,10 +88,9 @@ const createAgenda = async (request, response) => {
     }
 
     if (
-      !post_title ||
-      post_title != "" ||
-      !validator.isLength(post_title, { min: 5, max: 200 }) ||
-      !allowedCharactersRegex.test(post_title)
+      !agenda_title ||
+      agenda_title == "" ||
+      !validator.isLength(agenda_title, { min: 5, max: 200 })
     ) {
       return response
         .status(400)
@@ -140,7 +142,7 @@ const createAgenda = async (request, response) => {
         user_id,
         agenda_title,
         agenda_description,
-        image_url,
+        image_url == undefined ? "" : image_url,
         locality_city,
         locality_state,
         locality_country,
@@ -251,9 +253,7 @@ const updateAgenda = async (request, response) => {
 
     const updateQuery = `UPDATE agenda SET ${setClause.join(
       ", "
-    )} WHERE user_id = ${
-      user_id
-    } AND agenda_id = $1 RETURNING agenda_id`;
+    )} WHERE user_id = ${user_id} AND agenda_id = $1 RETURNING agenda_id`;
 
     pool.query(updateQuery, values, async (error, results) => {
       if (error) {
