@@ -94,6 +94,7 @@ class PostApiService extends BaseApiService {
     String? postContent,
     String? imageUrl = "",
   }) async {
+    await getUserToken();
     Map<String, dynamic> sendBody = {
       'post_title': "$postTitle",
       'post_content': "$postContent",

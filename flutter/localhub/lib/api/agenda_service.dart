@@ -25,4 +25,30 @@ class AgendaApiService extends BaseApiService {
     }
     return responseData;
   }
+
+  Future<Map<String, dynamic>> createAgendaList({
+    required String agendaTitle,
+    String? agendaDescription,
+    String? imageUrl,
+    required String localityCity,
+    required String localityState,
+    required String localityCountry,
+    required DateTime agendaStartDate,
+    required DateTime agendaEndDate,
+  }) async {
+    await getUserToken();
+     Map<String, dynamic> sendBody = {
+    'token': token,
+    'agenda_title': agendaTitle,
+    'agenda_description': agendaDescription,
+    'image_url': imageUrl,
+    'locality_city': localityCity,
+    'locality_state': localityState,
+    'locality_country': localityCountry,
+    'agenda_start_date': agendaStartDate.toIso8601String(),
+    'agenda_end_date': agendaEndDate.toIso8601String(),
+  };
+
+  return await makeMapPOSTRequest(endpoint: '/api/v1/agendas/create', body: sendBody);
+  }
 }
