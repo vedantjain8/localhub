@@ -1,25 +1,15 @@
 const express = require("express");
 const router = express.Router();
 
-const moment = require("moment-timezone");
 const pool = require("../../db");
 const redisClient = require("../../dbredis");
-var validator = require("validator");
-const { reservedKeywordsFile } = require("../../tools");
-const { getUserData, getAdminData } = require("../functions/users");
-const { getCommunityData } = require("../functions/community");
 const config = require("../../config/config.json");
-var cron = require("node-cron");
-const { hashPassword, checkPassword } = require("../functions/hash_password");
-const { checkJoinedCommunity } = require("../functions/joinCommunityCheck");
 const { adminLogger } = require("./functions/adminLogger");
 const cachingBool = Boolean(config.caching);
 
-const allowedCharactersRegex = /^[a-zA-Z0-9_]*$/;
-
 // todo delete community for admin and creator user_id in normal ui
 const deleteCommunityAdmin = async (request, response) => {
-  const { token, community_id, log_description } = request.body ?? null;
+  const { token, community_id } = request.body ?? null;
 
   if (community_id == null) {
     return response.status(400).json({
@@ -59,12 +49,10 @@ const deleteCommunityAdmin = async (request, response) => {
 
       adminLogger(
         "admin-community-active-toggle",
-        `Community with communityID: ${community_id} is now active=${result.rows[0].active}. Log description: ${log_description}`,
+        `Community with communityID: ${community_id} is now active=${result.rows[0].active}`,
         admin_data["user_id"]
       );
 
-      // TODO: implement redis delete community
-      // redisClient.del(`:${new_admin_token}`);
       if (cachingBool) {
         await redisClient.flushall();
       }
@@ -78,7 +66,7 @@ const deleteCommunityAdmin = async (request, response) => {
 };
 
 const deletePostAdmin = async (request, response) => {
-  const { token, post_id, log_description } = request.body ?? null;
+  const { token, post_id } = request.body ?? null;
 
   if (post_id == null) {
     return response.status(400).json({
@@ -110,20 +98,21 @@ const deletePostAdmin = async (request, response) => {
   await pool.query(
     "UPDATE posts SET active = CASE WHEN active = true THEN false ELSE true END WHERE post_id = $1 returning active",
     [post_id],
-    (error, result) => {
+    async (error, result) => {
       if (error) {
         console.error(error);
         return response.status(500).json({ status: 500, response: error });
       }
 
-      // adminLogger(
-      //   "admin-post-active-toggle",
-      //   `Post with postID: ${post_id} is now active=${result.rows[0].active}`,
-      //   admin_data["user_id"]
-      // );
+      adminLogger(
+        "admin-post-active-toggle",
+        `Post with postID: ${post_id} is now active=${result.rows[0].active}`,
+        admin_data["user_id"]
+      );
 
-      // TODO: implement redis delete posts
-      // redisClient.del(`:${new_admin_token}`);
+      if (cachingBool) {
+        await redisClient.flushall();
+      }
 
       return response.status(200).json({
         status: 200,
@@ -134,7 +123,7 @@ const deletePostAdmin = async (request, response) => {
 };
 
 const deleteCommentAdmin = async (request, response) => {
-  const { token, comment_id, log_description } = request.body ?? null;
+  const { token, comment_id } = request.body ?? null;
 
   if (comment_id == null) {
     return response.status(400).json({
@@ -166,20 +155,21 @@ const deleteCommentAdmin = async (request, response) => {
   await pool.query(
     "UPDATE posts_comments_link SET active = CASE WHEN active = true THEN false ELSE true END WHERE comment_id = $1 returning active",
     [comment_id],
-    (error, result) => {
+    async (error, result) => {
       if (error) {
         console.error(error);
         return response.status(500).json({ status: 500, response: error });
       }
 
-      // adminLogger(
-      //   "admin-comment-active-toggle",
-      //   `Comment with comment_id: ${comment_id} is now active=${result.rows[0].active}`,
-      //   admin_data["user_id"]
-      // );
+      adminLogger(
+        "admin-comment-active-toggle",
+        `Comment with comment_id: ${comment_id} is now active=${result.rows[0].active}`,
+        admin_data["user_id"]
+      );
 
-      // TODO: implement redis delete posts
-      // redisClient.del(`:${new_admin_token}`);
+      if (cachingBool) {
+        await redisClient.flushall();
+      }
 
       return response.status(200).json({
         status: 200,
@@ -211,14 +201,14 @@ const listReportedPosts = async (request, response) => {
       LIMIT 10 OFFSET $1`,
       [offset],
       (error, result) => {
-      if (error) {
-        console.error(error);
-        return response.status(500).json({ status: 500, response: error });
-      }
-      return response.status(200).json({
-        status: 200,
-        response: result.rows,
-      });
+        if (error) {
+          console.error(error);
+          return response.status(500).json({ status: 500, response: error });
+        }
+        return response.status(200).json({
+          status: 200,
+          response: result.rows,
+        });
       }
     );
   } catch (error) {

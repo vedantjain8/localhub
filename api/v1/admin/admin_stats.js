@@ -34,9 +34,7 @@ const localhubStatsAdmin = async (request, response) => {
       popularCommunity,
       post,
       popularPost,
-      adminLogs,
-      reportPost,
-      reportComment,
+      adminLogs
     ] = await Promise.all([
       // user stats
       pool.query(`

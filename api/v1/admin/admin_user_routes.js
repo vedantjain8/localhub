@@ -6,7 +6,7 @@ const pool = require("../../db");
 const redisClient = require("../../dbredis");
 var validator = require("validator");
 const { getAdminData } = require("../functions/users");
-// const { adminLogger } = require("./functions/adminLogger");
+const { adminLogData } = require("./functions/adminLogger");
 const { checkPassword } = require("../functions/hash_password");
 
 const allowedCharactersRegex = /^[a-zA-Z0-9_]*$/;
@@ -59,6 +59,13 @@ const loginAdmin = async (request, response) => {
             console.error(error);
             return response.status(500).json({ status: 500, response: error });
           }
+
+          adminLogData(
+            "admin-login",
+            `Admin with userID: ${user_id} logged in`,
+            user_id
+          );
+
           return response.status(200).json({ status: 200, response: token });
         }
       );
@@ -79,7 +86,7 @@ const loginAdmin = async (request, response) => {
 
 const makeAdmin = async (request, response) => {
   try {
-    const { token, new_admin_user_id, log_description } = request.body ?? null;
+    const { token, new_admin_user_id } = request.body ?? null;
 
     if (new_admin_user_id == null) {
       return response.status(400).json({
@@ -117,11 +124,11 @@ const makeAdmin = async (request, response) => {
           return response.status(500).json({ status: 500, response: error });
         }
 
-        // adminLog(
-        //   "admin-user-role-toggle",
-        //   `User with userID: ${new_admin_user_id} has now role ${result.rows[0].user_role}`,
-        //   admin_data["user_id"]
-        // );
+        adminLog(
+          "admin-user-role-toggle",
+          `User with userID: ${new_admin_user_id} has now role ${result.rows[0].user_role}`,
+          admin_data["user_id"]
+        );
 
         const new_admin_token = pool.query(
           "select token from users where user_id = $1",
@@ -144,7 +151,7 @@ const makeAdmin = async (request, response) => {
 
 const disableUser = async (request, response) => {
   try {
-    const { token, target_user_id, log_description } = request.body ?? null;
+    const { token, target_user_id } = request.body ?? null;
     // TODO: add description to the log
     if (target_user_id == null) {
       return response.status(400).json({
@@ -182,11 +189,11 @@ const disableUser = async (request, response) => {
           return response.status(500).json({ status: 500, response: error });
         }
 
-        // adminLog(
-        //   "admin-user-role-toggle",
-        //   `User with userID: ${new_admin_user_id} has now role ${result.rows[0].user_role}`,
-        //   admin_data["user_id"]
-        // );
+        adminLog(
+          "admin-user-active-toggle",
+          `User with userID: ${new_admin_user_id} is now active = ${result.rows[0].user_role}`,
+          admin_data["user_id"]
+        );
 
         const target_user_token = pool.query(
           "select token from users where user_id = $1",
