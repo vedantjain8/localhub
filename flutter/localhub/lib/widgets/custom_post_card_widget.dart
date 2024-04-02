@@ -150,13 +150,13 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
     if (value != null) {
       return bool.parse(value);
     } else {
-    final status =
-        await csas.checkCommunityJoinStatus(communityID: communityID);
+      final status =
+          await csas.checkCommunityJoinStatus(communityID: communityID);
 
-    await storage.write(
-        key: "is-$communityID-joined",
-        value: status['response']['exists'].toString());
-    return (status['response']['exists']);
+      await storage.write(
+          key: "is-$communityID-joined",
+          value: status['response']['exists'].toString());
+      return (status['response']['exists']);
     }
   }
 
@@ -204,6 +204,10 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                   }
                   return const CupertinoActivityIndicator();
                 }
+              }
+
+              if (journals.isNotEmpty && journals[0]['error'] != null) {
+                return Center(child: Text(journals[0]['error'].toString()));
               }
 
               final finalPost = journals[index];

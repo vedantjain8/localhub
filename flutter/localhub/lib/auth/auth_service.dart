@@ -107,6 +107,6 @@ class AuthService {
     // ...
 
     // Remove the stored token
-    await _storage.delete(key: 'token');
+    await _storage.deleteAll();
   }
 }

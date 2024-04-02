@@ -5,6 +5,7 @@ import 'package:localhub/api/about_user_service.dart';
 import 'package:localhub/api/agenda_service.dart';
 import 'package:localhub/auth/auth_service.dart';
 import 'package:localhub/screens/admin/admin_login.dart';
+import 'package:localhub/screens/authscreens/login_screen.dart';
 import 'package:localhub/screens/layout/agenda_screen.dart';
 import 'package:localhub/screens/community/create_community.dart';
 import 'package:localhub/screens/layout/explore_screen.dart';
@@ -158,7 +159,11 @@ class _AppLayoutState extends State<AppLayout> {
                             builder: (context) => const AdminLoginPage()));
                       },
                       onTap: () {
-                        AuthService().logout();
+                        AuthService().logout().then((value) =>
+                            Navigator.of(context).pushAndRemoveUntil(
+                                MaterialPageRoute(
+                                    builder: (context) => const LoginScreen()),
+                                (route) => false));
                       },
                       child: _endDrawerItem(
                         FontAwesomeIcons.doorOpen,
