@@ -291,43 +291,65 @@ const getUserFeedPosts = async (request, response) => {
       (row) => row.community_id
     );
     mergedList.push(...communityIdsFromDB);
-
-    pool.query(
-      `SELECT
-      posts.post_id,
-      posts.post_title,
-      LEFT(posts.post_content, 159) as short_content,
-      posts.post_image,
-      posts.community_id,
-      posts.created_at,
-      community.community_name,
-      community.logo_url,
-      users.username AS post_username
-  FROM
-      posts
-  JOIN
-      community ON posts.community_id = community.community_id
-  JOIN
-      users on posts.user_id = users.user_id
-  WHERE
-      posts.active = 'T'
-      AND community.active = 'T'
-      AND posts.community_id IN (${mergedList.join(",")})
-  ORDER BY
-      posts.created_at DESC
-  LIMIT 20
-  OFFSET $1
-`,
-      [offset],
-      async (error, result) => {
-        if (error) {
-          console.error(error);
-          return response.status(500).json({ status: 500, response: error });
-        }
-        userData = result.rows;
-        return response.status(200).json({ status: 200, response: userData });
+    query =
+      mergedList.length === 0
+        ? `SELECT
+        posts.post_id,
+        posts.post_title,
+        LEFT(posts.post_content, 159) as short_content,
+        posts.post_image,
+        posts.community_id,
+        posts.created_at,
+        community.community_name,
+        community.logo_url,
+        users.username AS post_username
+        FROM
+        posts
+        JOIN
+        community ON posts.community_id = community.community_id
+        JOIN
+        users on posts.user_id = users.user_id
+        WHERE
+        posts.active = 'T'
+        AND community.active = 'T'
+        ORDER BY
+        posts.created_at DESC
+        LIMIT 20
+        OFFSET $1
+        `
+        : `SELECT
+        posts.post_id,
+        posts.post_title,
+        LEFT(posts.post_content, 159) as short_content,
+        posts.post_image,
+        posts.community_id,
+        posts.created_at,
+        community.community_name,
+        community.logo_url,
+        users.username AS post_username
+    FROM
+        posts
+    JOIN
+        community ON posts.community_id = community.community_id
+    JOIN
+        users on posts.user_id = users.user_id
+    WHERE
+        posts.active = 'T'
+        AND community.active = 'T'
+        AND posts.community_id IN (${mergedList.join(",")})
+    ORDER BY
+        posts.created_at DESC
+    LIMIT 20
+    OFFSET $1
+    `;
+    pool.query(query, [offset], async (error, result) => {
+      if (error) {
+        console.error(error);
+        return response.status(500).json({ status: 500, response: error });
       }
-    );
+      userData = result.rows;
+      return response.status(200).json({ status: 200, response: userData });
+    });
   } catch (error) {
     console.error(error);
     return response.status(400).json({ status: 400, response: error.message });
