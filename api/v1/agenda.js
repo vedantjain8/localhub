@@ -45,7 +45,7 @@ const getAgenda = async (request, response) => {
       WHERE
         active = TRUE
       ORDER BY
-        agenda_start_date DESC
+        agenda_start_date ASC
       LIMIT
         10
       OFFSET
