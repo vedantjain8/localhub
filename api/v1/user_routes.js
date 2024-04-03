@@ -208,48 +208,18 @@ const updateUser = async (request, response) => {
       token,
     } = request.body;
 
+    if (!token) {
+      return response
+        .status(400)
+        .json({ status: 400, response: "Token is required" });
+    }
+
     const user_id = JSON.parse(await getUserData(token))["user_id"];
 
     if (!user_id) {
       return response
         .status(401)
         .json({ status: 401, response: "Token is not valid" });
-    }
-
-    if (
-      !username ||
-      !validator.isLength(username, { min: 4, max: 15 }) ||
-      !allowedCharactersRegex.test(username)
-    ) {
-      return response
-        .status(400)
-        .json({ status: 400, response: "Enter a valid username" });
-    }
-
-    if (reservedKeywordsFile().includes(username.toLowerCase())) {
-      return response.status(400).json({
-        status: 400,
-        response: "Username is a reserved keyword and cannot be used.",
-      });
-    }
-
-    // Check if the username is available
-    const usernameCheckResult = await pool.query(
-      "SELECT * FROM users WHERE LOWER(username) = LOWER($1)",
-      [username]
-    );
-
-    if (usernameCheckResult.rows.length > 0) {
-      return response
-        .status(400)
-        .json({ status: 400, response: "Username not available" });
-    }
-
-    // email validation
-    if (!email || !validator.isEmail(email)) {
-      return response
-        .status(400)
-        .json({ status: 400, response: "Enter a valid email" });
     }
 
     const userResult = await pool.query(
@@ -268,11 +238,39 @@ const updateUser = async (request, response) => {
     const checkPasswordBool = await checkPassword(password, user.password_hash);
 
     if (checkPasswordBool) {
-      // set clause
       const setClause = [];
-      const values = [user_id];
+      const values = [];
 
       if (username !== undefined) {
+        if (
+          !username ||
+          !validator.isLength(username, { min: 4, max: 15 }) ||
+          !allowedCharactersRegex.test(username)
+        ) {
+          return response
+            .status(400)
+            .json({ status: 400, response: "Enter a valid username" });
+        }
+
+        if (reservedKeywordsFile().includes(username.toLowerCase())) {
+          return response.status(400).json({
+            status: 400,
+            response: "Username is a reserved keyword and cannot be used.",
+          });
+        }
+
+        // Check if the username is available
+        const usernameCheckResult = await pool.query(
+          "SELECT * FROM users WHERE LOWER(username) = LOWER($1)",
+          [username]
+        );
+
+        if (usernameCheckResult.rows.length > 0) {
+          return response
+            .status(400)
+            .json({ status: 400, response: "Username not available" });
+        }
+
         setClause.push(`username = $${values.push(username)}`);
       }
 
@@ -281,6 +279,12 @@ const updateUser = async (request, response) => {
       }
 
       if (email !== undefined) {
+        // email validation
+        if (!email || !validator.isEmail(email)) {
+          return response
+            .status(400)
+            .json({ status: 400, response: "Enter a valid email" });
+        }
         setClause.push(`email = $${values.push(email)}`);
       }
 
@@ -307,7 +311,7 @@ const updateUser = async (request, response) => {
 
       const updateQuery = `UPDATE users SET ${setClause.join(
         ", "
-      )} WHERE token = ${token} RETURNING post_id`;
+      )} WHERE token = '${token}' RETURNING user_id`;
 
       pool.query(updateQuery, values, async (error, results) => {
         if (error) {
@@ -325,12 +329,12 @@ const updateUser = async (request, response) => {
         }
 
         if (cachingBool) {
-          await redisClient.flushall();
+          await redisClient.sendCommand(["flushall"]);
         }
 
         response.status(200).json({
           status: 200,
-          response: `Post modified having Post_ID: ${post_id}`,
+          response: `User modified having user_id: ${results.rows[0].user_id}`,
         });
       });
     } else {
