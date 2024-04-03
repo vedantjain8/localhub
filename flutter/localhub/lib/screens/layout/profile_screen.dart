@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localhub/api/about_user_service.dart';
 import 'package:localhub/api/comments_service.dart';
 import 'package:localhub/api/post_service.dart';
+import 'package:localhub/screens/layout/edit_profile_screen.dart';
 import 'package:localhub/widgets/custom_comment_list_view_builder_widget.dart';
 import 'package:localhub/widgets/custom_post_card_widget.dart';
 import 'package:localhub/widgets/custom_shimmer.dart';
@@ -166,7 +167,14 @@ class _ProfileScreenState extends State<ProfileScreen>
                           ),
                           const Spacer(),
                           IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const EditProfileScreen(),
+                                ),
+                              );
+                            },
                             icon: const Icon(
                               FontAwesomeIcons.pen,
                               size: 20,
