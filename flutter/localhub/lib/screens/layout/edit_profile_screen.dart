@@ -41,10 +41,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       });
       _usernameController.text = meJournal['username'] as String;
       _bioController.text = meJournal['bio'] as String;
-      pickedImage = meJournal['avatar_url'] != null
-          ? XFile(meJournal['avatar_url'] as String)
-          : null;
+      // pickedImage = meJournal['avatar_url'] != null
+      //     ? XFile(meJournal['avatar_url'] as String)
+      //     : null;
     }
+    countryName = meJournal['locality_country'];
+    stateName = meJournal['locality_state'];
+    cityName = meJournal['locality_city'];
+    print('$countryName $cityName $stateName');
   }
 
   Future<void> _openGallery() async {
@@ -53,7 +57,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     CroppedFile? croppedImage = await ImageCropper().cropImage(
       sourcePath: pickedImage!.path,
       aspectRatioPresets: [
-        CropAspectRatioPreset.ratio16x9,
+        CropAspectRatioPreset.square,
         CropAspectRatioPreset.ratio3x2,
         CropAspectRatioPreset.original,
         CropAspectRatioPreset.ratio4x3,
@@ -81,7 +85,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     CroppedFile? croppedImage = await ImageCropper().cropImage(
       sourcePath: pickedImage!.path,
       aspectRatioPresets: [
-        CropAspectRatioPreset.ratio16x9,
+        CropAspectRatioPreset.square,
         CropAspectRatioPreset.ratio3x2,
         CropAspectRatioPreset.original,
         CropAspectRatioPreset.ratio4x3,
@@ -135,6 +139,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     _loadMeData();
+
     super.initState();
   }
 
@@ -220,15 +225,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         overlayColor:
                             MaterialStateProperty.all(Colors.transparent),
                         child: pickedImage == null
-                            ? Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: colorScheme.primaryContainer,
+                            ? CircleAvatar(
+                                radius: 45,
+                                backgroundImage: CachedNetworkImageProvider(
+                                  meJournal["avatar_url"],
                                 ),
-                                width: 80,
-                                height: 80,
-                                child: CachedNetworkImage(
-                                    imageUrl: meJournal['avatar_url']),
                               )
                             : SizedBox(
                                 width: 80,
@@ -242,14 +243,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                 ),
                               ),
                       )),
-                  InkWell(
-                    onTap: () {},
-                    child: CircleAvatar(
-                      radius: 45,
-                      backgroundImage: CachedNetworkImageProvider(
-                        meJournal["avatar_url"],
-                      ),
-                    ),
+                  const SizedBox(
+                    height: 20,
                   ),
                   TextFormField(
                     validator: (value) {
@@ -265,6 +260,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                     textInputAction: TextInputAction.next,
                   ),
+                  const SizedBox(
+                    height: 20,
+                  ),
                   TextFormField(
                     controller: _bioController,
                     decoration: CustomInputDecoration.inputDecoration(
@@ -272,6 +270,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       label: 'Bio',
                     ),
                     textInputAction: TextInputAction.next,
+                  ),
+                  const SizedBox(
+                    height: 20,
                   ),
                   InkWell(
                     onTap: () {
@@ -363,11 +364,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              countryName != null &&
-                                      stateName != null &&
-                                      cityName != null
-                                  ? '$countryName, $stateName, $cityName'
-                                  : 'Select Country, State, City',
+                              '$countryName, $stateName, $cityName',
                               softWrap: true,
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
@@ -384,6 +381,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ],
                       ),
                     ),
+                  ),
+                  const SizedBox(
+                    height: 20,
                   ),
                   ElevatedButton(
                     onPressed: () {

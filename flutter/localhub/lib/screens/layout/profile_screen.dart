@@ -168,12 +168,9 @@ class _ProfileScreenState extends State<ProfileScreen>
                           const Spacer(),
                           IconButton(
                             onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
+                              Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) =>
-                                      const EditProfileScreen(),
-                                ),
-                              );
+                                      const EditProfileScreen()));
                             },
                             icon: const Icon(
                               FontAwesomeIcons.pen,
@@ -194,6 +191,11 @@ class _ProfileScreenState extends State<ProfileScreen>
                           overlayColor: const MaterialStatePropertyAll(
                               Colors.transparent),
                           tabs: _tabs,
+                          onTap: (value) {
+                            setState(() {
+                              _tabController.index == value;
+                            });
+                          },
                           controller: _tabController,
                           unselectedLabelColor: colorScheme.primary,
                           labelColor: colorScheme.background,
@@ -207,23 +209,16 @@ class _ProfileScreenState extends State<ProfileScreen>
                         ),
                       ),
                     ),
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height,
-                      child: TabBarView(
-                        controller: _tabController,
-                        children: [
-                          CustomPostCardWidget(
+                    _tabController.index == 0
+                        ? CustomPostCardWidget(
                             journals: postJournals,
                             hasMoreData: hasMoreDataPosts,
                             isFromProfilePage: true,
-                          ),
-                          commentListViewBuilderWidget(
-                              commentJournals: commentsJournals,
-                              hasMoreData: hasMoreDataComments,
-                              isFromProfilePage: true)
-                        ],
-                      ),
-                    ),
+                          )
+                        : commentListViewBuilderWidget(
+                            commentJournals: commentsJournals,
+                            hasMoreData: hasMoreDataComments,
+                            isFromProfilePage: true),
                     const SizedBox(height: 70),
                   ],
                 ),
