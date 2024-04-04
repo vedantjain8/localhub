@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppTheme {
+  static String fontFamily = 'Montserrat';
   static const String _brightness = 'brightness';
   static const String _color = 'color';
   static const String _colorSeed = 'colorSeed'; // New variable for color seed
@@ -19,6 +20,7 @@ class AppTheme {
         : ColorSeed.values[0];
 
     final theme = ThemeData(
+      fontFamily: fontFamily,
       colorSchemeSeed: savedColor != null
           ? Color(int.parse(savedColor))
           : currentColorSeed.color,
@@ -38,6 +40,7 @@ class AppTheme {
     final updatedTheme = ThemeData(
       colorSchemeSeed: color,
       brightness: brightness,
+      fontFamily: fontFamily,
     );
     themeNotifier.value = updatedTheme;
   }

@@ -33,3 +33,12 @@ flutter:
   assets:
     - assets/images/
   uses-material-design: true
+
+  fonts:
+    - family: Montserrat
+      fonts:
+        - asset: fonts/montserrat/MONTSERRATREGULAR-BWBEL.TTF
+        - asset: fonts/montserrat/MONTSERRATMEDIUM-LGZ6E.OTF
+        - asset: fonts/montserrat/MONTSERRATBOLD-DOWZD.TTF
+        - asset: fonts/montserrat/MONTSERRATLIGHT-6YEMM.OTF
+
