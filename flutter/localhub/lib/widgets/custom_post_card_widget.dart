@@ -292,15 +292,36 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                                       const SizedBox(
                                         width: 10,
                                       ),
-                                      Text(
-                                        finalPost["community_name"],
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Text(
+                                                finalPost["community_name"],
+                                                style: const TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                              const SizedBox(
+                                                width: 9,
+                                              ),
+                                              Text(timeAgo(
+                                                  finalPost["created_at"])),
+                                            ],
+                                          ),
+                                          isFromPostPage
+                                              ? Text(
+                                                  finalPost["post_username"],
+                                                )
+                                              : const SizedBox()
+                                        ],
                                       ),
+                                      // Spacer(),
                                       const SizedBox(
                                         width: 10,
                                       ),
-                                      Text(timeAgo(finalPost["created_at"])),
                                     ],
                                   ),
                                 ),
@@ -334,7 +355,7 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                                             );
                                           }
                                         }),
-                                    const SizedBox(width: 10),
+                                    const SizedBox(width: 20),
                                     SizedBox(
                                       width: 30,
                                       child: GestureDetector(
