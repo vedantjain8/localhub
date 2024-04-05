@@ -148,12 +148,42 @@ class _AdminReportPageState extends State<AdminReportPage>
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  Text(
-                    _journalsPosts.toString(),
-                  ),
-                  Text(
-                    _journalsComments.toString(),
-                  ),
+                  _journalsPosts.isNotEmpty
+                      ? ListView.builder(itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Text(_journalsPosts[index]['post_title']),
+                            subtitle: Text(
+                                "Post ID: ${_journalsPosts[index]['post_id']} at ${_journalsPosts[index]['report_time']}"),
+                            trailing: ElevatedButton(
+                              onPressed: () {
+                                // TODO: add post delete button functionality
+                              },
+                              child: Text(
+                                  _journalsPosts[index]['active'] == true
+                                      ? "Delete"
+                                      : "Restore"),
+                            ),
+                          );
+                        })
+                      : const Center(child: CircularProgressIndicator()),
+                  _journalsComments.isNotEmpty
+                      ? ListView.builder(itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Text(_journalsComments[index]['post_title']),
+                            subtitle: Text(
+                                "Comment ID: ${_journalsComments[index]['comment_id']} at ${_journalsComments[index]['report_time']}"),
+                            trailing: ElevatedButton(
+                              onPressed: () {
+                                // TODO: add post delete button functionality
+                              },
+                              child: Text(
+                                  _journalsComments[index]['active'] == true
+                                      ? "Delete"
+                                      : "Restore"),
+                            ),
+                          );
+                        })
+                      : const Center(child: CircularProgressIndicator()),
                 ],
               ),
             ),
