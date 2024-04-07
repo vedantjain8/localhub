@@ -67,6 +67,62 @@ const getAgenda = async (request, response) => {
   }
 };
 
+const getAgendaById = async (request, response) => {
+  try {
+    var agenda_id = parseInt(request.params.id);
+
+    if (agenda_id == null || agenda_id == "" || agenda_id == undefined) {
+      return response
+        .status(400)
+        .json({ status: 400, response: "agenda_id is required" });
+    }
+
+    if (cachingBool) {
+      redisClient.select(0);
+      const value = await redisClient.get(`agenda:agendaID-${agenda_id}`);
+      if (value) {
+        return response
+          .status(200)
+          .json({ status: 200, response: JSON.parse(value) }); // Data found in Redis
+      }
+    }
+
+    const { rows: agendaData } = await pool.query(
+      `SELECT
+        agenda_id,
+        agenda_title,
+        agenda_description,
+        image_url,
+        locality_city,
+        locality_state,
+        locality_country,
+        agenda_start_date,
+        agenda_end_date,
+        created_at
+      FROM
+        agenda
+      WHERE
+        active = TRUE 
+      AND
+        agenda_id = $1
+        `,
+      [agenda_id]
+    );
+
+    if (cachingBool) {
+      await redisClient.set(
+        `agenda:agendaID-${agenda_id}`,
+        JSON.stringify(agendaData)
+      );
+    }
+
+    return response.status(200).json({ status: 200, response: agendaData });
+  } catch (error) {
+    console.error(error);
+    return response.status(500).json({ status: 500, response: error });
+  }
+};
+
 const createAgenda = async (request, response) => {
   try {
     const {
@@ -355,6 +411,7 @@ const deleteAgenda = async (request, response) => {
 };
 
 router.get("/agendas", getAgenda);
+router.get("/agendas/:id", getAgendaById);
 router.post("/agendas/create", createAgenda);
 router.put("/agendas/:id", updateAgenda);
 router.delete("/agendas/:id", deleteAgenda);
