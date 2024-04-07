@@ -1,4 +1,4 @@
-name: LocalHub
+name: localhub
 description: "LocalHub app to reconnect with your locality."
 publish_to: 'none'
 version: 1.0.0
