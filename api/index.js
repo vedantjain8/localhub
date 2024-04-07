@@ -120,6 +120,78 @@ app.get("/version-apk", async (request, response) => {
   return response.send(apkversion);
 });
 
+app.get("/acknowledgement", async (request, response) => {
+  if (cachingBool) {
+    const text = await redisClient.get(`acknowledgement`);
+
+    if (text) {
+      return response.send(text);
+    }
+  }
+
+  const text = fs.readFileSync("doc/acknowledgement.txt", "utf-8");
+
+  if (cachingBool) {
+    await redisClient.set(`acknowledgement`, text);
+  }
+
+  return response.send(text);
+});
+
+app.get("/content-policy", async (request, response) => {
+  if (cachingBool) {
+    const text = await redisClient.get(`content-policy`);
+
+    if (text) {
+      return response.send(text);
+    }
+  }
+
+  const text = fs.readFileSync("doc/content-policy.txt", "utf-8");
+
+  if (cachingBool) {
+    await redisClient.set(`content-policy`, text);
+  }
+
+  return response.send(text);
+});
+
+app.get("/privacy-policy", async (request, response) => {
+  if (cachingBool) {
+    const text = await redisClient.get(`privacy-policy`);
+
+    if (text) {
+      return response.send(text);
+    }
+  }
+
+  const text = fs.readFileSync("doc/privacy-policy.txt", "utf-8");
+
+  if (cachingBool) {
+    await redisClient.set(`privacy-policy`, text);
+  }
+
+  return response.send(text);
+});
+
+app.get("/user-agreement", async (request, response) => {
+  if (cachingBool) {
+    const text = await redisClient.get(`user-agreement`);
+
+    if (text) {
+      return response.send(text);
+    }
+  }
+
+  const text = fs.readFileSync("doc/user-agreement.txt", "utf-8");
+
+  if (cachingBool) {
+    await redisClient.set(`user-agreement`, text);
+  }
+
+  return response.send(text);
+});
+
 process.on("SIGINT", async () => {
   console.log("Ctrl-C was pressed");
   process.exit();
