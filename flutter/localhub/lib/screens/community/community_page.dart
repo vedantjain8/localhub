@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:localhub/api/community_service.dart';
 import 'package:localhub/api/community_stats_service.dart';
@@ -65,7 +64,7 @@ class _CommunityPageState extends State<CommunityPage> {
     final Map<String, dynamic> data =
         await commas.getCommunityData(communityID: communityID);
     setState(() {
-      _communityData = data;
+      _communityData = data['response'];
     });
   }
 
@@ -73,7 +72,7 @@ class _CommunityPageState extends State<CommunityPage> {
     final Map<String, dynamic> data =
         await commsas.getCommunityStats(communityID: communityID);
     setState(() {
-      _communityStats = data;
+      _communityStats = data['response'];
     });
   }
 
@@ -127,7 +126,7 @@ class _CommunityPageState extends State<CommunityPage> {
                                 aspectRatio: 4 / 1,
                                 child: Container(
                                   decoration: _communityData["banner_url"]
-                                          .isEmpty
+                                          .isNotEmpty
                                       ? BoxDecoration(
                                           image: DecorationImage(
                                             fit: BoxFit.cover,
@@ -148,16 +147,6 @@ class _CommunityPageState extends State<CommunityPage> {
                                             ],
                                           ),
                                         ),
-                                ),
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 5, top: 20),
-                                child: IconButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  icon: const Icon(FontAwesomeIcons.arrowLeft),
                                 ),
                               ),
                               Padding(

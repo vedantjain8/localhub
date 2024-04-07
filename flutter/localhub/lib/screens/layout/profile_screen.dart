@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localhub/api/about_user_service.dart';
 import 'package:localhub/api/comments_service.dart';
 import 'package:localhub/api/post_service.dart';
+import 'package:localhub/screens/layout/edit_profile_screen.dart';
 import 'package:localhub/widgets/custom_comment_list_view_builder_widget.dart';
 import 'package:localhub/widgets/custom_post_card_widget.dart';
 import 'package:localhub/widgets/custom_shimmer.dart';
@@ -105,7 +106,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   void _loadMeData() async {
     Map<String, dynamic> data = await auas.aboutUserData();
     setState(() {
-      meJournal = data;
+      meJournal = data['response'];
     });
   }
 
@@ -166,7 +167,11 @@ class _ProfileScreenState extends State<ProfileScreen>
                           ),
                           const Spacer(),
                           IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) =>
+                                      const EditProfileScreen()));
+                            },
                             icon: const Icon(
                               FontAwesomeIcons.pen,
                               size: 20,
@@ -186,6 +191,11 @@ class _ProfileScreenState extends State<ProfileScreen>
                           overlayColor: const MaterialStatePropertyAll(
                               Colors.transparent),
                           tabs: _tabs,
+                          onTap: (value) {
+                            setState(() {
+                              _tabController.index == value;
+                            });
+                          },
                           controller: _tabController,
                           unselectedLabelColor: colorScheme.primary,
                           labelColor: colorScheme.background,
@@ -199,23 +209,16 @@ class _ProfileScreenState extends State<ProfileScreen>
                         ),
                       ),
                     ),
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height,
-                      child: TabBarView(
-                        controller: _tabController,
-                        children: [
-                          CustomPostCardWidget(
+                    _tabController.index == 0
+                        ? CustomPostCardWidget(
                             journals: postJournals,
                             hasMoreData: hasMoreDataPosts,
                             isFromProfilePage: true,
-                          ),
-                          commentListViewBuilderWidget(
-                              commentJournals: commentsJournals,
-                              hasMoreData: hasMoreDataComments,
-                              isFromProfilePage: true)
-                        ],
-                      ),
-                    ),
+                          )
+                        : commentListViewBuilderWidget(
+                            commentJournals: commentsJournals,
+                            hasMoreData: hasMoreDataComments,
+                            isFromProfilePage: true),
                     const SizedBox(height: 70),
                   ],
                 ),

@@ -46,10 +46,8 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
   final storage = const FlutterSecureStorage();
 
   Future<Map<String, dynamic>> _loadStats(int postID) async {
-    await pass.getHostAddress();
-
     final Map<String, dynamic> data = await pass.getPostStats(postID: postID);
-    return data;
+    return data['response'];
   }
 
   @override
@@ -101,7 +99,13 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
       if (value == null) return;
 
       if (value == "1") {
-        ras.reportPost(postID: postID);
+        ras.reportPost(postID: postID).then(
+              (value) => ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(value['response'].toString()),
+                ),
+              ),
+            );
       } else if (value == "2") {
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -148,9 +152,11 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
     } else {
       final status =
           await csas.checkCommunityJoinStatus(communityID: communityID);
+
       await storage.write(
-          key: "is-$communityID-joined", value: status['exists'].toString());
-      return (status['exists']);
+          key: "is-$communityID-joined",
+          value: status['response']['exists'].toString());
+      return (status['response']['exists']);
     }
   }
 
@@ -198,6 +204,10 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                   }
                   return const CupertinoActivityIndicator();
                 }
+              }
+
+              if (journals.isNotEmpty && journals[0]['error'] != null) {
+                return Center(child: Text(journals[0]['error'].toString()));
               }
 
               final finalPost = journals[index];
@@ -282,15 +292,36 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                                       const SizedBox(
                                         width: 10,
                                       ),
-                                      Text(
-                                        finalPost["community_name"],
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Text(
+                                                finalPost["community_name"],
+                                                style: const TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                              const SizedBox(
+                                                width: 9,
+                                              ),
+                                              Text(timeAgo(
+                                                  finalPost["created_at"])),
+                                            ],
+                                          ),
+                                          isFromPostPage
+                                              ? Text(
+                                                  finalPost["post_username"],
+                                                )
+                                              : const SizedBox()
+                                        ],
                                       ),
+                                      // Spacer(),
                                       const SizedBox(
                                         width: 10,
                                       ),
-                                      Text(timeAgo(finalPost["created_at"])),
                                     ],
                                   ),
                                 ),
@@ -324,7 +355,7 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                                             );
                                           }
                                         }),
-                                    const SizedBox(width: 10),
+                                    const SizedBox(width: 20),
                                     SizedBox(
                                       width: 30,
                                       child: GestureDetector(

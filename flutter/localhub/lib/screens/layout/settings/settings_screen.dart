@@ -1,11 +1,9 @@
-// todo: theme, hostaddress and submit, main.dart me server down aur update wali screen pe
-
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localhub/api/version_check.dart';
+import 'package:localhub/screens/layout/legal_screen.dart';
 import 'package:localhub/themes/theme.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -19,6 +17,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool isDark = AppTheme.themeNotifier.value.brightness == Brightness.dark;
   TextEditingController _hostAddressController = TextEditingController();
   late String previousHostAddress;
+  late String version;
 
   void _loadHostAddress() async {
     final prefs = await SharedPreferences.getInstance();
@@ -105,11 +104,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  void _loadAppDetails() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    version = packageInfo.version;
+  }
+
   @override
   void initState() {
     AppTheme.initialize();
     super.initState();
     _loadHostAddress();
+    _loadAppDetails();
   }
 
   @override
@@ -127,170 +132,166 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _section(
-                    title: 'App Settings',
-                    items: [
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      _sectionItem(
-                        height: _submited ? 100 : 80,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              'HostAddress',
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Expanded(
-                              child: TextField(
-                                controller: _hostAddressController,
-                                decoration: InputDecoration(
-                                    // label: const Text("HostAddress"),
-                                    errorText: _submited ? _errorText : null,
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(20.0),
-                                      borderSide: BorderSide(
-                                        color: colorScheme.outlineVariant,
-                                      ),
+        child: Column(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _section(
+                  title: 'App Settings',
+                  items: [
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    _sectionItem(
+                      height: _submited ? 100 : 80,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            'HostAddress',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Expanded(
+                            child: TextField(
+                              controller: _hostAddressController,
+                              decoration: InputDecoration(
+                                  // label: const Text("HostAddress"),
+                                  errorText: _submited ? _errorText : null,
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                    borderSide: BorderSide(
+                                      color: colorScheme.outlineVariant,
                                     ),
-                                    suffix: IconButton(
-                                        onPressed: () {
-                                          _checkUrl();
-                                        },
-                                        icon: const Icon(
-                                            FontAwesomeIcons.solidFloppyDisk)),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(20.0),
-                                      borderSide: BorderSide(
-                                        color: colorScheme.outlineVariant,
-                                      ),
-                                    )),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      // const Divider(),
-                      // _sectionItem(
-                      //   child: ElevatedButton(
-                      //     onPressed: () {
-                      //       _checkUrl();
-                      //     },
-                      //     child: const Icon(Icons.save_rounded),
-                      //   ),
-                      // ),
-                      _sectionItem(
-                        height: 60,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Theme',
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            Switch(
-                              trackOutlineColor: MaterialStatePropertyAll(
-                                  colorScheme.secondaryContainer),
-                              inactiveTrackColor:
-                                  colorScheme.secondaryContainer,
-                              activeTrackColor: colorScheme.secondaryContainer,
-                              thumbColor: MaterialStatePropertyAll(
-                                  colorScheme.secondary),
-                              value: isDark,
-                              onChanged: (value) async {
-                                setState(() {
-                                  isDark = !isDark;
-                                });
-                                await AppTheme.toggleBrightness();
-                              },
-                              thumbIcon: MaterialStatePropertyAll(
-                                isDark
-                                    ? Icon(
-                                        FontAwesomeIcons.solidSun,
-                                        color: colorScheme.onInverseSurface,
-                                      )
-                                    : Icon(
-                                        FontAwesomeIcons.solidMoon,
-                                        color: colorScheme.onInverseSurface,
-                                      ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      // const Divider(),
-                      _sectionItem(
-                        height: 70,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Colors',
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            Row(
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                        color: colorScheme.outlineVariant,
-                                        width: 1),
                                   ),
-                                  child: DropdownButton<Color>(
-                                    padding: const EdgeInsets.all(10),
-                                    borderRadius: BorderRadius.circular(20),
-                                    underline: Container(),
-                                    value: AppTheme.currentColorSeed.color,
-                                    icon: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Icon(
-                                        FontAwesomeIcons.angleDown,
-                                        color: colorScheme.secondary,
-                                      ),
+                                  suffix: IconButton(
+                                      onPressed: () {
+                                        _checkUrl();
+                                      },
+                                      icon: const Icon(
+                                          FontAwesomeIcons.solidFloppyDisk)),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                    borderSide: BorderSide(
+                                      color: colorScheme.outlineVariant,
                                     ),
-                                    items: ColorSeed.values.map((colorSeed) {
-                                      return DropdownMenuItem(
-                                        value: colorSeed.color,
-                                        child: Row(
-                                          children: [
-                                            CircleAvatar(
-                                              radius: 10,
-                                              backgroundColor: colorSeed.color,
-                                            ),
-                                            const SizedBox(width: 10),
-                                            Text(colorSeed.label),
-                                          ],
-                                        ),
-                                      );
-                                    }).toList(),
-                                    onChanged: (color) {
-                                      AppTheme.selectColor(color!);
-                                    },
-                                  ),
+                                  )),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    _sectionItem(
+                      height: 60,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Theme',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          Switch(
+                            trackOutlineColor: MaterialStatePropertyAll(
+                                colorScheme.secondaryContainer),
+                            inactiveTrackColor: colorScheme.secondaryContainer,
+                            activeTrackColor: colorScheme.secondaryContainer,
+                            thumbColor:
+                                MaterialStatePropertyAll(colorScheme.secondary),
+                            value: isDark,
+                            onChanged: (value) async {
+                              setState(() {
+                                isDark = !isDark;
+                              });
+                              await AppTheme.toggleBrightness();
+                            },
+                            thumbIcon: MaterialStatePropertyAll(
+                              isDark
+                                  ? Icon(
+                                      FontAwesomeIcons.solidSun,
+                                      color: colorScheme.onInverseSurface,
+                                    )
+                                  : Icon(
+                                      FontAwesomeIcons.solidMoon,
+                                      color: colorScheme.onInverseSurface,
+                                    ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    // const Divider(),
+                    _sectionItem(
+                      height: 70,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Colors',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          Row(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                      color: colorScheme.outlineVariant,
+                                      width: 1),
                                 ),
-                              ],
-                            ),
-                          ],
+                                child: DropdownButton<Color>(
+                                  padding: const EdgeInsets.all(10),
+                                  borderRadius: BorderRadius.circular(20),
+                                  underline: Container(),
+                                  value: AppTheme.currentColorSeed.color,
+                                  icon: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Icon(
+                                      FontAwesomeIcons.angleDown,
+                                      color: colorScheme.secondary,
+                                    ),
+                                  ),
+                                  items: ColorSeed.values.map((colorSeed) {
+                                    return DropdownMenuItem(
+                                      value: colorSeed.color,
+                                      child: Row(
+                                        children: [
+                                          CircleAvatar(
+                                            radius: 10,
+                                            backgroundColor: colorSeed.color,
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Text(colorSeed.label),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (color) {
+                                    AppTheme.selectColor(color!);
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                _section(
+                  title: "About",
+                  items: [
+                    InkWell(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ContentPolicyScreen(toLoad: 'Content-Policy',), //pass the endpoint name case does not matters
                         ),
                       ),
-                    ],
-                  ),
-                  _section(title: "About", items: [
-                    InkWell(
                       child: _sectionItem(
                         child: Text(
                           'Content Policy',
@@ -300,6 +301,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     InkWell(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ContentPolicyScreen(toLoad: 'Privacy-Policy',), //pass the endpoint name case does not matters
+                        ),
+                      ),
                       child: _sectionItem(
                         child: Text(
                           'Privacy Policy',
@@ -309,6 +315,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     InkWell(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ContentPolicyScreen(toLoad: 'User-Agreement',), //pass the endpoint name case does not matters
+                        ),
+                      ),
                       child: _sectionItem(
                         child: Text(
                           'User Agreement',
@@ -318,6 +329,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     InkWell(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ContentPolicyScreen(toLoad: 'Acknowledgement',), //pass the endpoint name case does not matters
+                        ),
+                      ),
                       child: _sectionItem(
                         child: Text(
                           'Acknowledgements',
@@ -326,11 +342,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         height: 50,
                       ),
                     ),
-                  ])
-                ],
-              ),
-            ],
-          ),
+                  ],
+                )
+              ],
+            ),
+            const Spacer(),
+            Text("Version: $version"),
+          ],
         ),
       ),
     );

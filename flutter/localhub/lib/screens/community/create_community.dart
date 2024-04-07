@@ -116,6 +116,14 @@ class _CreateCommunityState extends State<CreateCommunity> {
         actions: [
           ElevatedButton(
               onPressed: () {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                );
+
                 if (!_formKey.currentState!.validate()) {
                   if (pickedLogo == null) {
                     setState(() {
@@ -125,6 +133,7 @@ class _CreateCommunityState extends State<CreateCommunity> {
                 } else if (_formKey.currentState!.validate()) {
                   _createCommunity().then(
                     (Map<String, dynamic> status) => {
+                      Navigator.of(context).pop(),
                       if (status['status'] != null)
                         {
                           if (status['status'] == 200)
@@ -134,7 +143,6 @@ class _CreateCommunityState extends State<CreateCommunity> {
                                   content: Text(status['response']),
                                 ),
                               ),
-                              Navigator.of(context).pop(),
                               Navigator.pushAndRemoveUntil(
                                   context,
                                   MaterialPageRoute(
@@ -177,7 +185,7 @@ class _CreateCommunityState extends State<CreateCommunity> {
                   children: [
                     InkWell(
                       onTap: () {
-                          _openGallery(forImage: 1);
+                        _openGallery(forImage: 1);
                       },
                       overlayColor:
                           MaterialStateProperty.all(Colors.transparent),

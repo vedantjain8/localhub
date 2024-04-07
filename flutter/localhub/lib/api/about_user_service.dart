@@ -1,55 +1,54 @@
-import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:localhub/api/base_api_service.dart';
 
-class AboutUserApiService {
-  Future<void> getHostAddress() async {
-    final prefs = await SharedPreferences.getInstance();
-    hostaddress = prefs.getString('hostaddress')!;
-  }
-
-  Future<void> getUserToken() async {
-    token = await _storage.read(key: 'token');
-  }
-
-  late String hostaddress;
-  late String? token;
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
-
-  AboutUserApiService() {
-    getUserToken();
-    getHostAddress(); // Fetch hostaddress once per instance
-  }
-
+class AboutUserApiService extends BaseApiService {
 //   functions for seperate api activities
   Future<Map<String, dynamic>> aboutUserData() async {
-    await getHostAddress();
     await getUserToken();
-    Map<String, dynamic> responseData = {};
-    try {
-      Map<String, dynamic> sendBody = {
-        'token': "$token",
-      };
-      var url = Uri.https(hostaddress, '/api/v1/me');
-      var response = await http.post(url, body: sendBody);
 
-      if (response.statusCode == 200) {
-        var jsonResponse = jsonDecode(response.body)['response'];
-        responseData = jsonResponse;
-      } else {
-        print('Request failed with status: ${response.statusCode}.');
-
-        responseData = {
-          'error': '${response.statusCode}'
-        };
-      }
-    } catch (e) {
-      print('Error: $e');
-      responseData = {'error': 'catch Request failed with status: $e'};
-    }
-    return responseData;
+    return await makeMapPOSTRequest(endpoint: '/api/v1/me', body: {
+      'token': "$token",
+    });
   }
-  
-  
+
+  Future<Map<String, dynamic>> updateUser({
+    required password,
+    String? username,
+    String? bio,
+    String? avatar_url,
+    String? locality_city,
+    String? locality_state,
+    String? locality_country,
+  }) async {
+    await getUserToken();
+
+    Map<String, dynamic> sendBody = {
+      'token': '$token',
+      'password': '$password',
+    };
+
+    if (username != null) {
+      sendBody['username'] = "$username";
+    }
+
+    if (bio != null || bio != "") {
+      sendBody['bio'] = "$bio";
+    }
+
+    if (avatar_url != null || avatar_url != "") {
+      sendBody['avatar_url'] = "$avatar_url";
+    }
+
+    if (locality_city != null || locality_city != "") {
+      sendBody['locality_city'] = "$locality_city";
+    }
+
+    if (locality_state != null || locality_state != "") {
+      sendBody['locality_state'] = "$locality_state";
+    }
+
+    if (locality_country != null || locality_country != "") {
+      sendBody['locality_country'] = "$locality_country";
+    }
+    return await makeMapPUTRequest(endpoint: '/api/v1/users', body: sendBody);
+  }
 }

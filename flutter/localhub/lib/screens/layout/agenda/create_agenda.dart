@@ -1,40 +1,44 @@
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:csc_picker/csc_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:localhub/api/community_service.dart';
-import 'package:localhub/api/post_service.dart';
+import 'package:intl/intl.dart';
+import 'package:localhub/api/agenda_service.dart';
 import 'package:localhub/api/upload_image_service.dart';
-import 'package:localhub/screens/layout/app_layout.dart';
 import 'package:localhub/widgets/custom_input_decoration.dart';
 
-class CreatePost extends StatefulWidget {
+class CreateAgenda extends StatefulWidget {
   final bool isUpdating;
   final int? postID;
-  const CreatePost({
+  const CreateAgenda({
     super.key,
     this.isUpdating = false,
     this.postID,
   });
 
   @override
-  State<CreatePost> createState() => _CreatePostState();
+  State<CreateAgenda> createState() => _CreateAgendaState();
 }
 
-class _CreatePostState extends State<CreatePost> {
-  final TextEditingController _postTitleController = TextEditingController();
-  final TextEditingController _postDescriptionController =
+class _CreateAgendaState extends State<CreateAgenda> {
+  final TextEditingController _agendaTitleController = TextEditingController();
+  final TextEditingController _agendaDescriptionController =
       TextEditingController();
+  String? countryName;
+  String? stateName;
+  String? cityName;
 
-  List<String> community = [];
-  String selectedCommunity = "";
+  late bool locationSelected = true;
+
+  late final DateTime _agendaStartDate;
+  late final DateTime _agendaEndDate;
+  late String _selectedDateText = "Select Date";
 
   final ImageUploadService ius = ImageUploadService();
-  final PostApiService pas = PostApiService();
-  final CommunityApiService cas = CommunityApiService();
+  final AgendaApiService aas = AgendaApiService();
 
   XFile? pickedImage;
   final _picker = ImagePicker();
@@ -95,52 +99,21 @@ class _CreatePostState extends State<CreatePost> {
     }
   }
 
-  Future<List<String>> _loadCommunityList(String? communityName) async {
-    List<String> community = [];
-    final List<Map<String, dynamic>> data =
-        await cas.getCommunityList(communityName: communityName);
-
-    for (var element in data) {
-      community.add(element['community_name'] as String);
-    }
-
-    return community;
-  }
-
   Map<String, dynamic> _journals = {};
-
-  void _loadData(int postID) async {
-    final List<Map<String, dynamic>> data =
-        await pas.getPostById(postId: postID);
-
-    setState(() {
-      _journals = data[0];
-    });
-
-    _postDescriptionController.text = _journals['post_content'] as String;
-    _postTitleController.text = _journals['post_title'] as String;
-    pickedImage = _journals['post_image'] != null
-        ? XFile(_journals['post_image'] as String)
-        : null;
-  }
 
   @override
   void initState() {
     super.initState();
-    if (widget.isUpdating == true) {
-      _loadData(widget.postID!);
-    }
-    _loadCommunityList("");
   }
 
   @override
   void dispose() {
     super.dispose();
-    _postTitleController.dispose();
-    _postDescriptionController.dispose();
+    _agendaTitleController.dispose();
+    _agendaDescriptionController.dispose();
   }
 
-  Future<Map<String, dynamic>> _createPost() async {
+  Future<Map<String, dynamic>> _createAgenda() async {
     // Upload image if pickedImage is not null
     String? imageUrl;
     if (pickedImage != null) {
@@ -153,35 +126,38 @@ class _CreatePostState extends State<CreatePost> {
     }
 
     // Create new post
-    Map<String, dynamic> res = await pas.createNewPost(
-        communityName: selectedCommunity,
-        postTitle: _postTitleController.text,
-        postContent: _postDescriptionController.text,
-        imageUrl: imageUrl);
+    Map<String, dynamic> res = await aas.createAgenda(
+        agendaTitle: _agendaTitleController.text,
+        agendaDescription: _agendaDescriptionController.text,
+        imageUrl: imageUrl,
+        localityCity: cityName.toString(),
+        localityState: stateName.toString(),
+        localityCountry: countryName.toString(),
+        agendaStartDate: _agendaStartDate,
+        agendaEndDate: _agendaEndDate);
     return res;
   }
 
-  Future<Map<String, dynamic>> _updatePost() async {
-    String? imageUrl;
-    if (pickedImage!.path == _journals['post_image']) {
-      imageUrl = _journals['post_image'];
-    } else if (pickedImage != null) {
-      Map<String, dynamic>? uploadResult =
-          await ius.uploadImageHTTP(File(pickedImage!.path));
-      if (uploadResult['status'] != 200) {
-        return {"status": 400};
-      }
-      imageUrl = uploadResult["response"];
-    }
-
-    // Create new post
-    Map<String, dynamic> res = await pas.updatePost(
-      postID: widget.postID!,
-      postTitle: _postTitleController.text,
-      postContent: _postDescriptionController.text,
-      imageUrl: imageUrl,
+  void _showDateTimeRangePicker() async {
+    final DateTimeRange? result = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2022, 1, 1),
+      lastDate: DateTime(2030, 12, 31),
+      currentDate: DateTime.now(),
+      saveText: 'Done',
     );
-    return res;
+
+    if (result != null) {
+      // Rebuild the UI
+      setState(() {
+        final selectedDateRange = result;
+        _agendaStartDate = selectedDateRange.start;
+        _agendaEndDate = selectedDateRange.end;
+        _selectedDateText =
+            '${DateFormat('dd/MM').format(_agendaStartDate)} to ${DateFormat('dd/MM').format(_agendaEndDate)}';
+        print(selectedDateRange);
+      });
+    }
   }
 
   @override
@@ -190,99 +166,9 @@ class _CreatePostState extends State<CreatePost> {
     bool isUpdating = widget.isUpdating;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Post'),
+        title: const Text('Create Agenda'),
         actions: [
-          ElevatedButton(
-              onPressed: () async {
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) {
-                    return const Center(child: CircularProgressIndicator());
-                  },
-                );
-
-                if (widget.isUpdating == false) {
-                  await _createPost().then(
-                    (Map<String, dynamic> status) => {
-                      Navigator.of(context).pop(),
-                      if (status['status'] != null)
-                        {
-                          if (status['status'] == 200)
-                            {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(status['response']),
-                                ),
-                              ),
-                              Navigator.of(context).pop(),
-                              Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const AppLayout()),
-                                  (route) => false),
-                            }
-                          else
-                            (
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(status['response']),
-                                ),
-                              ),
-                            )
-                        }
-                      else
-                        (
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(status['error']),
-                            ),
-                          ),
-                        )
-                    },
-                  );
-                }
-                if (widget.isUpdating == true) {
-                  await _updatePost().then(
-                    (Map<String, dynamic> status) => {
-                      if (status['status'] != null)
-                        {
-                          if (status['status'] == 200)
-                            {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(status['response']),
-                                ),
-                              ),
-                              Navigator.of(context).pop(),
-                              Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const AppLayout()),
-                                  (route) => false),
-                            }
-                          else
-                            (
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(status['response']),
-                                ),
-                              ),
-                            )
-                        }
-                      else
-                        (
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(status['error']),
-                            ),
-                          ),
-                        )
-                    },
-                  );
-                }
-              },
-              child: const Text('Post')),
+          ElevatedButton(onPressed: _createAgenda, child: const Text('Post')),
           const SizedBox(width: 15)
         ],
       ),
@@ -352,7 +238,7 @@ class _CreatePostState extends State<CreatePost> {
                   }
                   return null;
                 },
-                controller: _postTitleController,
+                controller: _agendaTitleController,
                 decoration: CustomInputDecoration.inputDecoration(
                   context: context,
                   label: 'Title',
@@ -371,7 +257,7 @@ class _CreatePostState extends State<CreatePost> {
                 },
                 maxLines: 20,
                 minLines: 1,
-                controller: _postDescriptionController,
+                controller: _agendaDescriptionController,
                 decoration: CustomInputDecoration.inputDecoration(
                   context: context,
                   label: 'Description',
@@ -379,51 +265,127 @@ class _CreatePostState extends State<CreatePost> {
                 ),
                 textInputAction: TextInputAction.next,
               ),
+              SizedBox(
+                height: 20,
+              ),
+              InkWell(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        content: SizedBox(
+                          height: 250, // Adjust the height as needed
+                          child: Center(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                  top: 30, right: 20, left: 20),
+                              child: CSCPicker(
+                                layout: Layout.vertical,
+                                flagState: CountryFlag.DISABLE,
+                                dropdownDecoration: BoxDecoration(
+                                  shape: BoxShape.rectangle,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    width: 0.7,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                disabledDropdownDecoration: BoxDecoration(
+                                  shape: BoxShape.rectangle,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    width: 0.7,
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                onCountryChanged: (value) {
+                                  setState(() {
+                                    countryName = value;
+                                  });
+                                },
+                                onStateChanged: (value) {
+                                  setState(() {
+                                    stateName = value;
+                                  });
+                                },
+                                onCityChanged: (value) {
+                                  setState(() {
+                                    cityName = value;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                        actions: [
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Done'),
+                          )
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: Container(
+                  height: 65,
+                  width: double.maxFinite,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20.0),
+                    border: Border.all(
+                      color: locationSelected == true
+                          ? colorScheme.onSurfaceVariant
+                          : colorScheme.error,
+                    ),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(width: 13),
+                      Icon(
+                        FontAwesomeIcons.earthAmericas,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          countryName != null &&
+                                  stateName != null &&
+                                  cityName != null
+                              ? '$countryName, $stateName, $cityName'
+                              : 'Select Country, State, City',
+                          softWrap: true,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          style: TextStyle(
+                            color: locationSelected == true
+                                ? colorScheme.onSurfaceVariant
+                                : colorScheme.error,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               const SizedBox(
                 height: 20,
               ),
-              (isUpdating == true)
-                  ? Container()
-                  : DropdownSearch<String>(
-                      popupProps: PopupProps.menu(
-                        searchFieldProps: TextFieldProps(
-                          decoration: CustomInputDecoration.inputDecoration(
-                            context: context,
-                            label: 'Search',
-                            prefixIcon:
-                                const Icon(FontAwesomeIcons.magnifyingGlass),
-                          ),
-                        ),
-                        menuProps: MenuProps(
-                            backgroundColor: colorScheme.onInverseSurface,
-                            borderRadius: BorderRadius.circular(30)),
-                        showSearchBox: true,
-                        searchDelay: const Duration(seconds: 1),
-                        isFilterOnline: true,
-                        showSelectedItems: true,
-                      ),
-                      asyncItems: (value) {
-                        return _loadCommunityList(value);
-                      },
-                      clearButtonProps: const ClearButtonProps(
-                        isVisible: true,
-                      ),
-                      dropdownButtonProps: const DropdownButtonProps(
-                          icon: Icon(FontAwesomeIcons.caretDown)),
-                      dropdownDecoratorProps: DropDownDecoratorProps(
-                        dropdownSearchDecoration: InputDecoration(
-                            labelText: "Select Community",
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(20))),
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          if (value != null) {
-                            selectedCommunity = value;
-                          }
-                        });
-                      },
-                    ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: _showDateTimeRangePicker,
+                    child: Text(_selectedDateText),
+                  ),
+                ],
+              ),
               const SizedBox(
                 height: 20,
               ),
@@ -469,7 +431,7 @@ class _CreatePostState extends State<CreatePost> {
                               ),
                             ],
                           ),
-                        )
+                        ),
             ],
           ),
         ),

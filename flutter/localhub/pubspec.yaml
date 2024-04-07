@@ -1,7 +1,7 @@
-name: localhub
-description: "A new Flutter project."
+name: LocalHub
+description: "LocalHub app to reconnect with your locality."
 publish_to: 'none'
-version: 0.2.2
+version: 1.0.0
 
 environment:
   sdk: '>=3.2.3 <4.0.0'
@@ -33,3 +33,12 @@ flutter:
   assets:
     - assets/images/
   uses-material-design: true
+
+  fonts:
+    - family: Montserrat
+      fonts:
+        - asset: fonts/montserrat/MONTSERRATREGULAR-BWBEL.TTF
+        - asset: fonts/montserrat/MONTSERRATMEDIUM-LGZ6E.OTF
+        - asset: fonts/montserrat/MONTSERRATBOLD-DOWZD.TTF
+        - asset: fonts/montserrat/MONTSERRATLIGHT-6YEMM.OTF
+

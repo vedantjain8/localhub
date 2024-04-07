@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:localhub/api/comments_service.dart';
 import 'package:localhub/api/report_service.dart';
 import 'package:localhub/functions/datetimeoperations.dart';
+import 'package:localhub/screens/post/post_page.dart';
 
 final ReportApiService ras = ReportApiService();
 final CommentsApiService cas = CommentsApiService();
@@ -34,7 +35,13 @@ void showPopUpMenuAtTap({
     if (value == null) return;
 
     if (value == "1") {
-      ras.reportComment(commentID: commentID);
+      ras.reportComment(commentID: commentID).then(
+            (value) => ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(value['response'].toString()),
+              ),
+            ),
+          );
     } else if (value == "2") {
       showDialog(
         context: context,
@@ -87,55 +94,64 @@ Widget commentListViewBuilderWidget({
               }
               return const CupertinoActivityIndicator();
             }
-            return Container(
-              margin: const EdgeInsets.only(left: 6.0, right: 6.0),
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(6.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            margin:
-                                const EdgeInsets.only(right: 6.0, bottom: 5.0),
-                            height: 33,
-                            width: 33,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              image: DecorationImage(
-                                image: CachedNetworkImageProvider(
-                                  commentJournals[index]["avatar_url"],
+            return InkWell(
+              onTap: () {
+                if (isFromProfilePage) {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) =>
+                          PostPage(postID: commentJournals[index]['post_id'])));
+                }
+              },
+              child: Container(
+                margin: const EdgeInsets.only(left: 6.0, right: 6.0),
+                child: Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(6.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.only(
+                                  right: 6.0, bottom: 5.0),
+                              height: 33,
+                              width: 33,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: DecorationImage(
+                                  image: CachedNetworkImageProvider(
+                                    commentJournals[index]["avatar_url"],
+                                  ),
+                                  fit: BoxFit.cover,
                                 ),
-                                fit: BoxFit.cover,
                               ),
                             ),
-                          ),
-                          Text(
-                              "${commentJournals[index]['username']} · ${timeAgo(commentJournals[index]["created_at"])}"),
-                        ],
-                      ),
-                      Text(
-                          commentJournals[index]["comment_content"].toString()),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          GestureDetector(
-                            onTapDown: (details) {
-                              showPopUpMenuAtTap(
-                                  context: context,
-                                  details: details,
-                                  commentID: commentJournals[index]
-                                      ['comment_id'],
-                                  postID: commentJournals[index]['post_id'],
-                                  isFromProfilePage: isFromProfilePage);
-                            },
-                            child: const Icon(Icons.more_vert_rounded),
-                          )
-                        ],
-                      ),
-                    ],
+                            Text(
+                                "${commentJournals[index]['username']} · ${timeAgo(commentJournals[index]["created_at"])}"),
+                          ],
+                        ),
+                        Text(commentJournals[index]["comment_content"]
+                            .toString()),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            GestureDetector(
+                              onTapDown: (details) {
+                                showPopUpMenuAtTap(
+                                    context: context,
+                                    details: details,
+                                    commentID: commentJournals[index]
+                                        ['comment_id'],
+                                    postID: commentJournals[index]['post_id'],
+                                    isFromProfilePage: isFromProfilePage);
+                              },
+                              child: const Icon(Icons.more_vert_rounded),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
