@@ -61,6 +61,6 @@ const communitySearch = (request, response) => {
 };
 
 router.get("/search", search);
-router.get("/community/search", communitySearch);
+router.get("/search/community", communitySearch);
 
 module.exports = router;

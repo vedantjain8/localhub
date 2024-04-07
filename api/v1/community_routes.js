@@ -163,7 +163,7 @@ const joinCommunityStatus = async (request, response) => {
 
     return response
       .status(200)
-      .json({ status: 200, response: [{ exists: checkBool }] });
+      .json({ status: 200, response: { exists: checkBool } });
   } catch (error) {
     return response.status(400).json({ status: 400, response: error });
   }

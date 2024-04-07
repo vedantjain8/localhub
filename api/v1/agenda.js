@@ -2,8 +2,10 @@ const express = require("express");
 const router = express.Router();
 
 const pool = require("../db");
+const { getUserData } = require("./functions/users");
 const redisClient = require("../dbredis");
 const { getAdminData } = require("./functions/users");
+var validator = require("validator");
 const config = require("../config/config.json");
 
 const cachingBool = Boolean(config.caching);
@@ -43,7 +45,7 @@ const getAgenda = async (request, response) => {
       WHERE
         active = TRUE
       ORDER BY
-        agenda_start_date DESC
+        agenda_start_date ASC
       LIMIT
         10
       OFFSET
@@ -54,6 +56,62 @@ const getAgenda = async (request, response) => {
     if (cachingBool) {
       await redisClient.set(
         `agenda:offset-${offset}`,
+        JSON.stringify(agendaData)
+      );
+    }
+
+    return response.status(200).json({ status: 200, response: agendaData });
+  } catch (error) {
+    console.error(error);
+    return response.status(500).json({ status: 500, response: error });
+  }
+};
+
+const getAgendaById = async (request, response) => {
+  try {
+    var agenda_id = parseInt(request.params.id);
+
+    if (agenda_id == null || agenda_id == "" || agenda_id == undefined) {
+      return response
+        .status(400)
+        .json({ status: 400, response: "agenda_id is required" });
+    }
+
+    if (cachingBool) {
+      redisClient.select(0);
+      const value = await redisClient.get(`agenda:agendaID-${agenda_id}`);
+      if (value) {
+        return response
+          .status(200)
+          .json({ status: 200, response: JSON.parse(value) }); // Data found in Redis
+      }
+    }
+
+    const { rows: agendaData } = await pool.query(
+      `SELECT
+        agenda_id,
+        agenda_title,
+        agenda_description,
+        image_url,
+        locality_city,
+        locality_state,
+        locality_country,
+        agenda_start_date,
+        agenda_end_date,
+        created_at
+      FROM
+        agenda
+      WHERE
+        active = TRUE 
+      AND
+        agenda_id = $1
+        `,
+      [agenda_id]
+    );
+
+    if (cachingBool) {
+      await redisClient.set(
+        `agenda:agendaID-${agenda_id}`,
         JSON.stringify(agendaData)
       );
     }
@@ -76,6 +134,7 @@ const createAgenda = async (request, response) => {
       locality_country,
       agenda_start_date,
       agenda_end_date,
+      image_url,
     } = request.body || "";
 
     if (!token) {
@@ -85,10 +144,9 @@ const createAgenda = async (request, response) => {
     }
 
     if (
-      !post_title ||
-      post_title != "" ||
-      !validator.isLength(post_title, { min: 5, max: 200 }) ||
-      !allowedCharactersRegex.test(post_title)
+      !agenda_title ||
+      agenda_title == "" ||
+      !validator.isLength(agenda_title, { min: 5, max: 200 })
     ) {
       return response
         .status(400)
@@ -112,26 +170,11 @@ const createAgenda = async (request, response) => {
       !agenda_start_date ||
       !agenda_end_date ||
       !validator.isISO8601(agenda_start_date) ||
-      !validator.isISO8601(agenda_end_date) ||
-      agenda_start_date > agenda_end_date
+      !validator.isISO8601(agenda_end_date)
     ) {
       return response
         .status(400)
         .json({ status: 400, response: "Enter a valid start and end date" });
-    }
-
-    const admin_data = JSON.parse((await getAdminData(token)) ?? null);
-
-    if (admin_data == null) {
-      return response
-        .status(401)
-        .json({ status: 401, response: "Token is not valid" });
-    }
-
-    if (admin_data.user_role !== 2 && admin_data.user_role !== 1) {
-      return response
-        .status(401)
-        .json({ status: 401, response: "Unauthorised" });
     }
 
     if (agenda_start_date > agenda_end_date) {
@@ -141,13 +184,21 @@ const createAgenda = async (request, response) => {
       });
     }
 
+    const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+    if (!user_id) {
+      return response
+        .status(401)
+        .json({ status: 401, response: "Token is not valid" });
+    }
+
     await pool.query(
       "INSERT INTO agenda (user_id, agenda_title, agenda_description, image_url, locality_city, locality_state, locality_country, agenda_start_date, agenda_end_date) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)",
       [
-        admin_data.user_id,
+        user_id,
         agenda_title,
         agenda_description,
-        image_url,
+        image_url == undefined ? "" : image_url,
         locality_city,
         locality_state,
         locality_country,
@@ -191,20 +242,6 @@ const updateAgenda = async (request, response) => {
   } = request.body;
 
   try {
-    const admin_data = JSON.parse((await getAdminData(token)) ?? null);
-
-    if (admin_data == null) {
-      return response
-        .status(401)
-        .json({ status: 401, response: "Token is not valid" });
-    }
-
-    if (admin_data.user_role !== 2 && admin_data.user_role !== 1) {
-      return response
-        .status(401)
-        .json({ status: 401, response: "Unauthorised" });
-    }
-
     if (
       agenda_start_date != undefined &&
       agenda_end_date != undefined &&
@@ -221,15 +258,17 @@ const updateAgenda = async (request, response) => {
     const values = [agenda_id];
 
     if (agenda_title !== undefined) {
-      setClause.push(`agenda_title = $${values.push(post_title)}`);
+      setClause.push(`agenda_title = $${values.push(agenda_title)}`);
     }
 
     if (agenda_description !== undefined) {
-      setClause.push(`agenda_description = $${values.push(post_content)}`);
+      setClause.push(
+        `agenda_description = $${values.push(agenda_description)}`
+      );
     }
 
-    if (image_url !== undefined && post_image !== "") {
-      setClause.push(`image_url = $${values.push(post_image)}`);
+    if (image_url !== undefined && image_url !== "") {
+      setClause.push(`image_url = $${values.push(image_url)}`);
     }
 
     if (locality_city !== undefined && locality_city !== "") {
@@ -258,6 +297,14 @@ const updateAgenda = async (request, response) => {
         status: 400,
         response: "No valid fields provided for update.",
       });
+    }
+
+    const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+    if (!user_id) {
+      return response
+        .status(401)
+        .json({ status: 401, response: "Token is not valid" });
     }
 
     const updateQuery = `UPDATE agenda SET ${setClause.join(
@@ -301,8 +348,72 @@ const updateAgenda = async (request, response) => {
   }
 };
 
+const deleteAgenda = async (request, response) => {
+  const agenda_id = parseInt(request.params.id);
+  const token = request.body.token;
+
+  try {
+    if (!agenda_id) {
+      return response
+        .status(400)
+        .json({ status: 400, response: "agenda_id is required" });
+    }
+
+    if (!token) {
+      return response
+        .status(400)
+        .json({ status: 400, response: "Provide a user token" });
+    }
+
+    const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+    if (!user_id) {
+      return response
+        .status(401)
+        .json({ status: 401, response: "Token is not valid" });
+    }
+
+    pool.query(
+      `UPDATE agenda SET active = false WHERE user_id = $1 AND agenda_id = $2 RETURNING agenda_id`,
+      [user_id, agenda_id],
+      async (error, result) => {
+        if (error) {
+          console.error(error);
+          return response.status(500).json({ status: 500, response: error });
+        }
+        userData = result.rows[0];
+
+        if (userData.length == 0) {
+          return response
+            .status(400)
+            .json({ status: 400, response: "No post found" });
+        }
+
+        if (cachingBool) {
+          const keys = await redisClient.keys("agenda:offset-*");
+
+          // Delete each key
+          const deletePromises = keys.map((key) => redisClient.del(key));
+
+          // Wait for all keys to be deleted
+          await Promise.all(deletePromises);
+        }
+        return response.status(200).json({
+          status: 200,
+          response: `agenda deleted for agenda id: ${userData.agenda_id}`,
+        });
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    return response.status(400).json({ status: 400, response: error.message });
+  }
+};
+
 router.get("/agendas", getAgenda);
+router.get("/agendas/:id", getAgendaById);
 router.post("/agendas/create", createAgenda);
-router.put("/agendas/", updateAgenda);
+router.put("/agendas/:id", updateAgenda);
+router.delete("/agendas/:id", deleteAgenda);
 
 module.exports = router;

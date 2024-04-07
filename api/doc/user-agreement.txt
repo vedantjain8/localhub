@@ -1,0 +1,41 @@
+User Agreement for LocalHub
+
+Welcome to LocalHub! Before using our mobile application ("the App"), please read this User Agreement carefully. By accessing or using the App, you agree to be bound by the terms and conditions outlined below.
+
+1. Acceptance of Terms:
+By accessing or using the App, you agree to comply with this User Agreement and all applicable laws and regulations. If you do not agree with any part of this Agreement, you may not access or use the App.
+
+2. Use of the App:
+You may use the App for personal, non-commercial purposes only. You agree not to use the App for any unlawful or prohibited purpose or in any manner that could damage, disable, overburden, or impair the functionality of the App.
+
+3. User Accounts:
+In order to access certain features of the App, you may be required to create a user account. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.
+
+4. Content and Conduct:
+You are solely responsible for any content you post, share, or transmit through the App. You agree not to post or transmit any content that is unlawful, defamatory, offensive, or infringes upon the rights of others. LocalHub reserves the right to remove any content that violates this Agreement.
+
+5. Intellectual Property:
+The App and its content, including but not limited to text, graphics, logos, and images, are protected by copyright and other intellectual property laws. You may not modify, reproduce, distribute, or create derivative works based on the App or its content without prior written consent from LocalHub.
+
+6. Privacy:
+Your privacy is important to us. Please review our Privacy Policy to understand how we collect, use, and disclose your personal information when you use the App.
+
+7. Termination:
+LocalHub reserves the right to suspend or terminate your access to the App at any time, without prior notice or liability, for any reason, including but not limited to breach of this Agreement.
+
+8. Disclaimer of Warranties:
+The App is provided on an "as is" and "as available" basis, without warranties of any kind, either express or implied. LocalHub makes no representations or warranties about the accuracy, reliability, or completeness of the App or its content.
+
+9. Limitation of Liability:
+In no event shall LocalHub be liable for any indirect, incidental, special, or consequential damages arising out of or in connection with your use of the App, whether based on warranty, contract, tort, or any other legal theory.
+
+10. Governing Law:
+This User Agreement shall be governed by and construed in accordance with the laws of [Your Jurisdiction], without regard to its conflict of law provisions.
+
+11. Changes to Agreement:
+LocalHub reserves the right to modify or revise this User Agreement at any time. Your continued use of the App following the posting of any changes constitutes acceptance of those changes.
+
+12. Contact Us:
+If you have any questions or concerns about this User Agreement, please contact us at [contact email or link].
+
+By accessing or using the App, you acknowledge that you have read, understood, and agree to be bound by this User Agreement.

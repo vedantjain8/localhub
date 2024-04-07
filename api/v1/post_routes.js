@@ -133,6 +133,7 @@ const getPosts = async (request, response) => {
       `SELECT
           posts.post_id,
           posts.post_title,
+          users.username AS post_username,
           LEFT(posts.post_content, 159) as short_content,
           posts.post_image,
           posts.community_id,
@@ -143,6 +144,8 @@ const getPosts = async (request, response) => {
           posts
         JOIN
           community ON posts.community_id = community.community_id
+        JOIN
+          users ON posts.user_id = users.user_id
         WHERE
           posts.active = 'T'
           AND community.active = 'T'
@@ -243,28 +246,28 @@ const getCommunityPosts = async (request, response) => {
 };
 
 const getUserFeedPosts = async (request, response) => {
-  var { offset } = parseInt(request.body.offset);
-  var token = request.body.token;
-
-  if (!offset) {
-    offset = 0;
-  }
-
-  if (!token || token == null || token == "" || token == undefined) {
-    return response
-      .status(400)
-      .json({ status: 400, response: "Provide a user token" });
-  }
-
-  const user_id = JSON.parse(await getUserData(token))["user_id"];
-
-  if (!user_id) {
-    return response
-      .status(401)
-      .json({ status: 401, response: "Token is not valid" });
-  }
-
   try {
+    var { offset } = parseInt(request.body.offset);
+    var token = request.body.token;
+
+    if (!offset) {
+      offset = 0;
+    }
+
+    if (!token || token == null || token == "" || token == undefined) {
+      return response
+        .status(400)
+        .json({ status: 400, response: "Provide a user token" });
+    }
+
+    const user_id = JSON.parse(await getUserData(token))["user_id"];
+
+    if (!user_id) {
+      return response
+        .status(401)
+        .json({ status: 401, response: "Token is not valid" });
+    }
+
     mergedList = [];
 
     if (cachingBool) {
@@ -288,43 +291,65 @@ const getUserFeedPosts = async (request, response) => {
       (row) => row.community_id
     );
     mergedList.push(...communityIdsFromDB);
-
-    pool.query(
-      `SELECT
-      posts.post_id,
-      posts.post_title,
-      LEFT(posts.post_content, 159) as short_content,
-      posts.post_image,
-      posts.community_id,
-      posts.created_at,
-      community.community_name,
-      community.logo_url,
-      users.username AS post_username
-  FROM
-      posts
-  JOIN
-      community ON posts.community_id = community.community_id
-  JOIN
-      users on posts.user_id = users.user_id
-  WHERE
-      posts.active = 'T'
-      AND community.active = 'T'
-      AND posts.community_id IN (${mergedList})
-  ORDER BY
-      posts.created_at DESC
-  LIMIT 20
-  OFFSET $1
-`,
-      [offset],
-      async (error, result) => {
-        if (error) {
-          console.error(error);
-          return response.status(500).json({ status: 500, response: error });
-        }
-        userData = result.rows;
-        return response.status(200).json({ status: 200, response: userData });
+    query =
+      mergedList.length === 0
+        ? `SELECT
+        posts.post_id,
+        posts.post_title,
+        LEFT(posts.post_content, 159) as short_content,
+        posts.post_image,
+        posts.community_id,
+        posts.created_at,
+        community.community_name,
+        community.logo_url,
+        users.username AS post_username
+        FROM
+        posts
+        JOIN
+        community ON posts.community_id = community.community_id
+        JOIN
+        users on posts.user_id = users.user_id
+        WHERE
+        posts.active = 'T'
+        AND community.active = 'T'
+        ORDER BY
+        posts.created_at DESC
+        LIMIT 20
+        OFFSET $1
+        `
+        : `SELECT
+        posts.post_id,
+        posts.post_title,
+        LEFT(posts.post_content, 159) as short_content,
+        posts.post_image,
+        posts.community_id,
+        posts.created_at,
+        community.community_name,
+        community.logo_url,
+        users.username AS post_username
+    FROM
+        posts
+    JOIN
+        community ON posts.community_id = community.community_id
+    JOIN
+        users on posts.user_id = users.user_id
+    WHERE
+        posts.active = 'T'
+        AND community.active = 'T'
+        AND posts.community_id IN (${mergedList.join(",")})
+    ORDER BY
+        posts.created_at DESC
+    LIMIT 20
+    OFFSET $1
+    `;
+    pool.query(query, [offset], async (error, result) => {
+      if (error) {
+        console.error(error);
+        return response.status(500).json({ status: 500, response: error });
       }
-    );
+      userData = result.rows;
+      return response.status(200).json({ status: 200, response: userData });
+    });
   } catch (error) {
     console.error(error);
     return response.status(400).json({ status: 400, response: error.message });
@@ -332,6 +357,7 @@ const getUserFeedPosts = async (request, response) => {
 };
 
 const getPostById = async (request, response) => {
+  try {
   const post_id = parseInt(request.params.id);
   const token = request.body.token || null;
 
@@ -341,7 +367,6 @@ const getPostById = async (request, response) => {
       .json({ status: 400, response: "post id is required" });
   }
 
-  try {
     if (cachingBool) {
       redisClient.select(0);
 
