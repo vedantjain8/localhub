@@ -75,7 +75,7 @@ class BaseApiService {
     Map<String, dynamic> jsonResponse = {};
     try {
       var url = Uri.https(hostaddress, endpoint, parameter);
-      var response = await http.post(url, body: body);
+      var response = await http.delete(url, body: body);
 
       if (response.statusCode == 200) {
         jsonResponse = jsonDecode(response.body);

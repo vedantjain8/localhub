@@ -137,4 +137,16 @@ class AdminService extends BaseApiService {
     }
     return responseData;
   }
+
+  Future<Map<String, dynamic>> reportDeletePost({
+    required int postId,
+    required String token,
+  }) async {
+
+    return await makeMapDELETERequest(
+        endpoint: '/api/admin/v1/posts/${postId}',
+        body: {
+          'token': '$token'
+        });
+  }
 }
