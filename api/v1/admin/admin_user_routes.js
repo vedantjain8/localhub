@@ -124,7 +124,7 @@ const makeAdmin = async (request, response) => {
           return response.status(500).json({ status: 500, response: error });
         }
 
-        adminLog(
+        adminLogData(
           "admin-user-role-toggle",
           `User with userID: ${new_admin_user_id} has now role ${result.rows[0].user_role}`,
           admin_data["user_id"]
@@ -189,9 +189,9 @@ const disableUser = async (request, response) => {
           return response.status(500).json({ status: 500, response: error });
         }
 
-        adminLog(
+        adminLogData(
           "admin-user-active-toggle",
-          `User with userID: ${new_admin_user_id} is now active = ${result.rows[0].user_role}`,
+          `User with userID: ${target_user_id} is now active = ${result.rows[0].user_role}`,
           admin_data["user_id"]
         );
 

@@ -4,7 +4,8 @@ const router = express.Router();
 const pool = require("../../db");
 const redisClient = require("../../dbredis");
 const config = require("../../config/config.json");
-const { adminLogger } = require("./functions/adminLogger");
+const { adminLogData } = require("./functions/adminLogger");
+const { getAdminData } = require("../functions/users");
 const cachingBool = Boolean(config.caching);
 
 // todo delete community for admin and creator user_id in normal ui
@@ -47,14 +48,14 @@ const deleteCommunityAdmin = async (request, response) => {
         return response.status(500).json({ status: 500, response: error });
       }
 
-      adminLogger(
+      adminLogData(
         "admin-community-active-toggle",
         `Community with communityID: ${community_id} is now active=${result.rows[0].active}`,
         admin_data["user_id"]
       );
 
       if (cachingBool) {
-        await redisClient.flushall();
+        await redisClient.sendCommand(["flushall"]);
       }
 
       return response.status(200).json({
@@ -66,7 +67,8 @@ const deleteCommunityAdmin = async (request, response) => {
 };
 
 const deletePostAdmin = async (request, response) => {
-  const { token, post_id } = request.body ?? null;
+  const post_id = request.params.id;
+  const { token } = request.body ?? null;
 
   if (post_id == null) {
     return response.status(400).json({
@@ -104,14 +106,14 @@ const deletePostAdmin = async (request, response) => {
         return response.status(500).json({ status: 500, response: error });
       }
 
-      adminLogger(
+      adminLogData(
         "admin-post-active-toggle",
         `Post with postID: ${post_id} is now active=${result.rows[0].active}`,
         admin_data["user_id"]
       );
 
       if (cachingBool) {
-        await redisClient.flushall();
+        await redisClient.sendCommand(["flushall"]);
       }
 
       return response.status(200).json({
@@ -161,14 +163,14 @@ const deleteCommentAdmin = async (request, response) => {
         return response.status(500).json({ status: 500, response: error });
       }
 
-      adminLogger(
+      adminLogData(
         "admin-comment-active-toggle",
         `Comment with comment_id: ${comment_id} is now active=${result.rows[0].active}`,
         admin_data["user_id"]
       );
 
       if (cachingBool) {
-        await redisClient.flushall();
+        await redisClient.sendCommand(["flushall"]);
       }
 
       return response.status(200).json({
