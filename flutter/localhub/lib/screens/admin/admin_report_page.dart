@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:localhub/api/admin_service.dart';
+import 'package:localhub/functions/datetimeoperations.dart';
 
 class AdminReportPage extends StatefulWidget {
   final String token;
@@ -148,42 +149,89 @@ class _AdminReportPageState extends State<AdminReportPage>
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  _journalsPosts.isNotEmpty
-                      ? ListView.builder(itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Text(_journalsPosts[index]['post_title']),
-                            subtitle: Text(
-                                "Post ID: ${_journalsPosts[index]['post_id']} at ${_journalsPosts[index]['report_time']}"),
-                            trailing: ElevatedButton(
-                              onPressed: () {
-                                // TODO: add post delete button functionality
-                              },
-                              child: Text(
-                                  _journalsPosts[index]['active'] == true
-                                      ? "Delete"
-                                      : "Restore"),
-                            ),
-                          );
-                        })
-                      : const Center(child: CircularProgressIndicator()),
-                  _journalsComments.isNotEmpty
-                      ? ListView.builder(itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Text(_journalsComments[index]['post_title']),
-                            subtitle: Text(
-                                "Comment ID: ${_journalsComments[index]['comment_id']} at ${_journalsComments[index]['report_time']}"),
-                            trailing: ElevatedButton(
-                              onPressed: () {
-                                // TODO: add post delete button functionality
-                              },
-                              child: Text(
-                                  _journalsComments[index]['active'] == true
-                                      ? "Delete"
-                                      : "Restore"),
-                            ),
-                          );
-                        })
-                      : const Center(child: CircularProgressIndicator()),
+                  _journalsPosts.isEmpty
+                      ? (_hasMoreDataPosts)
+                          ? const Center(child: CircularProgressIndicator())
+                          : const Center(child: Text("no more data"))
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: _journalsPosts.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              title: Text(_journalsPosts[index]['post_title']),
+                              subtitle: Text(
+                                  "Post ID: ${_journalsPosts[index]['post_id']} on ${dateFormat(_journalsPosts[index]['report_time'])}"),
+                              trailing: ElevatedButton(
+                                onPressed: () async {
+                                  await aas
+                                      .reportDeletePost(
+                                          postId: _journalsPosts[index]
+                                              ['post_id'],
+                                          token: widget.token)
+                                      .then(
+                                        (value) => ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              value['response'] ??
+                                                  value['error'] ??
+                                                  "Error",
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                },
+                                child: Text(
+                                    _journalsPosts[index]['active'] == true
+                                        ? "Delete"
+                                        : "Restore"),
+                              ),
+                            );
+                          }),
+                  _journalsComments.isEmpty
+                      ? (_hasMoreDataComments)
+                          ? const Center(
+                              child: CircularProgressIndicator(),
+                            )
+                          : const Center(
+                              child: Text("No more data to load"),
+                            )
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: _journalsComments.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              title:
+                                  Text(_journalsComments[index]['post_title']),
+                              subtitle: Text(
+                                  "Comment ID: ${_journalsComments[index]['comment_id']} on ${dateFormat(_journalsComments[index]['report_time'])}"),
+                              trailing: ElevatedButton(
+                                onPressed: () {
+                                  aas
+                                      .reportDeleteComments(
+                                          commentId: _journalsComments[index]
+                                              ['comment_id'],
+                                          token: widget.token)
+                                      .then(
+                                        (value) => ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              value['response'] ??
+                                                  value['error'] ??
+                                                  "Error",
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                },
+                                child: Text(
+                                    _journalsComments[index]['active'] == true
+                                        ? "Delete"
+                                        : "Restore"),
+                              ),
+                            );
+                          }),
                 ],
               ),
             ),

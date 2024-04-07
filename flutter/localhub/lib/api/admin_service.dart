@@ -149,4 +149,16 @@ class AdminService extends BaseApiService {
           'token': '$token'
         });
   }
+  
+  Future<Map<String, dynamic>> reportDeleteComments({
+    required int commentId,
+    required String token,
+  }) async {
+
+    return await makeMapDELETERequest(
+        endpoint: '/api/admin/v1/comments/${commentId}',
+        body: {
+          'token': '$token'
+        });
+  }
 }
