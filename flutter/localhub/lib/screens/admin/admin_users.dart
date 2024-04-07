@@ -21,7 +21,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
 
   void _loadData() async {
     if (!_hasMoreData) {
-      return; // No more data to load
+      return;
     }
 
     final List<Map<String, dynamic>> data = await aas.getAllUsersList(
@@ -99,8 +99,8 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                     DataColumn(label: Text('City')),
                     DataColumn(label: Text('Active')),
                     DataColumn(label: Text('Role')),
-                    DataColumn(label: Text('Actions1')),
-                    DataColumn(label: Text('Actions2')),
+                    DataColumn(label: Text('Admin Status')),
+                    DataColumn(label: Text('Status')),
                   ],
                   rows: _journals.map<DataRow>((journal) {
                     return DataRow(cells: [
@@ -109,7 +109,7 @@ class _AdminUsersPageState extends State<AdminUsersPage> {
                       DataCell(Text(journal['email'])),
                       DataCell(Text(journal['avatar_url'])),
                       DataCell(Text(journal['created_at'])),
-                      DataCell(Text(journal['last_login'])),
+                      DataCell(Text(journal['last_login'] ?? "unknown")),
                       DataCell(Text(journal['locality_country'])),
                       DataCell(Text(journal['locality_state'])),
                       DataCell(Text(journal['locality_city'])),

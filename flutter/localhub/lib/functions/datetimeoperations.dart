@@ -30,8 +30,5 @@ String timeAgo(String fatchedDateString) {
 }
 
 String dateFormat(String fatchedDateString) {
-  DateTime fetchedDate = DateTime.parse(fatchedDateString);
-  String formattedDate = "";
-  formattedDate = DateFormat.yMMMd().format(fetchedDate);
-  return formattedDate;
+  return DateFormat.yMMMd().format(DateTime.parse(fatchedDateString));
 }
