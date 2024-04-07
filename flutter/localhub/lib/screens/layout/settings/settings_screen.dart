@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localhub/api/version_check.dart';
+import 'package:localhub/screens/layout/legal_screen.dart';
 import 'package:localhub/themes/theme.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -286,6 +287,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: "About",
                   items: [
                     InkWell(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ContentPolicyScreen(toLoad: 'Content-Policy',), //pass the endpoint name case does not matters
+                        ),
+                      ),
                       child: _sectionItem(
                         child: Text(
                           'Content Policy',
@@ -295,6 +301,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     InkWell(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ContentPolicyScreen(toLoad: 'Privacy-Policy',), //pass the endpoint name case does not matters
+                        ),
+                      ),
                       child: _sectionItem(
                         child: Text(
                           'Privacy Policy',
@@ -304,6 +315,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     InkWell(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ContentPolicyScreen(toLoad: 'User-Agreement',), //pass the endpoint name case does not matters
+                        ),
+                      ),
                       child: _sectionItem(
                         child: Text(
                           'User Agreement',
@@ -313,6 +329,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     InkWell(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const ContentPolicyScreen(toLoad: 'Acknowledgement',), //pass the endpoint name case does not matters
+                        ),
+                      ),
                       child: _sectionItem(
                         child: Text(
                           'Acknowledgements',
