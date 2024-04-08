@@ -110,6 +110,24 @@ class _AdminReportPageState extends State<AdminReportPage>
     });
   }
 
+  void _refreshReporPostData() async {
+    setState(() {
+      _hasMoreDataPosts = true;
+      _journalsPosts = [];
+      offsetPosts = 0;
+    });
+    _loadReportedPostsData();
+  }
+
+  void _refreshReporCommentData() async {
+    setState(() {
+      _hasMoreDataComments = true;
+      _journalsComments = [];
+      offsetComments = 0;
+    });
+    _loadReportedCommentsData();
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -169,17 +187,20 @@ class _AdminReportPageState extends State<AdminReportPage>
                                               ['post_id'],
                                           token: widget.token)
                                       .then(
-                                        (value) => ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              value['response'] ??
-                                                  value['error'] ??
-                                                  "Error",
-                                            ),
+                                    (value) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            value['response'] ??
+                                                value['error'] ??
+                                                "Error",
                                           ),
                                         ),
                                       );
+                                      _refreshReporPostData();
+                                    },
+                                  );
                                 },
                                 child: Text(
                                     _journalsPosts[index]['active'] == true
@@ -212,18 +233,18 @@ class _AdminReportPageState extends State<AdminReportPage>
                                           commentId: _journalsComments[index]
                                               ['comment_id'],
                                           token: widget.token)
-                                      .then(
-                                        (value) => ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              value['response'] ??
-                                                  value['error'] ??
-                                                  "Error",
-                                            ),
-                                          ),
+                                      .then((value) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          value['response'] ??
+                                              value['error'] ??
+                                              "Error",
                                         ),
-                                      );
+                                      ),
+                                    );
+                                    _refreshReporCommentData();
+                                  });
                                 },
                                 child: Text(
                                     _journalsComments[index]['active'] == true

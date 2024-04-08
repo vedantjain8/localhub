@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:localhub/api/version_check.dart';
 import 'package:localhub/auth/auth_service.dart';
@@ -33,6 +34,13 @@ _launchURL() async {
   }
 }
 
+final List<String> serverDownText = [
+  "Server is down",
+  "This server is powered from lemon and two electrodes",
+  "Be patient, the server's on a break, enjoying a well-deserved nap.",
+];
+final _random = Random();
+
 Future<void> checkAppVersion() async {
   final VersionCheckApiService vcas = VersionCheckApiService();
   final String? versionFromApi = await vcas.versionCheck();
@@ -48,20 +56,38 @@ Future<void> checkAppVersion() async {
           navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
           home: Scaffold(
-            body: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Center(child: Text("server is down")),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      navigatorKey.currentState!.push(MaterialPageRoute(
-                          builder: (context) => const SettingsScreen()));
-                    },
-                    child: const Icon(Icons.settings),
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    serverDownText[_random.nextInt(serverDownText.length)],
+                    softWrap: true,
+                    textAlign: TextAlign.center,
                   ),
-                ),
-              ],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          navigatorKey.currentState!.push(MaterialPageRoute(
+                              builder: (context) => const SettingsScreen()));
+                        },
+                        child: const Icon(Icons.settings),
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          checkAppVersion();
+                        },
+                        child: const Icon(Icons.refresh),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         );

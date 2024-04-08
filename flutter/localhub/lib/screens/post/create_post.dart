@@ -190,7 +190,7 @@ class _CreatePostState extends State<CreatePost> {
     bool isUpdating = widget.isUpdating;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Post'),
+        title: Text(isUpdating ? "Update post" : 'Create Post'),
         actions: [
           ElevatedButton(
               onPressed: () async {
@@ -282,7 +282,7 @@ class _CreatePostState extends State<CreatePost> {
                   );
                 }
               },
-              child: const Text('Post')),
+              child: Text(isUpdating ? 'Update' :'Post')),
           const SizedBox(width: 15)
         ],
       ),
