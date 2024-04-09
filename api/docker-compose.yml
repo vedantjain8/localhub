@@ -1,19 +1,52 @@
-version: '3.9'
+version: '3.1'
 services:
-    localhubapi:
-        image: localhubapi
+  localhubserver:
+        depends_on:
+            - db
+            - redis-stack
+        container_name: localhub
+        image: ghcr.io/vedantjain8/localhub:latest
         volumes:
-            - '/path/to/your/uploads/folder:/home/bun/app/upload'
+            - '/home/localhub/api/:/home/bun/app/upload'
         ports:
             - '3002:3002'
             - '3001:3001'
         environment:
             - REDIS_PORT=6379
-            - REDIS_HOST=localhost
+            - REDIS_HOST=redis-stack
             - DB_PASSWORD=localhub
             - DB_USER=localhub
             - DB_DATABASE=localhub
             - DB_PORT=5432
-            - DB_HOST=localhost
+            - DB_HOST=db
             - NODE_ENV=production
-        container_name: localhub
+
+  db:
+    container_name: db
+    user: 1000:1000
+    image: postgres:alpine3.18
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - '/home/localhub/db/:/var/lib/postgresql/data'
+    environment:
+      POSTGRES_PASSWORD: CHANGETHIS
+      PGDATA: /var/lib/postgresql/data/pgdata
+
+    # This is optional 
+  adminer:
+    depends_on:
+      - db
+    container_name: dbAdmin
+    image: adminer
+    restart: always
+    ports:
+      - 7123:8080
+
+  redis-stack:
+    image: 'redis/redis-stack:latest'
+    ports:
+        - 8001:8001
+        - 6379:6379
+    container_name: redis-stack
