@@ -87,8 +87,6 @@ const createCommunity = async (request, response) => {
   }
 };
 
-
-
 const getcommunityDataById = async (request, response) => {
   const community_id = parseInt(request.params.id);
 

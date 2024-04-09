@@ -358,14 +358,14 @@ const getUserFeedPosts = async (request, response) => {
 
 const getPostById = async (request, response) => {
   try {
-  const post_id = parseInt(request.params.id);
-  const token = request.body.token || null;
+    const post_id = parseInt(request.params.id);
+    const token = request.body.token || null;
 
-  if (!post_id) {
-    return response
-      .status(400)
-      .json({ status: 400, response: "post id is required" });
-  }
+    if (!post_id) {
+      return response
+        .status(400)
+        .json({ status: 400, response: "post id is required" });
+    }
 
     if (cachingBool) {
       redisClient.select(0);

@@ -6,7 +6,7 @@ const pool = require("../../db");
 const redisClient = require("../../dbredis");
 var validator = require("validator");
 const { getAdminData } = require("../functions/users");
-// const { adminLogger } = require("./functions/adminLogger");
+// const { adminLogData } = require("./functions/adminLogger");
 const checkPassword = require("../functions/hash_password");
 
 const localhubStatsAdmin = async (request, response) => {
@@ -28,16 +28,10 @@ const localhubStatsAdmin = async (request, response) => {
         .json({ status: 401, response: "User is not an admin" });
     }
 
-    const [
-      user,
-      community,
-      popularCommunity,
-      post,
-      popularPost,
-      adminLogs
-    ] = await Promise.all([
-      // user stats
-      pool.query(`
+    const [user, community, popularCommunity, post, popularPost, adminLogs] =
+      await Promise.all([
+        // user stats
+        pool.query(`
           SELECT
             COUNT(user_id) FILTER (WHERE user_role = 0) AS total_public_users,
             COUNT(user_id) FILTER (WHERE user_role = 1) AS total_admins,
@@ -47,8 +41,8 @@ const localhubStatsAdmin = async (request, response) => {
             users
         `),
 
-      // community
-      pool.query(`
+        // community
+        pool.query(`
         SELECT
         COUNT(community.community_id) FILTER (WHERE active=true) AS total_active_communities,
         COUNT(community.community_id) AS total_communities
@@ -57,9 +51,9 @@ const localhubStatsAdmin = async (request, response) => {
         JOIN community on community.community_id = community_stats.community_id
         `),
 
-      // popular community
-      pool.query(
-        `SELECT
+        // popular community
+        pool.query(
+          `SELECT
         community.community_id,
         community.community_name,
         community.creator_user_id,
@@ -73,10 +67,10 @@ const localhubStatsAdmin = async (request, response) => {
         subscriber_count desc
       LIMIT
         5`
-      ),
+        ),
 
-      // post stats
-      pool.query(`
+        // post stats
+        pool.query(`
       SELECT
       COUNT(post_id) FILTER (
         WHERE
@@ -87,9 +81,9 @@ const localhubStatsAdmin = async (request, response) => {
         posts
           `),
 
-      // most popular posts
-      pool.query(
-        `SELECT
+        // most popular posts
+        pool.query(
+          `SELECT
         posts.post_id,
         posts.post_title,
         posts_stats.total_views,
@@ -102,11 +96,11 @@ const localhubStatsAdmin = async (request, response) => {
         total_views desc
       LIMIT
         5`
-      ),
+        ),
 
-      // admin logs
-      pool.query(
-        `SELECT
+        // admin logs
+        pool.query(
+          `SELECT
         log_event,
         log_description,
         created_at,
@@ -117,8 +111,8 @@ const localhubStatsAdmin = async (request, response) => {
         created_at desc
       LIMIT
         10;`
-      ),
-    ]);
+        ),
+      ]);
 
     responseData["user"] = user.rows[0];
     responseData["community"] = community.rows[0];

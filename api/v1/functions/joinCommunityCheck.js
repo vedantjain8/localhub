@@ -4,7 +4,7 @@ const config = require("../../config/config.json");
 const cachingBool = Boolean(config.caching);
 
 async function checkJoinedCommunity(community_id, user_id) {
-    // return bool
+  // return bool
   try {
     if (cachingBool) {
       // create user community join check from redis
@@ -22,7 +22,9 @@ async function checkJoinedCommunity(community_id, user_id) {
       [user_id, community_id]
     );
     return responseBool[0].exists;
-  } catch (error) {return error}
+  } catch (error) {
+    return error;
+  }
 }
 
 module.exports = { checkJoinedCommunity };
