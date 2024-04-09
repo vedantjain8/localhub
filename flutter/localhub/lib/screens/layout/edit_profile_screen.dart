@@ -110,15 +110,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<Map<String, dynamic>> _updateProfile(
       {required String password}) async {
     String? imageUrl;
-    if (pickedImage!.path == meJournal['avatar_url']) {
-      imageUrl = meJournal['avatar_url'];
-    } else if (pickedImage != null) {
-      Map<String, dynamic>? uploadResult =
-          await ius.uploadImageHTTP(File(pickedImage!.path));
-      if (uploadResult['status'] != 200) {
-        return {"status": 400};
+    if (pickedImage?.path != null) {
+      if (pickedImage!.path == meJournal['avatar_url']) {
+        imageUrl = meJournal['avatar_url'];
+      } else if (pickedImage != null) {
+        Map<String, dynamic>? uploadResult =
+            await ius.uploadImageHTTP(File(pickedImage!.path));
+        if (uploadResult['status'] != 200) {
+          return {"status": 400};
+        }
+        imageUrl = uploadResult["response"];
       }
-      imageUrl = uploadResult["response"];
+    } else {
+      imageUrl = meJournal['avatar_url'];
     }
 
     Map<String, dynamic> res = await auas.updateUser(
@@ -393,6 +397,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           return AlertDialog(
                             title: const Text('Enter Password'),
                             content: TextFormField(
+                              obscureText: true,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter password';

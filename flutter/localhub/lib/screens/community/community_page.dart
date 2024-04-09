@@ -107,7 +107,7 @@ class _CommunityPageState extends State<CommunityPage> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      body: (_journals.isEmpty)
+      body: (_communityData.isEmpty)
           ? const Center(
               child: CircularProgressIndicator(),
             )

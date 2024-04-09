@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:localhub/api/version_check.dart';
 import 'package:localhub/auth/auth_service.dart';
@@ -26,12 +27,18 @@ Future<void> initializeHostAddress() async {
 }
 
 _launchURL() async {
-  final Uri url = Uri.parse(
-      'https://drive.google.com/file/d/1Ky1rEFHGjvREMkXouabS3-DjXlEH0K3U/view?usp=drive_link');
+  final Uri url = Uri.parse('https://github.com/vedantjain8/localhub/releases');
   if (!await launchUrl(url)) {
     throw Exception('Could not launch $url');
   }
 }
+
+final List<String> serverDownText = [
+  "Server is down",
+  "This server is powered from lemon and two electrodes",
+  "Be patient, the server's on a break, enjoying a well-deserved nap.",
+];
+final _random = Random();
 
 Future<void> checkAppVersion() async {
   final VersionCheckApiService vcas = VersionCheckApiService();
@@ -48,20 +55,38 @@ Future<void> checkAppVersion() async {
           navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
           home: Scaffold(
-            body: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Center(child: Text("server is down")),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      navigatorKey.currentState!.push(MaterialPageRoute(
-                          builder: (context) => const SettingsScreen()));
-                    },
-                    child: const Icon(Icons.settings),
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    serverDownText[_random.nextInt(serverDownText.length)],
+                    softWrap: true,
+                    textAlign: TextAlign.center,
                   ),
-                ),
-              ],
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          navigatorKey.currentState!.push(MaterialPageRoute(
+                              builder: (context) => const SettingsScreen()));
+                        },
+                        child: const Icon(Icons.settings),
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          checkAppVersion();
+                        },
+                        child: const Icon(Icons.refresh),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -96,7 +121,7 @@ Future<void> checkAppVersion() async {
                 body: AlertDialog(
                   title: const Text('New Update Available'),
                   content: const Text(
-                      'New Update is available to download. Click update to download and install manually.'),
+                      'Click update to download the latest release and install it manually.'),
                   actions: [
                     TextButton(
                       onPressed: () {

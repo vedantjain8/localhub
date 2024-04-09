@@ -132,7 +132,7 @@ class PostApiService extends BaseApiService {
       sendBody['post_image'] = "$imageUrl";
     }
 
-    return await makeMapPOSTRequest(
+    return await makeMapPUTRequest(
         endpoint: '/api/v1/posts/$postID', body: sendBody);
   }
 

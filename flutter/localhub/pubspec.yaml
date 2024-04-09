@@ -23,6 +23,7 @@ dependencies:
   dropdown_search: ^5.0.6
   image_picker: ^1.0.7
   image_cropper: ^5.0.1
+  share_plus: ^7.2.2
 
 dev_dependencies:
   flutter_test:

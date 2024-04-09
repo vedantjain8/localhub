@@ -14,6 +14,7 @@ import 'package:localhub/screens/community/community_page.dart';
 import 'package:localhub/screens/post/create_post.dart';
 import 'package:localhub/screens/post/post_page.dart';
 import 'package:localhub/widgets/custom_shimmer.dart';
+import 'package:share_plus/share_plus.dart';
 
 class CustomPostCardWidget extends StatefulWidget {
   final List<Map<String, dynamic>> journals;
@@ -506,7 +507,14 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                                     Row(
                                       children: [
                                         IconButton(
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    PostPage(postID: postID),
+                                              ),
+                                            );
+                                          },
                                           icon: FaIcon(
                                             FontAwesomeIcons.message,
                                             color: colorScheme.secondary,
@@ -523,7 +531,12 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                                     Row(
                                       children: [
                                         IconButton(
-                                          onPressed: () {},
+                                          onPressed: () async {
+                                            Share.share(
+                                                """Title: ${finalPost['post_title']} ${finalPost['short_content'] != null ? '' : "\n ${finalPost['post_content']}"} \nCheckout this post on LocalHub!""",
+                                                subject:
+                                                    "Check out this post on LocalHub!");
+                                          },
                                           icon: FaIcon(
                                             color: colorScheme.secondary,
                                             FontAwesomeIcons.shareFromSquare,

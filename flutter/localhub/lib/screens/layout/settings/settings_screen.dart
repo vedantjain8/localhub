@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:localhub/api/version_check.dart';
 import 'package:localhub/screens/layout/legal_screen.dart';
@@ -17,7 +18,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool isDark = AppTheme.themeNotifier.value.brightness == Brightness.dark;
   TextEditingController _hostAddressController = TextEditingController();
   late String previousHostAddress;
-  late String version;
+  String? version;
 
   void _loadHostAddress() async {
     final prefs = await SharedPreferences.getInstance();
@@ -31,6 +32,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _submited = false;
   String _errorText = "";
 
+  Future<String> clearURL({required String url}) async {
+    if (url.startsWith("https://")) {
+      url = url.substring(8);
+    }
+    if (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    return url;
+  }
+
   void _checkUrl() async {
     // validation
     if (_hostAddressController.text.isEmpty) {
@@ -42,7 +53,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
 
     // parse URL to URI
-    final uri = Uri.tryParse("https://${_hostAddressController.text}") ?? false;
+    final uri =
+        Uri.tryParse("https://${clearURL(url: _hostAddressController.text)}") ??
+            false;
 
     // URI validation
     if (uri == false) {
@@ -56,16 +69,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
 
     // skip save if same host address
-    if (previousHostAddress == _hostAddressController.text) {
+    clearURL(url: _hostAddressController.text).then((value) async {
+      if (previousHostAddress == value) {
+        setState(() {
+          _submited = false;
+        });
+        return;
+      }
+      // save hostaddress to storage
+      await prefs.setString('hostaddress', value);
       setState(() {
         _submited = false;
       });
-      return;
-    }
-    // save hostaddress to storage
-    await prefs.setString('hostaddress', _hostAddressController.text);
-    setState(() {
-      _submited = false;
     });
 
     // check for api server status
@@ -127,6 +142,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text('Settings'),
       ),
@@ -289,7 +305,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     InkWell(
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => const ContentPolicyScreen(toLoad: 'Content-Policy',), //pass the endpoint name case does not matters
+                          builder: (context) => const ContentPolicyScreen(
+                            toLoad: 'Content-Policy',
+                          ), //pass the endpoint name case does not matters
                         ),
                       ),
                       child: _sectionItem(
@@ -303,7 +321,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     InkWell(
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => const ContentPolicyScreen(toLoad: 'Privacy-Policy',), //pass the endpoint name case does not matters
+                          builder: (context) => const ContentPolicyScreen(
+                            toLoad: 'Privacy-Policy',
+                          ), //pass the endpoint name case does not matters
                         ),
                       ),
                       child: _sectionItem(
@@ -317,7 +337,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     InkWell(
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => const ContentPolicyScreen(toLoad: 'User-Agreement',), //pass the endpoint name case does not matters
+                          builder: (context) => const ContentPolicyScreen(
+                            toLoad: 'User-Agreement',
+                          ), //pass the endpoint name case does not matters
                         ),
                       ),
                       child: _sectionItem(
@@ -331,7 +353,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     InkWell(
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => const ContentPolicyScreen(toLoad: 'Acknowledgement',), //pass the endpoint name case does not matters
+                          builder: (context) => const ContentPolicyScreen(
+                            toLoad: 'Acknowledgement',
+                          ), //pass the endpoint name case does not matters
                         ),
                       ),
                       child: _sectionItem(
