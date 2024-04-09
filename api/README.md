@@ -22,6 +22,7 @@ ghcr.io/vedantjain8/localhub:latest
 ```
 
 Make sure to change `DB_HOST`, `DB_DATABASE`, `DB_USER`, and `DB_PASSWORD` according to your configuration.
+Also update the URL in `api/v1/uploadImage_route.js` line 51 to your URL.
 
 ### Parameters
 | Parameters  | Functions  |
