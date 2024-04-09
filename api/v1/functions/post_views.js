@@ -7,7 +7,6 @@ const cachingBool = Boolean(config.caching);
 async function incrementView(postId, userId) {
   if (cachingBool)
     try {
-
       const rateLimitCheck = await redisClient.get(
         `viewrateLimit:postID-${postId}:userID-${userId}`
       );

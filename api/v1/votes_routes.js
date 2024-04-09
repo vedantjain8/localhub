@@ -22,7 +22,7 @@ const createVote = async (request, response, vote_type) => {
 
     const userDataString = await getUserData(token);
     const user_id = await JSON.parse(userDataString)["user_id"];
-    
+
     if (!user_id) {
       return response
         .status(401)
@@ -100,9 +100,7 @@ const createVote = async (request, response, vote_type) => {
     });
   } catch (error) {
     console.error(error);
-    response
-      .status(500)
-      .json({ status: 500, response: error });
+    response.status(500).json({ status: 500, response: error });
   }
 };
 
