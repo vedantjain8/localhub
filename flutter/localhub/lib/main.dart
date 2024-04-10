@@ -21,8 +21,8 @@ void main() async {
 Future<void> initializeHostAddress() async {
   final prefs = await SharedPreferences.getInstance();
   if (!prefs.containsKey('hostaddress')) {
-    // await prefs.setString('hostaddress', "192.168.29.16:3002");
-    await prefs.setString('hostaddress', "localhub-flutter.duckdns.org:3002");
+    await prefs.setString('hostaddress', "localhub.starlingnet.duckdns.org");
+    // await prefs.setString('hostaddress', "localhub-flutter.duckdns.org:3002");
   }
 }
 
@@ -59,6 +59,10 @@ Future<void> checkAppVersion() async {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Image.asset(
+                    'assets/images/server_offline_logo.png',
+                    height: 250,
+                  ),
                   Text(
                     serverDownText[_random.nextInt(serverDownText.length)],
                     softWrap: true,

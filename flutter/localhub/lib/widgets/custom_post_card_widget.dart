@@ -200,7 +200,8 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
                 if (index == journals.length) {
                   if (hasMoreData == false) {
                     return const Center(
-                      child: Text("No more data to load"),
+                      child: Padding(padding: EdgeInsets.only(bottom: 30),
+                      child: Text("No more data to load")),
                     );
                   }
                   return const CupertinoActivityIndicator();
@@ -221,13 +222,13 @@ class _CustomPostCardWidgetState extends State<CustomPostCardWidget> {
 
               // Extract like count and comment count from stats
               int totalVotes = stats['total_votes'] ?? 0;
-              if (isFromPostPage) {
-                if (widget.voteState == true) {
-                  totalVotes += 1;
-                } else if (widget.voteState == false) {
-                  totalVotes -= 1;
-                }
-              }
+              // if (isFromPostPage) {
+              //   if (widget.voteState == true) {
+              //     totalVotes += 1;
+              //   } else if (widget.voteState == false) {
+              //     totalVotes -= 1;
+              //   }
+              // }
               int totalComments = stats['total_comments'] ?? 0;
               return Padding(
                 padding: const EdgeInsets.all(8.0),

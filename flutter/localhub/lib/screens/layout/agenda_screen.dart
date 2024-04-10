@@ -48,70 +48,86 @@ class _AgendaScreenState extends State<AgendaScreen> {
                       color: colorScheme.onInverseSurface,
                     ),
                     padding: const EdgeInsets.all(20),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(
-                          width: 210,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                  "${dateFormat(agendaList[index]["agenda_start_date"])} - ${dateFormat(agendaList[index]["agenda_end_date"])}"),
-                              const SizedBox(height: 10),
-                              Text(
-                                agendaList[index]["agenda_title"],
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleLarge!
-                                    .copyWith(fontWeight: FontWeight.bold),
-                                textAlign: TextAlign.start,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                agendaList[index]["agenda_description"],
-                                style: Theme.of(context).textTheme.titleMedium,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                agendaList[index]["locality_city"] +
-                                    ", " +
-                                    agendaList[index]["locality_state"] +
-                                    ", " +
-                                    agendaList[index]["locality_country"],
-                                style: Theme.of(context).textTheme.bodySmall,
-                                textAlign: TextAlign.start,
-                                overflow: TextOverflow
-                                    .ellipsis, // Set overflow property
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Visibility(
-                          visible: agendaList[index]["image_url"] != null &&
-                              agendaList[index]["image_url"]!.isNotEmpty,
-                          child: SizedBox(
-                            height: 130,
-                            width: 130,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
-                              child: CachedNetworkImage(
-                                fit: BoxFit.cover,
-                                imageUrl: agendaList[index]["image_url"],
-                                progressIndicatorBuilder:
-                                    (context, url, downloadProgress) => Center(
-                                  child: CircularProgressIndicator(
-                                      value: downloadProgress.progress),
+                        Text(
+                            "${dateFormat(agendaList[index]["agenda_start_date"])} - ${dateFormat(agendaList[index]["agenda_end_date"])}"),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Column(
+                              children: [
+                                Visibility(
+                                  visible:
+                                      agendaList[index]["image_url"] != null &&
+                                          agendaList[index]["image_url"]!
+                                              .isNotEmpty,
+                                  child: SizedBox(
+                                    height: 130,
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.3,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(15),
+                                      child: CachedNetworkImage(
+                                        fit: BoxFit.cover,
+                                        imageUrl: agendaList[index]
+                                            ["image_url"],
+                                        progressIndicatorBuilder:
+                                            (context, url, downloadProgress) =>
+                                                Center(
+                                          child: CircularProgressIndicator(
+                                              value: downloadProgress.progress),
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            const Icon(Icons.error),
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                                errorWidget: (context, url, error) =>
-                                    const Icon(Icons.error),
+                              ],
+                            ),
+                            const SizedBox(width: 10),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.5,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    agendaList[index]["agenda_title"],
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge!
+                                        .copyWith(fontWeight: FontWeight.bold),
+                                    textAlign: TextAlign.start,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    agendaList[index]["agenda_description"],
+                                    style:
+                                        Theme.of(context).textTheme.titleMedium,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    agendaList[index]["locality_city"] +
+                                        ", " +
+                                        agendaList[index]["locality_state"] +
+                                        ", " +
+                                        agendaList[index]["locality_country"],
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall,
+                                    textAlign: TextAlign.start,
+                                    overflow: TextOverflow
+                                        .ellipsis, // Set overflow property
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
+                          ],
                         ),
                       ],
                     ),
