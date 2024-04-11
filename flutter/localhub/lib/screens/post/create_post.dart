@@ -282,7 +282,7 @@ class _CreatePostState extends State<CreatePost> {
                   );
                 }
               },
-              child: Text(isUpdating ? 'Update' :'Post')),
+              child: Text(isUpdating ? 'Update' : 'Post')),
           const SizedBox(width: 15)
         ],
       ),
@@ -369,8 +369,9 @@ class _CreatePostState extends State<CreatePost> {
                   }
                   return null;
                 },
-                maxLines: 20,
-                minLines: 1,
+                maxLines: null,
+                keyboardType: TextInputType.multiline,
+                // minLines: 1,
                 controller: _postDescriptionController,
                 decoration: CustomInputDecoration.inputDecoration(
                   context: context,
