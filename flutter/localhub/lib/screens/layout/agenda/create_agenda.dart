@@ -155,7 +155,6 @@ class _CreateAgendaState extends State<CreateAgenda> {
         _agendaEndDate = selectedDateRange.end;
         _selectedDateText =
             '${DateFormat('dd/MM').format(_agendaStartDate)} to ${DateFormat('dd/MM').format(_agendaEndDate)}';
-        print(selectedDateRange);
       });
     }
   }
@@ -265,7 +264,7 @@ class _CreateAgendaState extends State<CreateAgenda> {
                 ),
                 textInputAction: TextInputAction.next,
               ),
-              SizedBox(
+              const SizedBox(
                 height: 20,
               ),
               InkWell(

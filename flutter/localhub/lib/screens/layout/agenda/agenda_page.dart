@@ -1,7 +1,5 @@
 import "package:cached_network_image/cached_network_image.dart";
-import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
-import "package:flutter/widgets.dart";
 import "package:flutter_markdown/flutter_markdown.dart";
 import "package:localhub/api/agenda_service.dart";
 import "package:localhub/functions/datetimeoperations.dart";
@@ -24,11 +22,9 @@ class _AgendaPageState extends State<AgendaPage> {
 
   void _loadData() async {
     int agendaID = widget.agendaID;
-    print("agendaID: $agendaID");
 
     final List<Map<String, dynamic>> data =
         await aas.getAgendaById(agendaId: agendaID);
-    print("data: $data");
 
     setState(() {
       _journals = data;

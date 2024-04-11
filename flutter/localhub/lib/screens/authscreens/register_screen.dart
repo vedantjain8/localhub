@@ -76,7 +76,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 decoration: CustomInputDecoration.inputDecoration(
                     context: context,
                     label: 'Username',
-                    prefixIcon: Icon(FontAwesomeIcons.solidUser)),
+                    prefixIcon: const Icon(FontAwesomeIcons.solidUser)),
               ),
               const SizedBox(
                 height: 30,
@@ -96,7 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 decoration: CustomInputDecoration.inputDecoration(
                     context: context,
                     label: 'Email',
-                    prefixIcon: Icon(FontAwesomeIcons.solidEnvelope)),
+                    prefixIcon: const Icon(FontAwesomeIcons.solidEnvelope)),
               ),
               const SizedBox(
                 height: 30,

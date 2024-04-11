@@ -34,7 +34,6 @@ class _AgendaScreenState extends State<AgendaScreen> {
             itemBuilder: ((context, index) {
               return InkWell(
                 onTap: () {
-                  print(agendaList[index]["agenda_id"]);
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => AgendaPage(
                             agendaID: agendaList[index]["agenda_id"],

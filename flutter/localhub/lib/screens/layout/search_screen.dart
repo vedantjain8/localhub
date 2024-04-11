@@ -147,7 +147,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         ),
                       ),
                       const SizedBox(height: 5),
-                      Text("c/" + data[index]["community_name"]),
+                      Text("c/ ${data[index]["community_name"]}"),
                     ],
                   ),
                 ),
@@ -160,7 +160,6 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget buildPostSearchResult(String title, List<dynamic>? data) {
-
     if (data == null || data.isEmpty) {
       return const SizedBox.shrink();
     }
