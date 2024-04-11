@@ -14,10 +14,10 @@ class AboutUserApiService extends BaseApiService {
     required password,
     String? username,
     String? bio,
-    String? avatar_url,
-    String? locality_city,
-    String? locality_state,
-    String? locality_country,
+    String? avatarurl,
+    String? localitycity,
+    String? localitystate,
+    String? localitycountry,
   }) async {
     await getUserToken();
 
@@ -34,20 +34,20 @@ class AboutUserApiService extends BaseApiService {
       sendBody['bio'] = "$bio";
     }
 
-    if (avatar_url != null || avatar_url != "") {
-      sendBody['avatar_url'] = "$avatar_url";
+    if (avatarurl != null || avatarurl != "") {
+      sendBody['avatar_url'] = "$avatarurl";
     }
 
-    if (locality_city != null || locality_city != "") {
-      sendBody['locality_city'] = "$locality_city";
+    if (localitycity != null || localitycity != "") {
+      sendBody['locality_city'] = "$localitycity";
     }
 
-    if (locality_state != null || locality_state != "") {
-      sendBody['locality_state'] = "$locality_state";
+    if (localitystate != null || localitystate != "") {
+      sendBody['locality_state'] = "$localitystate";
     }
 
-    if (locality_country != null || locality_country != "") {
-      sendBody['locality_country'] = "$locality_country";
+    if (localitycountry != null || localitycountry != "") {
+      sendBody['locality_country'] = "$localitycountry";
     }
     return await makeMapPUTRequest(endpoint: '/api/v1/users', body: sendBody);
   }

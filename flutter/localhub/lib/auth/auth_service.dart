@@ -46,7 +46,7 @@ class AuthService {
       return token; // Return the token to the caller
     } catch (error) {
       // Handle registration failure
-      print('Registration failed: $error');
+      // print('Registration failed: $error');
       return null; // Rethrow the error for the caller to handle
     }
   }

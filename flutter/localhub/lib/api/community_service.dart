@@ -49,13 +49,13 @@ class CommunityApiService extends BaseApiService {
         responseData = jsonResponse.cast<Map<String, dynamic>>().toList();
       } else {
         // Handle the case where jsonResponse is not a List
-        print('Unexpected response format: $jsonResponse');
+        // print('Unexpected response format: $jsonResponse');
         responseData = [
           {'error': 'Unexpected response format'}
         ];
       }
     } catch (e) {
-      print('Error: $e');
+      // print('Error: $e');
       responseData = [
         {'error': 'catch Request failed with status: $e'}
       ];

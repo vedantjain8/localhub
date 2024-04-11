@@ -48,7 +48,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     countryName = meJournal['locality_country'];
     stateName = meJournal['locality_state'];
     cityName = meJournal['locality_city'];
-    print('$countryName $cityName $stateName');
   }
 
   Future<void> _openGallery() async {
@@ -132,10 +131,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ? null
           : _usernameController.text,
       bio: _bioController.text,
-      avatar_url: imageUrl,
-      locality_city: cityName,
-      locality_state: stateName,
-      locality_country: countryName,
+      avatarurl: imageUrl,
+      localitycity: cityName,
+      localitystate: stateName,
+      localitycountry: countryName,
     );
     return res;
   }

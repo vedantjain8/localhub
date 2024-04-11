@@ -26,11 +26,11 @@ class VersionCheckApiService {
       if (response.statusCode == 200) {
         responseData = response.body.toString();
       } else {
-        print('Request failed with status: ${response.statusCode}.');
+        // print('Request failed with status: ${response.statusCode}.');
         responseData = null;
       }
     } catch (e) {
-      print('Error: $e');
+      // print('Error: $e');
       responseData = e.toString();
     }
     return responseData;
