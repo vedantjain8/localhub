@@ -41,13 +41,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       });
       _usernameController.text = meJournal['username'] as String;
       _bioController.text = meJournal['bio'] as String;
-      // pickedImage = meJournal['avatar_url'] != null
-      //     ? XFile(meJournal['avatar_url'] as String)
-      //     : null;
+      countryName = meJournal['locality_country'];
+      stateName = meJournal['locality_state'];
+      cityName = meJournal['locality_city'];
     }
-    countryName = meJournal['locality_country'];
-    stateName = meJournal['locality_state'];
-    cityName = meJournal['locality_city'];
   }
 
   Future<void> _openGallery() async {

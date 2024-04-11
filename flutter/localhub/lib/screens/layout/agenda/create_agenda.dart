@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:localhub/api/agenda_service.dart';
 import 'package:localhub/api/upload_image_service.dart';
+import 'package:localhub/screens/layout/app_layout.dart';
 import 'package:localhub/widgets/custom_input_decoration.dart';
 
 class CreateAgenda extends StatefulWidget {
@@ -167,7 +168,14 @@ class _CreateAgendaState extends State<CreateAgenda> {
       appBar: AppBar(
         title: const Text('Create Agenda'),
         actions: [
-          ElevatedButton(onPressed: _createAgenda, child: const Text('Post')),
+          ElevatedButton(
+              onPressed: () async {
+                await _createAgenda();
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => const AppLayout()),
+                    (route) => false);
+              },
+              child: const Text('Post')),
           const SizedBox(width: 15)
         ],
       ),
