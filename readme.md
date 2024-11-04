@@ -2,6 +2,17 @@
 
 Welcome to the LocalHub project! This repository contains both the backend API and the frontend Flutter app for LocalHub, a platform designed to connect users with their local communities.
 
+## Screen Shots 📸
+| Screenshots  |
+|---|
+ ![](screenshots/Screenshot_2024-04-14_10_21_09.png)  |
+ ![](screenshots/Screenshot_2024-04-14_10_21_18.png)  |
+ ![](screenshots/Screenshot_2024-04-14_10_21_23.png)  |
+ ![](screenshots/Screenshot_2024-04-14_10_21_32.png)  |
+ ![](screenshots/Screenshot_2024-04-14_10_21_36.png)  |
+ ![](screenshots/Screenshot_2024-04-14_10_21_41.png)  |
+
+
 ## Project Structure 📂
 
 - **api/**: Contains the backend API code written in bun(nodejs drop in replacement), responsible for handling server-side logic, database operations, and serving data to the Flutter app.
